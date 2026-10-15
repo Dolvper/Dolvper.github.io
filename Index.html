@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Misiones de Daniella ✨</title>
+    <style>
+        :root {
+            --primary: #ff6b81;
+            --primary-dark: #ff4757;
+            --secondary: #2ed573;
+            --accent: #ffa502;
+            --purple: #9b59b6;
+            --bg-gradient: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+            --card-bg: #ffffff;
+            --text: #2f3542;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Comic Sans MS', Tahoma, sans-serif;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #a1c4fd 100%);
+            min-height: 100vh;
+            color: var(--text);
+            text-align: center;
+            margin: 0;
+            padding: 15px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 540px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px 20px;
+            border-radius: 28px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+            position: relative;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            color: var(--primary-dark);
+            font-size: 2em;
+            margin: 0 0 5px 0;
+            text-shadow: 1px 1px 0px #ffeaa7;
+        }
+
+        h2 {
+            color: #57606f;
+            font-size: 1.1em;
+            margin-top: 0;
+            font-weight: 600;
+        }
+
+        /* Top Bar */
+        .top-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .btn-small {
+            background: #f1f2f6;
+            border: 2px solid #dfe4ea;
+            border-radius: 12px;
+            padding: 8px 12px;
+            font-size: 0.9em;
+            font-weight: bold;
+            color: #57606f;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-small:hover {
+            background: #dfe4ea;
+        }
+
+        /*Mascota Luli*/
+        .luli-box {
+            background: linear-gradient(135deg, #f3e7e9 0%, #e3eeff 100%);
+            border: 3px solid #d2b4de;
+            border-radius: 20px;
+            padding: 12px 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 18px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            text-align: left;
+        }
+
+        .luli-box:active {
+            transform: scale(0.97);
+        }
+
+        .luli-avatar {
+            font-size: 2.8em;
+            animation: bounce 2s infinite ease-in-out;
+            flex-shrink: 0;
+        }
+
+        .luli-speech {
+            font-size: 1em;
+            font-weight: 600;
+            color: #4a235a;
+            line-height: 1.3;
+        }
+
+        /* Barra de progreso y estrellas */
+        .progress-wrapper {
+            margin: 15px 0;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 6px;
+            color: #2f3542;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 28px;
+            background: #dfe4ea;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+            border: 2px solid #ced6e0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #2ed573, #7bed9f);
+            width: 0%;
+            transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border-radius: 12px;
+        }
+
+        .stars-container {
+            font-size: 2.1em;
+            margin: 12px 0;
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .star {
+            color: #dfe4ea;
+            transition: transform 0.4s, color 0.4s;
+            filter: drop-shadow(0 2px 3px rgba(0,0,0,0.1));
+        }
+
+        .star.earned {
+            color: #ffa502;
+            animation: starPop 0.5s ease;
+            filter: drop-shadow(0 0 8px rgba(255, 165, 2, 0.6));
+        }
+
+        /* Tarjetas de tareas */
+        .task-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .task-card {
+            background: white;
+            border: 3px solid #dfe4ea;
+            padding: 15px 18px;
+            border-radius: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.25s ease;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.04);
+        }
+
+        .task-card:active {
+            transform: scale(0.97);
+        }
+
+        .task-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-align: left;
+        }
+
+        .task-emoji {
+            font-size: 2.2em;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f1f2f6;
+            border-radius: 14px;
+            flex-shrink: 0;
+        }
+
+        .task-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #2f3542;
+        }
+
+        .task-subtitle {
+            font-size: 0.85em;
+            color: #747d8c;
+            margin-top: 2px;
+        }
+
+        .checkbox-circle {
+            width: 36px;
+            height: 36px;
+            border: 3px solid #ced6e0;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4em;
+            color: transparent;
+            flex-shrink: 0;
+            transition: all 0.3s;
+        }
+
+        .task-card.completed {
+            background: linear-gradient(135deg, #2ed573 0%, #1dd1a1 100%);
+            border-color: #10ac84;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(46, 213, 115, 0.3);
+        }
+
+        .task-card.completed .task-title {
+            color: white;
+            text-decoration: line-through;
+        }
+
+        .task-card.completed .task-subtitle {
+            color: #e8f8f5;
+        }
+
+        .task-card.completed .task-emoji {
+            background: rgba(255,255,255,0.25);
+        }
+
+        .task-card.completed .checkbox-circle {
+            border-color: white;
+            background: white;
+            color: #10ac84;
+            font-weight: bold;
+        }
+
+        /* Pantalla de Configuración (Padres) */
+        #setup-screen { display: none; }
+        #app-screen { display: block; }
+        #trophy-screen { display: none; }
+
+        .theme-selector {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 15px 0;
+        }
+
+        .theme-btn {
+            background: #f1f2f6;
+            border: 2px solid #dfe4ea;
+            border-radius: 14px;
+            padding: 8px 12px;
+            font-size: 0.95em;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .theme-btn.active {
+            background: var(--purple);
+            color: white;
+            border-color: #8e44ad;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 8px;
+            margin: 15px 0;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px 15px;
+            font-size: 1em;
+            border: 2px solid #dfe4ea;
+            border-radius: 12px;
+            outline: none;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--primary);
+        }
+
+        .btn-main {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2em;
+            font-weight: bold;
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            margin-top: 12px;
+            color: white;
+            background: var(--secondary);
+            box-shadow: 0 5px 15px rgba(46, 213, 115, 0.4);
+        }
+
+        .btn-restore {
+            background: #ffa502;
+            box-shadow: 0 5px 15px rgba(255, 165, 2, 0.3);
+            font-size: 1em;
+            padding: 12px;
+        }
+
+        #task-list-setup {
+            list-style: none;
+            padding: 0;
+            margin: 15px 0;
+            max-height: 320px;
+            overflow-y: auto;
+        }
+
+        #task-list-setup li {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            margin: 8px 0;
+            padding: 10px 12px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+        }
+
+        .setup-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .icon-btn {
+            background: #dfe4ea;
+            border: none;
+            border-radius: 8px;
+            padding: 6px 10px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .icon-btn.delete {
+            background: #ff4757;
+            color: white;
+        }
+
+        /* Pantalla Trofeo */
+        .trophy-icon {
+            font-size: 7.5em;
+            margin: 15px 0;
+            animation: float 2s infinite ease-in-out;
+            filter: drop-shadow(0 10px 15px rgba(255, 165, 2, 0.4));
+        }
+
+        .poem-box {
+            background: #fff9db;
+            border: 3px dashed #fcc419;
+            border-radius: 20px;
+            padding: 18px;
+            margin: 20px 0;
+            font-size: 1.15em;
+            line-height: 1.5;
+            color: #5c4033;
+            font-weight: 600;
+        }
+
+        /* Confetti Canvas */
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        @keyframes starPop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.4) rotate(15deg); }
+            100% { transform: scale(1) rotate(0); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="confetti-canvas"></canvas>
+
+<div class="container">
+    <!-- PANTALLA PRINCIPAL DE DANIELLA -->
+    <div id="app-screen">
+        <div class="top-controls">
+            <button class="btn-small" onclick="openSetup()">⚙️ Configurar</button>
+            <button class="btn-small" onclick="toggleSound()" id="soundBtn">🔊 Voz: ON</button>
+            <button class="btn-small" onclick="resetMorningProgress()">🔄 Reiniciar día</button>
+        </div>
+
+        <h1>¡Buenos días, Daniella! ☀️</h1>
+        <h2 id="themeSubtitle">Tus misiones de esta mañana</h2>
+
+        <!-- Mascota Luli -->
+        <div class="luli-box" onclick="luliSpeakRandom()">
+            <div class="luli-avatar">🦄</div>
+            <div class="luli-speech" id="luliText">
+                ¡Hola Daniella! Toca cada misión cuando la termines para ganar todas las estrellas 🌟
+            </div>
+        </div>
+
+        <!-- Barra de Progreso -->
+        <div class="progress-wrapper">
+            <div class="progress-header">
+                <span>Progreso</span>
+                <span id="progressPercent">0%</span>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+
+        <!-- Estrellas -->
+        <div class="stars-container" id="starsContainer"></div>
+
+        <!-- Lista de Tareas -->
+        <div class="task-grid" id="taskGrid"></div>
+    </div>
+
+    <!-- PANTALLA DE CONFIGURACIÓN (PADRES) -->
+    <div id="setup-screen">
+        <h1>⚙️ Zona de Padres</h1>
+        <h2>Configura o personaliza la rutina de Daniella</h2>
+
+        <div>
+            <strong>✨ Modo de Fantasía:</strong>
+            <div class="theme-selector">
+                <button class="theme-btn active" onclick="setTheme('normal', this)">☀️ Normal</button>
+                <button class="theme-btn" onclick="setTheme('princesa', this)">👑 Princesa</button>
+                <button class="theme-btn" onclick="setTheme('superheroina', this)">🦸‍♀️ Superheroína</button>
+                <button class="theme-btn" onclick="setTheme('astronauta', this)">🚀 Astronauta</button>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <input type="text" id="taskInput" placeholder="Añadir otra tarea... (ej: Ponerse el abrigo 🧥)" onkeypress="if(event.key==='Enter') addTask()">
+            <button class="btn-small" style="background:#1e90ff; color:white; border:none;" onclick="addTask()">+ Añadir</button>
+        </div>
+
+        <ul id="task-list-setup"></ul>
+
+        <button class="btn-main btn-restore" onclick="restoreDefaultRoutine()">⭐ Restaurar las 9 tareas principales</button>
+        <button class="btn-main" onclick="closeSetup()">¡Listo! Volver con Daniella 🚀</button>
+    </div>
+
+    <!-- PANTALLA DEL TROFEO (100%) -->
+    <div id="trophy-screen">
+        <h1>¡Reto Superado, Daniella! 🎉</h1>
+        <div class="trophy-icon">🏆</div>
+        <h2>¡Has conseguido las 9 estrellas de la mañana!</h2>
+
+        <div class="poem-box" id="victoryPoem">
+            ¡Ropa lista, cara limpia y mochila en su lugar,<br>
+            la campeona Daniella ya está lista para brillar!<br>
+            Con tus 9 estrellas doradas hoy te vas a divertir,<br>
+            ¡que tengas un día mágico y muy feliz! 🌟🎒✨
+        </div>
+
+        <button class="btn-main" style="background:#9b59b6;" onclick="speakVictory()">🔊 Escuchar felicitación</button>
+        <button class="btn-main" onclick="resetMorningProgress()">🔄 Empezar una nueva mañana</button>
+    </div>
+</div>
+
+<script>
+    // 1. RUTINA PRINCIPAL PREDETERMINADA (Las 9 tareas exactas)
+    const DEFAULT_ROUTINE = [
+        { id: 'levantarse', text: 'Levantarse de cama', emoji: '🛏️', completed: false },
+        { id: 'desayunar', text: 'Desayunar', emoji: '🥣', completed: false },
+        { id: 'pis', text: 'Hacer pis', emoji: '🚽', completed: false },
+        { id: 'dientes', text: 'Lavar los dientes', emoji: '🪥', completed: false },
+        { id: 'cara', text: 'Lavar la cara', emoji: '🧼', completed: false },
+        { id: 'vestirse', text: 'Vestirse', emoji: '👗', completed: false },
+        { id: 'peinarse', text: 'Peinarse', emoji: '🪮', completed: false },
+        { id: 'mochila', text: 'Coger la mochila', emoji: '🎒', completed: false },
+        { id: 'cole', text: '¡Y al cole!', emoji: '🏫', completed: false }
+    ];
+
+    // Subtítulos mágicos por temática para cada una de las 9 tareas
+    const THEME_DESCRIPTIONS = {
+        normal: {},
+        princesa: {
+            levantarse: 'Despertar en el gran castillo real 🏰',
+            desayunar: 'Tomar el banquete mágico del reino 🥐',
+            pis: 'Pasar por el tocador de cristal ✨',
+            dientes: 'Dar brillo de diamante a la sonrisa 💎',
+            cara: 'Refrescarse con gotas de rocío 🌸',
+            vestirse: 'Ponerse el vestido real de aventuras 👑',
+            peinarse: 'Peinar la melena con el cepillo encantado ✨',
+            mochila: 'Guardar los tesoros en el bolso real 🎒',
+            cole: 'Subir a la carroza rumbo al cole 🦄'
+        },
+        superheroina: {
+            levantarse: 'Activar energía en la base secreta ⚡',
+            desayunar: 'Recargar superpoderes al máximo 🔋',
+            pis: 'Parada técnica antes de despegar 🚀',
+            dientes: 'Escudo láser anticaries activado 🛡️',
+            cara: 'Visión clara de superheroína 💦',
+            vestirse: 'Ponerse el supertraje protector 🦸‍♀️',
+            peinarse: 'Peinado aerodinámico supersónico 💨',
+            mochila: 'Equipar la mochila de herramientas 🎒',
+            cole: '¡Volar hacia el cuartel del cole! 🌟'
+        },
+        astronauta: {
+            levantarse: 'Salir de la cápsula espacial de sueño 🛸',
+            desayunar: 'Combustible estelar para el viaje 🪐',
+            pis: 'Revisión en la estación orbital 🛰️',
+            dientes: 'Limpieza lunar de dientes brillantes 🌙',
+            cara: 'Frescor de nebulosa espacial 💧',
+            vestirse: 'Colocarse el traje espacial 👩‍🚀',
+            peinarse: 'Preparar el casco intergaláctico ✨',
+            mochila: 'Cargar el propulsor en la espalda 🎒',
+            cole: '¡3, 2, 1... Despegue hacia el cole! 🚀'
+        }
+    };
+
+    let tasks = [];
+    let currentTheme = 'normal';
+    let soundEnabled = true;
+    let audioCtx = null;
+
+    // Inicializar al abrir
+    window.onload = () => {
+        const saved = localStorage.getItem('daniella_tasks_v2');
+        if (saved) {
+            tasks = JSON.parse(saved);
+        } else {
+            tasks = JSON.parse(JSON.stringify(DEFAULT_ROUTINE));
+            saveTasks();
+        }
+        renderApp();
+    };
+
+    function saveTasks() {
+        localStorage.setItem('daniella_tasks_v2', JSON.stringify(tasks));
+    }
+
+    // Sonidos con Web Audio API
+    function initAudio() {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+    }
+
+    function playStarSound(stepIndex) {
+        if (!soundEnabled) return;
+        initAudio();
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        const notes = [523.25, 587.33, 659.25, 698.46, 783.99, 880.00, 987.77, 1046.50, 1174.66];
+        const freq = notes[stepIndex % notes.length];
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, now);
+        osc.frequency.exponentialRampToValueAtTime(freq * 1.25, now + 0.18);
+
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.35);
+    }
+
+    function playVictoryFanfare() {
+        if (!soundEnabled) return;
+        initAudio();
+        const notes = [523.25, 659.25, 783.99, 1046.50];
+        notes.forEach((freq, idx) => {
+            const now = audioCtx.currentTime + idx * 0.14;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, now);
+            gain.gain.setValueAtTime(0.3, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now);
+            osc.stop(now + 0.4);
+        });
+    }
+
+    // Voz en español (SpeechSynthesis)
+    function speak(text) {
+        if (!soundEnabled || !('speechSynthesis' in window)) return;
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'es-ES';
+        utterance.rate = 1.02;
+        utterance.pitch = 1.2;
+        window.speechSynthesis.speak(utterance);
+    }
+
+    function toggleSound() {
+        soundEnabled = !soundEnabled;
+        document.getElementById('soundBtn').textContent = soundEnabled ? '🔊 Voz: ON' : '🔇 Voz: OFF';
+        if (!soundEnabled && 'speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+        }
+    }
+
+    // Renderizar Pantalla Principal
+    function renderApp() {
+        const completedCount = tasks.filter(t => t.completed).length;
+        const total = tasks.length;
+        const pct = total > 0 ? Math.round((completedCount / total) * 100) : 0;
+
+        document.getElementById('progressFill').style.width = `${pct}%`;
+        document.getElementById('progressPercent').textContent = `${pct}%`;
+
+        // Estrellas
+        const starsContainer = document.getElementById('starsContainer');
+        starsContainer.innerHTML = tasks.map((_, i) => 
+            `<span class="star ${i < completedCount ? 'earned' : ''}">★</span>`
+        ).join('');
+
+        // Tarjetas de tareas
+        const grid = document.getElementById('taskGrid');
+        grid.innerHTML = '';
+        tasks.forEach((task, index) => {
+            const subText = (THEME_DESCRIPTIONS[currentTheme] && THEME_DESCRIPTIONS[currentTheme][task.id]) || '';
+            grid.innerHTML += `
+                <div class="task-card ${task.completed ? 'completed' : ''}" onclick="toggleTask(${index})">
+                    <div class="task-left">
+                        <div class="task-emoji">${task.emoji || '⭐'}</div>
+                        <div>
+                            <div class="task-title">${task.text}</div>
+                            ${subText ? `<div class="task-subtitle">${subText}</div>` : ''}
+                        </div>
+                    </div>
+                    <div class="checkbox-circle">✓</div>
+                </div>
+            `;
+        });
+    }
+
+    function toggleTask(index) {
+        tasks[index].completed = !tasks[index].completed;
+        saveTasks();
+
+        const completedCount = tasks.filter(t => t.completed).length;
+        const total = tasks.length;
+
+        if (tasks[index].completed) {
+            playStarSound(completedCount - 1);
+            const remaining = total - completedCount;
+            let phrase = '';
+
+            if (remaining === 0) {
+                phrase = `¡Increíble Daniella! ¡Has terminado todas las misiones y vamos al cole!`;
+            } else if (remaining === 1) {
+                phrase = `¡Muy bien Daniella! ¡Solo te falta una estrella para ganar el trofeo!`;
+            } else {
+                phrase = `¡Súper bien! "${tasks[index].text}" completado. ¡Ya tienes ${completedCount} estrellas!`;
+            }
+
+            document.getElementById('luliText').textContent = phrase;
+            speak(phrase);
+        }
+
+        renderApp();
+
+        // Si llega al 100%
+        if (completedCount === total && total > 0) {
+            setTimeout(() => {
+                document.getElementById('app-screen').style.display = 'none';
+                document.getElementById('trophy-screen').style.display = 'block';
+                playVictoryFanfare();
+                launchConfetti();
+            }, 650);
+        }
+    }
+
+    function luliSpeakRandom() {
+        const phrases = [
+            "¡Tú puedes Daniella! Cada misión te da una estrella brillante 🌟",
+            "¡Qué mayor eres Daniella! Lo estás haciendo fenomenal 🦄",
+            "¡Cuando consigas todas las estrellas desbloquearás la gran copa dorada! 🏆"
+        ];
+        const randomPhrase = phrases[Math.floor(Math.random() * phrases.length)];
+        document.getElementById('luliText').textContent = randomPhrase;
+        speak(randomPhrase);
+    }
+
+    function speakVictory() {
+        speak("¡Felicidades campeona Daniella! Ropa lista, cara limpia y mochila en su lugar, ¡ya estás lista para brillar en el cole!");
+    }
+
+    function resetMorningProgress() {
+        tasks.forEach(t => t.completed = false);
+        saveTasks();
+        document.getElementById('trophy-screen').style.display = 'none';
+        document.getElementById('app-screen').style.display = 'block';
+        document.getElementById('luliText').textContent = '¡Nuevo día, Daniella! ¿Empezamos por levantarnos de la cama? ☀️';
+        renderApp();
+    }
+
+    // Configuración de Padres
+    function openSetup() {
+        document.getElementById('app-screen').style.display = 'none';
+        document.getElementById('setup-screen').style.display = 'block';
+        renderSetupList();
+    }
+
+    function closeSetup() {
+        document.getElementById('setup-screen').style.display = 'none';
+        document.getElementById('app-screen').style.display = 'block';
+        renderApp();
+    }
+
+    function setTheme(theme, btn) {
+        currentTheme = theme;
+        document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        const titles = {
+            normal: 'Tus misiones de esta mañana',
+            princesa: '👑 Misiones del Castillo Real',
+            superheroina: '🦸‍♀️ Entrenamiento de Superheroína',
+            astronauta: '🚀 Misión Espacial Matutina'
+        };
+        document.getElementById('themeSubtitle').textContent = titles[theme];
+    }
+
+    function detectEmoji(text) {
+        const lower = text.toLowerCase();
+        if (lower.includes('cama') || lower.includes('levantar')) return '🛏️';
+        if (lower.includes('desayun') || lower.includes('leche')) return '🥣';
+        if (lower.includes('pis') || lower.includes('baño')) return '🚽';
+        if (lower.includes('diente')) return '🪥';
+        if (lower.includes('cara') || lower.includes('agua')) return '🧼';
+        if (lower.includes('vestir') || lower.includes('ropa')) return '👗';
+        if (lower.includes('pein') || lower.includes('pelo')) return '🪮';
+        if (lower.includes('mochila')) return '🎒';
+        if (lower.includes('cole')) return '🏫';
+        if (lower.includes('zapato')) return '👟';
+        return '⭐';
+    }
+
+    function addTask() {
+        const input = document.getElementById('taskInput');
+        const val = input.value.trim();
+        if (!val) return;
+        tasks.push({
+            id: 'custom_' + Date.now(),
+            text: val,
+            emoji: detectEmoji(val),
+            completed: false
+        });
+        input.value = '';
+        saveTasks();
+        renderSetupList();
+    }
+
+    function removeTask(index) {
+        tasks.splice(index, 1);
+        saveTasks();
+        renderSetupList();
+    }
+
+    function moveTask(index, dir) {
+        const newIndex = index + dir;
+        if (newIndex < 0 || newIndex >= tasks.length) return;
+        const temp = tasks[index];
+        tasks[index] = tasks[newIndex];
+        tasks[newIndex] = temp;
+        saveTasks();
+        renderSetupList();
+    }
+
+    function restoreDefaultRoutine() {
+        tasks = JSON.parse(JSON.stringify(DEFAULT_ROUTINE));
+        saveTasks();
+        renderSetupList();
+    }
+
+    function renderSetupList() {
+        const ul = document.getElementById('task-list-setup');
+        ul.innerHTML = '';
+        tasks.forEach((task, index) => {
+            ul.innerHTML += `
+                <li>
+                    <span>${task.emoji} ${task.text}</span>
+                    <div class="setup-actions">
+                        <button class="icon-btn" onclick="moveTask(${index}, -1)">↑</button>
+                        <button class="icon-btn" onclick="moveTask(${index}, 1)">↓</button>
+                        <button class="icon-btn delete" onclick="removeTask(${index})">✕</button>
+                    </div>
+                </li>
+            `;
+        });
+    }
+
+    // Lluvia de confeti al ganar el trofeo
+    function launchConfetti() {
+        const canvas = document.getElementById('confetti-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const pieces = Array.from({ length: 90 }, () => ({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height - canvas.height,
+            size: Math.random() * 8 + 5,
+            speedY: Math.random() * 4 + 2,
+            speedX: (Math.random() - 0.5) * 3,
+            color: ['#ff6b81', '#2ed573', '#ffa502', '#1e90ff', '#a55eea'][Math.floor(Math.random() * 5)]
+        }));
+
+        let frames = 0;
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            pieces.forEach(p => {
+                p.y += p.speedY;
+                p.x += p.speedX;
+                ctx.fillStyle = p.color;
+                ctx.fillRect(p.x, p.y, p.size, p.size);
+            });
+            frames++;
+            if (frames < 180) {
+                requestAnimationFrame(animate);
+            } else {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+        }
+        animate();
+    }
+</script>
+
+</body>
+</html>
