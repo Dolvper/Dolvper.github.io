@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fitness Suite Pro — Gestión & PPL Tracker</title>
+    <title>Fitness Suite Pro — Gestión, PPL & Progresión</title>
     <style>
         :root {
             --primary: #4F46E5;
@@ -39,12 +39,12 @@
         }
 
         .container {
-            max-width: 820px;
+            max-width: 860px;
             width: 100%;
             padding-bottom: 40px;
         }
 
-        /* PANTALLA DE BIENVENIDA / ACCESO */
+        /* PANTALLA DE BIENVENIDA */
         #welcome-screen {
             display: flex;
             flex-direction: column;
@@ -59,7 +59,7 @@
             padding: 32px 28px;
             width: 100%;
             max-width: 520px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
             text-align: center;
             border: 1px solid var(--border);
         }
@@ -115,9 +115,6 @@
             font-size: 1.05rem;
             color: var(--primary);
             margin-bottom: 6px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
         }
 
         .option-box p {
@@ -169,7 +166,7 @@
             background-color: #111827;
         }
 
-        /* CABECERA DE USUARIO ACTIVO */
+        /* CABECERA DE USUARIO */
         .top-bar {
             display: flex;
             justify-content: space-between;
@@ -184,18 +181,10 @@
             border-left: 5px solid var(--primary);
         }
 
-        .user-info {
-            display: flex;
-            flex-direction: column;
-        }
-
         .user-info .greeting {
             font-weight: 700;
             font-size: 1.1rem;
             color: var(--text);
-            display: flex;
-            align-items: center;
-            gap: 8px;
         }
 
         .user-info .last-save {
@@ -223,12 +212,10 @@
             align-items: center;
             gap: 6px;
             box-shadow: 0 2px 4px rgba(16, 185, 129, 0.25);
-            transition: all 0.2s;
         }
 
         .btn-save-txt:hover {
             background-color: #059669;
-            transform: translateY(-1px);
         }
 
         .btn-switch-user {
@@ -242,25 +229,21 @@
             cursor: pointer;
         }
 
-        .btn-switch-user:hover {
-            background-color: #E5E7EB;
-        }
-
-        /* NAVEGACIÓN PRINCIPAL */
+        /* NAVEGACIÓN PRINCIPAL (3 MÓDULOS) */
         .main-nav {
-            display: flex;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
             gap: 10px;
             margin-bottom: 20px;
         }
 
         .main-nav button {
-            flex: 1;
             background: var(--card-bg);
             color: var(--text-light);
             border: 1px solid var(--border);
             border-radius: 10px;
-            padding: 12px;
-            font-size: 0.95rem;
+            padding: 12px 10px;
+            font-size: 0.9rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
@@ -274,7 +257,7 @@
             box-shadow: 0 4px 10px rgba(79, 70, 229, 0.25);
         }
 
-        /* TARJETAS Y FORMULARIOS (ESTILO FITCALC) */
+        /* TARJETAS Y FORMULARIOS */
         .card {
             background-color: var(--card-bg);
             border-radius: 12px;
@@ -293,6 +276,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
         .form-grid {
@@ -323,7 +308,6 @@
             border-radius: 6px;
             font-size: 0.95rem;
             outline: none;
-            transition: border-color 0.2s;
             background: #fff;
         }
 
@@ -341,12 +325,34 @@
             font-weight: 600;
             cursor: pointer;
             width: 100%;
-            margin-top: 20px;
+            margin-top: 16px;
             transition: background-color 0.2s;
         }
 
         .btn-action:hover {
             background-color: var(--primary-hover);
+        }
+
+        .btn-log-history {
+            background-color: #0F172A;
+            color: white;
+            border: none;
+            padding: 11px 16px;
+            border-radius: 8px;
+            font-size: 0.92rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: background 0.2s;
+        }
+
+        .btn-log-history:hover {
+            background-color: #1E293B;
         }
 
         .results {
@@ -376,6 +382,47 @@
             text-align: center;
         }
 
+        /* BARRA DE FECHA PARA GUARDAR SESIÓN */
+        .date-log-bar {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px 18px;
+            margin-bottom: 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+
+        .date-log-bar .date-pick {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .btn-record-session {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-record-session:hover {
+            background: var(--primary-hover);
+        }
+
         /* MÓDULO PPL TRACKER */
         .sub-nav {
             display: flex;
@@ -395,7 +442,6 @@
             font-weight: 600;
             color: var(--text);
             cursor: pointer;
-            transition: all 0.2s;
         }
 
         .sub-nav button.active {
@@ -446,13 +492,6 @@
             font-weight: 600;
             cursor: pointer;
             color: var(--text);
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .btn-icon:hover {
-            background: #E5E7EB;
         }
 
         .btn-rir-table {
@@ -464,10 +503,6 @@
             font-size: 0.82rem;
             font-weight: 700;
             cursor: pointer;
-        }
-
-        .btn-rir-table:hover {
-            background: #E0E7FF;
         }
 
         .rm-anterior-bar {
@@ -570,7 +605,6 @@
             color: var(--primary);
             margin: 14px 0 8px 0;
             text-transform: uppercase;
-            letter-spacing: 0.03em;
         }
 
         .summary-grid {
@@ -612,6 +646,81 @@
             align-items: center;
         }
 
+        /* MÓDULO 3: VISUALIZAR DATOS Y GRÁFICAS SVG */
+        .chart-controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .chart-controls select {
+            flex: 1;
+            min-width: 200px;
+            font-weight: 600;
+        }
+
+        .chart-box {
+            background: #FAFAFA;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 10px 10px 10px;
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .svg-chart {
+            width: 100%;
+            height: 230px;
+            display: block;
+            overflow: visible;
+        }
+
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .kpi-box {
+            background: #F9FAFB;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .kpi-box .kpi-label {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .kpi-box .kpi-val {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-top: 2px;
+        }
+
+        .btn-del-row {
+            background: none;
+            border: none;
+            color: var(--danger);
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .btn-del-row:hover {
+            background: var(--danger-bg);
+        }
+
         /* BOTÓN FINAL DE GUARDAR Y DESCARGAR TXT */
         .footer-save-card {
             background: linear-gradient(135deg, #4F46E5 0%, #3730A3 100%);
@@ -647,27 +756,6 @@
             align-items: center;
             gap: 8px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: transform 0.15s;
-        }
-
-        .btn-footer-download:hover {
-            transform: scale(1.02);
-        }
-
-        .btn-promote-rm {
-            background: rgba(255,255,255,0.15);
-            color: white;
-            border: 1px solid rgba(255,255,255,0.4);
-            padding: 10px 16px;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 0.85rem;
-            cursor: pointer;
-            margin-left: 8px;
-        }
-
-        .btn-promote-rm:hover {
-            background: rgba(255,255,255,0.25);
         }
 
         /* MODAL RIR */
@@ -690,7 +778,6 @@
             padding: 22px;
             max-height: 90vh;
             overflow-y: auto;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
         }
 
         .modal-header {
@@ -711,14 +798,14 @@
             font-size: 1.5rem;
             cursor: pointer;
             color: var(--text-light);
-            line-height: 1;
         }
 
-        @media (max-width: 520px) {
+        @media (max-width: 600px) {
+            .main-nav { grid-template-columns: 1fr; }
             .form-grid { grid-template-columns: 1fr; }
             .form-group.full-width { grid-column: span 1; }
             .new-user-inputs { flex-direction: column; }
-            .btn-promote-rm { margin-left: 0; margin-top: 10px; width: 100%; }
+            .kpi-row { grid-template-columns: 1fr; }
             .btn-footer-download { width: 100%; justify-content: center; }
         }
     </style>
@@ -732,23 +819,21 @@
         <div class="welcome-card">
             <div class="welcome-logo">⚡</div>
             <h1>Fitness Suite Pro</h1>
-            <p class="subtitle">Calculadora Antropométrica & PPL Workout Tracker con gestión de registros en archivo <strong>.txt</strong></p>
+            <p class="subtitle">Composición Corporal, Rutina PPL & Gráficas de Progresión con guardado en archivo <strong>.txt</strong></p>
 
             <div class="welcome-options">
-                <!-- Opción A: Nuevo Usuario -->
                 <div class="option-box">
                     <h3>👤 Nuevo Usuario</h3>
-                    <p>Inicia un perfil desde cero para registrar tus medidas corporales, cargas de entrenamiento y marcas 1RM.</p>
+                    <p>Inicia un perfil desde cero para registrar tus medidas, cargas de entrenamiento e historial por fechas.</p>
                     <div class="new-user-inputs">
-                        <input type="text" id="new-username" placeholder="Tu nombre o alias (ej. Carlos)">
+                        <input type="text" id="new-username" placeholder="Tu nombre o alias">
                         <button type="button" class="btn-welcome" onclick="startNewUser()">Empezar →</button>
                     </div>
                 </div>
 
-                <!-- Opción B: Cargar Usuario (.txt) -->
                 <div class="option-box">
                     <h3>📂 Cargar Usuario Existente (.txt)</h3>
-                    <p>Sube el archivo <strong>.txt</strong> descargado en tu última sesión para restaurar todos tus pesos, alternativas y récords.</p>
+                    <p>Sube tu archivo <strong>.txt</strong> para restaurar todos tus registros históricos y gráficas de evolución.</p>
                     <input type="file" id="file-upload-txt" accept=".txt" style="display: none;" onchange="loadUserFromTxt(event)">
                     <button type="button" class="btn-welcome secondary" onclick="document.getElementById('file-upload-txt').click()">
                         📄 Seleccionar Archivo .TXT
@@ -761,13 +846,13 @@
     <!-- 2. APLICACIÓN PRINCIPAL -->
     <div id="app-screen" style="display: none;">
 
-        <!-- Barra Superior de Usuario -->
+        <!-- Barra Superior -->
         <div class="top-bar">
             <div class="user-info">
                 <div class="greeting">
                     <span>👤 Atleta: <strong id="display-username" style="color: var(--primary);">Usuario</strong></span>
                 </div>
-                <div class="last-save" id="display-last-save">Sesión activa sin descargar aún</div>
+                <div class="last-save" id="display-last-save">Sesión activa</div>
             </div>
             <div class="top-actions">
                 <button type="button" class="btn-switch-user" onclick="returnToWelcome()">🔄 Cambiar Usuario</button>
@@ -775,16 +860,25 @@
             </div>
         </div>
 
-        <!-- Selector Principal de Módulos -->
+        <!-- Selector Principal de 3 Módulos -->
         <div class="main-nav">
-            <button type="button" id="nav-fitcalc" class="active" onclick="switchMainTab('fitcalc')">1. FitCalc Pro (Composición & Déficit)</button>
-            <button type="button" id="nav-tracker" onclick="switchMainTab('tracker')">2. Entrenamiento PPL & RIR / 1RM</button>
+            <button type="button" id="nav-fitcalc" class="active" onclick="switchMainTab('fitcalc')">1. Condición Física</button>
+            <button type="button" id="nav-tracker" onclick="switchMainTab('tracker')">2. Entrenamiento PPL & 1RM</button>
+            <button type="button" id="nav-stats" onclick="switchMainTab('stats')">3. 📈 Visualizar Progresión</button>
         </div>
 
-        <!-- MÓDULO 1: FITCALC PRO -->
+        <!-- ================================================================ -->
+        <!-- MÓDULO 1: FITCALC PRO (CON GUARDADO POR FECHA)                   -->
+        <!-- ================================================================ -->
         <div id="module-fitcalc">
             <div class="card">
-                <h2>1. Estado Actual</h2>
+                <h2>
+                    <span>1. Estado Actual</span>
+                    <div style="display:flex; align-items:center; gap:8px; font-size:0.85rem; font-weight:normal;">
+                        <label for="fc-log-date" style="margin:0; font-weight:600;">Fecha registro:</label>
+                        <input type="date" id="fc-log-date" style="padding:5px 8px; font-size:0.85rem;">
+                    </div>
+                </h2>
                 <div class="form-grid">
                     <div class="form-group">
                         <label>Sexo</label>
@@ -817,6 +911,9 @@
                     <p>IMC: <span id="out-imc"></span></p>
                     <p>Metabolismo Basal (TMB): <span id="out-tmb"></span> kcal/día</p>
                     <p>Gasto Diario (Mantenimiento): <span id="out-tdee"></span> kcal/día</p>
+                    <button type="button" class="btn-log-history" onclick="guardarEstadoEnHistorial()">
+                        📌 Guardar Estado Actual con Fecha en Historial
+                    </button>
                 </div>
             </div>
 
@@ -836,7 +933,7 @@
                     <p>% Grasa Estimado: <span id="out-p-grasa"></span></p>
                     <p>Grasa Total Estimada: <span id="out-p-grasakg"></span> kg</p>
                 </div>
-                <p class="note">Nota: Asume que todo el peso perdido es grasa pura (1 kg = 7700 kcal). En la realidad, también se pierde agua y glucógeno.</p>
+                <p class="note">Nota: Asume que todo el peso perdido es grasa pura (1 kg = 7700 kcal).</p>
             </div>
 
             <div class="card">
@@ -858,8 +955,22 @@
             </div>
         </div>
 
-        <!-- MÓDULO 2: PPL TRACKER & 1RM -->
+        <!-- ================================================================ -->
+        <!-- MÓDULO 2: PPL TRACKER & REGISTRO DE 1RM POR FECHA                -->
+        <!-- ================================================================ -->
         <div id="module-tracker" style="display: none;">
+
+            <!-- Barra de Fecha de Entrenamiento -->
+            <div class="date-log-bar">
+                <div class="date-pick">
+                    <label for="workout-log-date" style="margin:0;">📅 Fecha del Entreno:</label>
+                    <input type="date" id="workout-log-date" style="padding:6px 10px;">
+                </div>
+                <button type="button" class="btn-record-session" onclick="guardarSesionRMEnHistorial()">
+                    📌 Registrar Mejores 1RM en Historial
+                </button>
+            </div>
+
             <div class="sub-nav">
                 <button type="button" id="sub-push" class="active" onclick="switchSession('push')">Empuje (Push)</button>
                 <button type="button" id="sub-pull" onclick="switchSession('pull')">Tirón (Pull)</button>
@@ -872,22 +983,95 @@
             <!-- TARJETA DE RESUMEN GLOBAL DE MEJORES 1RM -->
             <div class="card" id="summary-card">
                 <h2>
-                    <span>🏆 Resumen de Mejores 1RM (Todos los Ejercicios)</span>
+                    <span>🏆 Resumen de Mejores 1RM Actuales</span>
                 </h2>
                 <div id="summary-content"></div>
             </div>
         </div>
 
-        <!-- TARJETA FINAL PARA FINALIZAR Y DESCARGAR .TXT -->
+        <!-- ================================================================ -->
+        <!-- MÓDULO 3: VISUALIZAR DATOS Y COMPARATIVA DE PROGRESIÓN           -->
+        <!-- ================================================================ -->
+        <div id="module-stats" style="display: none;">
+
+            <!-- 3A. Progresión de Condición Física -->
+            <div class="card">
+                <h2>
+                    <span>📊 Evolución de Condición Física</span>
+                </h2>
+                <div class="chart-controls">
+                    <label style="margin:0; font-weight:600;">Métrica a visualizar:</label>
+                    <select id="select-body-metric" onchange="renderBodyProgression()">
+                        <option value="peso">Peso Corporal (kg)</option>
+                        <option value="grasaPct">% Grasa Corporal (%)</option>
+                        <option value="magraKg">Masa Magra Libre de Grasa (kg)</option>
+                        <option value="grasaKg">Masa Grasa Total (kg)</option>
+                        <option value="cintura">Perímetro de Cintura (cm)</option>
+                    </select>
+                </div>
+
+                <div class="kpi-row" id="body-kpis"></div>
+
+                <div class="chart-box" id="body-chart-container"></div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Peso</th>
+                                <th>% Grasa</th>
+                                <th>Masa Magra</th>
+                                <th>Cintura</th>
+                                <th>TDEE</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="body-history-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 3B. Progresión de Fuerza (1RM por Ejercicio) -->
+            <div class="card">
+                <h2>
+                    <span>💪 Progresión de Fuerza (1RM por Ejercicio)</span>
+                </h2>
+                <div class="chart-controls">
+                    <label style="margin:0; font-weight:600;">Ejercicio:</label>
+                    <select id="select-ex-metric" onchange="renderRMProgression()"></select>
+                </div>
+
+                <div class="kpi-row" id="rm-kpis"></div>
+
+                <div class="chart-box" id="rm-chart-container"></div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Ejercicio / Variante usada</th>
+                                <th>Mejor Serie</th>
+                                <th>1RM Registrado</th>
+                                <th>Cambio vs Inicio</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="rm-history-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- TARJETA FINAL PARA GUARDAR Y DESCARGAR .TXT -->
         <div class="footer-save-card">
-            <h3>¿Has terminado de apuntar tus datos de hoy?</h3>
-            <p>Descarga tu archivo <strong>.txt</strong> actualizado con todos tus registros. La próxima vez solo tendrás que cargarlo al abrir la app.</p>
+            <h3>¿Has terminado tu sesión de hoy?</h3>
+            <p>Descarga tu archivo <strong>.txt</strong> con todo tu historial cronológico de condición física y récords 1RM.</p>
             <div>
                 <button type="button" class="btn-footer-download" onclick="saveAndDownloadTxt()">
-                    📥 Finalizar y Guardar Registro (.TXT)
-                </button>
-                <button type="button" class="btn-promote-rm" onclick="promoteCurrentToPrevious()">
-                    ⏭️ Pasar 1RM de hoy a "Sem. Anterior"
+                    📥 Finalizar y Descargar Registro (.TXT)
                 </button>
             </div>
         </div>
@@ -960,15 +1144,20 @@
 
     let appState = null;
     let currentSession = 'push';
+    let lastCalculatedBody = null;
+
+    function getTodayISO() {
+        return new Date().toISOString().split('T')[0];
+    }
 
     function createInitialState(userName) {
-        const hoy = new Date().toISOString().split('T')[0];
+        const hoy = getTodayISO();
         const mesSigDate = new Date();
         mesSigDate.setMonth(mesSigDate.getMonth() + 1);
         const mesSig = mesSigDate.toISOString().split('T')[0];
 
         const state = {
-            version: "4.1",
+            version: "5.0",
             userName: userName || "Atleta",
             lastSaved: "Sin descargas previas",
             fitcalc: {
@@ -992,7 +1181,9 @@
                 rGrasaFin: "",
                 rFechaFin: hoy
             },
-            exercises: {}
+            exercises: {},
+            bodyHistory: [], // Array de { date, peso, cintura, grasaPct, grasaKg, magraKg, imc, tdee }
+            rmHistory: []    // Array de { date, exId, exName, rm, bestSet }
         };
 
         Object.keys(defaultRoutines).forEach(sessionKey => {
@@ -1010,6 +1201,12 @@
         });
 
         return state;
+    }
+
+    function ensureStateCompatibility(parsed) {
+        if (!parsed.bodyHistory) parsed.bodyHistory = [];
+        if (!parsed.rmHistory) parsed.rmHistory = [];
+        return parsed;
     }
 
     function startNewUser() {
@@ -1037,10 +1234,10 @@
 
                 const parsed = JSON.parse(jsonStr);
                 if (!parsed || !parsed.exercises) {
-                    throw new Error("Estructura de archivo inválida");
+                    throw new Error("Estructura inválida");
                 }
 
-                appState = parsed;
+                appState = ensureStateCompatibility(parsed);
                 launchAppUI();
             } catch (err) {
                 alert("No se pudo leer el archivo .txt. Asegúrate de subir un archivo generado por Fitness Suite Pro.");
@@ -1056,10 +1253,15 @@
         document.getElementById('welcome-screen').style.display = 'none';
         document.getElementById('app-screen').style.display = 'block';
 
+        const hoy = getTodayISO();
+        document.getElementById('fc-log-date').value = hoy;
+        document.getElementById('workout-log-date').value = hoy;
+
         document.getElementById('display-username').innerText = appState.userName;
         document.getElementById('display-last-save').innerText = "Último registro: " + (appState.lastSaved || "Recién iniciado");
 
         populateFitCalcInputs();
+        populateExerciseSelectorForStats();
         renderSessionExercises();
         renderGlobalSummary();
 
@@ -1073,96 +1275,20 @@
         }
     }
 
-    function saveAndDownloadTxt() {
-        syncFitCalcState();
-        const nowStr = new Date().toLocaleString('es-ES');
-        appState.lastSaved = nowStr;
-        document.getElementById('display-last-save').innerText = "Último guardado: " + nowStr;
-        localStorage.setItem('fitness_suite_autosave', JSON.stringify(appState));
-
-        const NL = String.fromCharCode(10);
-        let lines = [];
-        lines.push("====================================================================");
-        lines.push("                 FITNESS SUITE PRO - REGISTRO DE USUARIO            ");
-        lines.push("====================================================================");
-        lines.push("Atleta: " + appState.userName);
-        lines.push("Fecha de guardado: " + nowStr);
-        lines.push("");
-        lines.push("--- 1. DATOS CORPORALES (FITCALC) ---");
-        lines.push("Sexo: " + appState.fitcalc.sexo + " | Edad: " + appState.fitcalc.edad + " años | Peso: " + appState.fitcalc.peso + " kg | Altura: " + appState.fitcalc.altura + " cm");
-        lines.push("Cintura: " + appState.fitcalc.cintura + " cm | Cuello: " + appState.fitcalc.cuello + " cm");
-        lines.push("");
-        lines.push("--- 2. RESUMEN DE MEJORES 1RM Y ENTRENAMIENTO PPL ---");
-
-        Object.keys(defaultRoutines).forEach(sKey => {
-            const group = defaultRoutines[sKey];
-            lines.push("");
-            lines.push("[" + group.label.toUpperCase() + "]");
-            group.exercises.forEach(ex => {
-                const exData = appState.exercises[ex.id];
-                const bestToday = getExerciseBestRM(ex.id);
-                const prevRM = parseFloat(exData.prevRM) || 0;
-                const diffStr = (bestToday > 0 && prevRM > 0)
-                    ? ((bestToday - prevRM >= 0 ? "+" : "") + (bestToday - prevRM).toFixed(1) + " kg")
-                    : "Sin comp.";
-
-                lines.push("• " + exData.customName + ": Mejor 1RM Hoy = " + (bestToday > 0 ? bestToday.toFixed(1) + " kg" : "--") + " | 1RM Sem. Anterior = " + (prevRM > 0 ? prevRM.toFixed(1) + " kg" : "--") + " (" + diffStr + ")");
-
-                exData.sets.forEach((st, idx) => {
-                    if (st.w && st.r) {
-                        const rm = calcBrzycki(parseFloat(st.w), parseInt(st.r), parseInt(st.rir));
-                        lines.push("    Serie " + (idx + 1) + ": " + st.w + " kg x " + st.r + " reps (RIR " + st.rir + ") -> 1RM est: " + rm.toFixed(1) + " kg");
-                    }
-                });
-            });
-        });
-
-        lines.push("");
-        lines.push("====================================================================");
-        lines.push("NO BORRAR EL SIGUIENTE BLOQUE (NECESARIO PARA CARGAR EN LA APP):");
-        lines.push("=== INICIO_DATOS_SISTEMA_JSON ===");
-        lines.push(JSON.stringify(appState));
-        lines.push("=== FIN_DATOS_SISTEMA_JSON ===");
-
-        const txtBlob = new Blob([lines.join(NL)], { type: "text/plain;charset=utf-8" });
-        const safeUser = appState.userName.replace(/[^a-z0-9_-]/gi, '_').toLowerCase();
-        const dateTag = new Date().toISOString().split('T')[0];
-        const fileName = "registro_" + safeUser + "_" + dateTag + ".txt";
-
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(txtBlob);
-        link.download = fileName;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(link.href);
-    }
-
-    function promoteCurrentToPrevious() {
-        if (!confirm("¿Quieres pasar los mejores 1RM calculados hoy a la casilla '1RM Sem. Anterior' y vaciar las series para empezar una nueva semana?")) {
-            return;
-        }
-        Object.keys(appState.exercises).forEach(exId => {
-            const bestToday = getExerciseBestRM(exId);
-            if (bestToday > 0) {
-                appState.exercises[exId].prevRM = bestToday.toFixed(1);
-            }
-            appState.exercises[exId].sets.forEach(s => {
-                s.w = "";
-                s.r = "";
-                s.rir = "1";
-            });
-        });
-        renderSessionExercises();
-        renderGlobalSummary();
-        localStorage.setItem('fitness_suite_autosave', JSON.stringify(appState));
-    }
-
     function switchMainTab(tab) {
         document.getElementById('nav-fitcalc').classList.toggle('active', tab === 'fitcalc');
         document.getElementById('nav-tracker').classList.toggle('active', tab === 'tracker');
+        document.getElementById('nav-stats').classList.toggle('active', tab === 'stats');
+
         document.getElementById('module-fitcalc').style.display = tab === 'fitcalc' ? 'block' : 'none';
         document.getElementById('module-tracker').style.display = tab === 'tracker' ? 'block' : 'none';
+        document.getElementById('module-stats').style.display = tab === 'stats' ? 'block' : 'none';
+
+        if (tab === 'stats') {
+            populateExerciseSelectorForStats();
+            renderBodyProgression();
+            renderRMProgression();
+        }
     }
 
     function switchSession(sessionKey) {
@@ -1173,6 +1299,9 @@
         renderSessionExercises();
     }
 
+    // =========================================================================
+    // MÓDULO 1: FITCALC PRO + GUARDADO CON FECHA EN HISTORIAL
+    // =========================================================================
     function toggleCadera() {
         const sexo = document.getElementById('sexo').value;
         document.getElementById('grupo-cadera').style.display = sexo === 'mujer' ? 'flex' : 'none';
@@ -1260,12 +1389,22 @@
         const grasaKg = peso * (pctGrasa / 100);
         const magraKg = peso - grasaKg;
 
-        document.getElementById('out-grasa-pct').innerText = pctGrasa.toFixed(1) + '%';
-        document.getElementById('out-grasa-kg').innerText = grasaKg.toFixed(1);
-        document.getElementById('out-magra-kg').innerText = magraKg.toFixed(1);
-        document.getElementById('out-imc').innerText = imc.toFixed(1);
+        lastCalculatedBody = {
+            peso: Number(peso.toFixed(1)),
+            cintura: Number(cintura.toFixed(1)),
+            grasaPct: Number(pctGrasa.toFixed(1)),
+            grasaKg: Number(grasaKg.toFixed(1)),
+            magraKg: Number(magraKg.toFixed(1)),
+            imc: Number(imc.toFixed(1)),
+            tdee: Math.round(tdee)
+        };
+
+        document.getElementById('out-grasa-pct').innerText = lastCalculatedBody.grasaPct + '%';
+        document.getElementById('out-grasa-kg').innerText = lastCalculatedBody.grasaKg;
+        document.getElementById('out-magra-kg').innerText = lastCalculatedBody.magraKg;
+        document.getElementById('out-imc').innerText = lastCalculatedBody.imc;
         document.getElementById('out-tmb').innerText = Math.round(tmb);
-        document.getElementById('out-tdee').innerText = Math.round(tdee);
+        document.getElementById('out-tdee').innerText = lastCalculatedBody.tdee;
         document.getElementById('res-estado').style.display = 'block';
 
         document.getElementById('p-peso').value = peso;
@@ -1273,6 +1412,35 @@
         document.getElementById('r-peso-ini').value = peso;
         document.getElementById('r-grasa-ini').value = pctGrasa.toFixed(1);
         syncFitCalcState();
+    }
+
+    function guardarEstadoEnHistorial() {
+        if (!lastCalculatedBody) calcularEstado();
+        if (!lastCalculatedBody) return;
+
+        const dateVal = document.getElementById('fc-log-date').value || getTodayISO();
+        const entry = {
+            date: dateVal,
+            peso: lastCalculatedBody.peso,
+            cintura: lastCalculatedBody.cintura,
+            grasaPct: lastCalculatedBody.grasaPct,
+            grasaKg: lastCalculatedBody.grasaKg,
+            magraKg: lastCalculatedBody.magraKg,
+            imc: lastCalculatedBody.imc,
+            tdee: lastCalculatedBody.tdee
+        };
+
+        // Si ya existe registro en esa misma fecha, lo actualiza; si no, lo añade
+        const existingIdx = appState.bodyHistory.findIndex(item => item.date === dateVal);
+        if (existingIdx >= 0) {
+            appState.bodyHistory[existingIdx] = entry;
+        } else {
+            appState.bodyHistory.push(entry);
+        }
+
+        appState.bodyHistory.sort((a, b) => a.date.localeCompare(b.date));
+        localStorage.setItem('fitness_suite_autosave', JSON.stringify(appState));
+        alert("✅ Estado físico registrado con fecha " + dateVal + ". Puedes ver la gráfica en la pestaña '3. Visualizar Progresión'.");
     }
 
     function calcularProyeccion() {
@@ -1328,6 +1496,9 @@
         document.getElementById('res-retro').style.display = 'block';
     }
 
+    // =========================================================================
+    // MÓDULO 2: PPL TRACKER + GUARDADO DE 1RM CON FECHA
+    // =========================================================================
     function calcBrzycki(peso, reps, rir) {
         if (!peso || !reps || peso <= 0 || reps <= 0) return 0;
         const totalRepsToFailure = parseInt(reps) + parseInt(rir || 0);
@@ -1336,20 +1507,83 @@
         return peso / (1.0278 - (0.0278 * totalRepsToFailure));
     }
 
-    function getExerciseBestRM(exId) {
+    function getExerciseBestRMAndSet(exId) {
         const exState = appState.exercises[exId];
-        if (!exState) return 0;
+        if (!exState) return { maxRM: 0, bestSetStr: "" };
         let maxRM = 0;
+        let bestSetStr = "";
         exState.sets.forEach(s => {
             const w = parseFloat(s.w);
             const r = parseInt(s.r);
             const rir = parseInt(s.rir);
             if (w > 0 && r > 0) {
                 const rm = calcBrzycki(w, r, rir);
-                if (rm > maxRM) maxRM = rm;
+                if (rm > maxRM) {
+                    maxRM = rm;
+                    bestSetStr = w + "kg × " + r + " (RIR " + rir + ")";
+                }
             }
         });
-        return maxRM;
+        return { maxRM, bestSetStr };
+    }
+
+    function getExerciseBestRM(exId) {
+        return getExerciseBestRMAndSet(exId).maxRM;
+    }
+
+    function guardarSesionRMEnHistorial() {
+        const dateVal = document.getElementById('workout-log-date').value || getTodayISO();
+        let savedCount = 0;
+
+        Object.keys(defaultRoutines).forEach(sKey => {
+            defaultRoutines[sKey].exercises.forEach(ex => {
+                const info = getExerciseBestRMAndSet(ex.id);
+                if (info.maxRM > 0) {
+                    const exState = appState.exercises[ex.id];
+                    const entry = {
+                        date: dateVal,
+                        exId: ex.id,
+                        exName: exState.customName,
+                        rm: Number(info.maxRM.toFixed(1)),
+                        bestSet: info.bestSetStr
+                    };
+
+                    const existingIdx = appState.rmHistory.findIndex(
+                        item => item.date === dateVal && item.exId === ex.id
+                    );
+                    if (existingIdx >= 0) {
+                        appState.rmHistory[existingIdx] = entry;
+                    } else {
+                        appState.rmHistory.push(entry);
+                    }
+                    savedCount++;
+                }
+            });
+        });
+
+        if (savedCount === 0) {
+            return alert("Introduce primero el peso y repeticiones en al menos un ejercicio para poder registrar su 1RM en el historial.");
+        }
+
+        appState.rmHistory.sort((a, b) => a.date.localeCompare(b.date));
+
+        if (confirm("✅ Se han guardado " + savedCount + " registros de 1RM con fecha " + dateVal + ".\n\n¿Quieres pasar también estos 1RM de hoy a la casilla '1RM Sem. Anterior' y vaciar las series para el próximo día?")) {
+            Object.keys(appState.exercises).forEach(exId => {
+                const bestToday = getExerciseBestRM(exId);
+                if (bestToday > 0) {
+                    appState.exercises[exId].prevRM = bestToday.toFixed(1);
+                    appState.exercises[exId].sets.forEach(s => {
+                        s.w = "";
+                        s.r = "";
+                        s.rir = "1";
+                    });
+                }
+            });
+            renderSessionExercises();
+            renderGlobalSummary();
+        }
+
+        localStorage.setItem('fitness_suite_autosave', JSON.stringify(appState));
     }
 
     function renderSessionExercises() {
@@ -1503,7 +1737,7 @@
                     const diff = bestToday - prevRM;
                     const color = diff > 0 ? 'var(--success)' : (diff < 0 ? 'var(--danger)' : 'var(--text-light)');
                     const sign = diff > 0 ? '+' : '';
-                    diffBadge = '<span style="color:' + color + '; font-weight:700;">' + sign + diff.toFixed(1) + ' kg vs ant.</span>';
+                    diffBadge = '<span style="color:' + color + '; font-weight:700;">' + sign + diff.toFixed(1) + ' kg</span>';
                 }
 
                 html += '<div class="summary-item">' +
@@ -1522,6 +1756,277 @@
         container.innerHTML = html;
     }
 
+    // =========================================================================
+    // MÓDULO 3: VISUALIZAR DATOS Y GRÁFICAS DE PROGRESIÓN (SVG INTERACTIVO)
+    // =========================================================================
+    function populateExerciseSelectorForStats() {
+        const sel = document.getElementById('select-ex-metric');
+        const currentVal = sel.value;
+        sel.innerHTML = '';
+
+        Object.keys(defaultRoutines).forEach(sKey => {
+            const group = defaultRoutines[sKey];
+            const optGroup = document.createElement('optgroup');
+            optGroup.label = group.label;
+            group.exercises.forEach(ex => {
+                const opt = document.createElement('option');
+                opt.value = ex.id;
+                opt.innerText = appState.exercises[ex.id].customName;
+                optGroup.appendChild(opt);
+            });
+            sel.appendChild(optGroup);
+        });
+
+        if (currentVal) sel.value = currentVal;
+    }
+
+    function buildSVGLineChart(points, unit) {
+        if (!points || points.length === 0) {
+            return '<div style="text-align:center; padding: 45px 15px; color: var(--text-light); font-size:0.9rem;">No hay registros guardados con fecha todavía.</div>';
+        }
+
+        const width = 720;
+        const height = 210;
+        const padLeft = 48;
+        const padRight = 30;
+        const padTop = 28;
+        const padBottom = 38;
+
+        const values = points.map(p => p.val);
+        let minVal = Math.min.apply(null, values);
+        let maxVal = Math.max.apply(null, values);
+
+        if (minVal === maxVal) {
+            minVal -= 2;
+            maxVal += 2;
+        } else {
+            const margin = (maxVal - minVal) * 0.15;
+            minVal -= margin;
+            maxVal += margin;
+        }
+
+        const plotW = width - padLeft - padRight;
+        const plotH = height - padTop - padBottom;
+
+        const coords = points.map((pt, idx) => {
+            const x = points.length === 1
+                ? padLeft + plotW / 2
+                : padLeft + (idx / (points.length - 1)) * plotW;
+            const y = padTop + plotH - ((pt.val - minVal) / (maxVal - minVal)) * plotH;
+            return { x, y, val: pt.val, date: pt.date };
+        });
+
+        let gridLines = '';
+        for (let i = 0; i <= 3; i++) {
+            const gy = padTop + (i / 3) * plotH;
+            const gVal = (maxVal - (i / 3) * (maxVal - minVal)).toFixed(1);
+            gridLines += '<line x1="' + padLeft + '" y1="' + gy + '" x2="' + (width - padRight) + '" y2="' + gy + '" stroke="#E5E7EB" stroke-dasharray="4 4" stroke-width="1"/>';
+            gridLines += '<text x="' + (padLeft - 8) + '" y="' + (gy + 4) + '" text-anchor="end" font-size="11" fill="#6B7280">' + gVal + '</text>';
+        }
+
+        let polyPoints = coords.map(c => c.x + ',' + c.y).join(' ');
+        let areaPoints = coords[0].x + ',' + (padTop + plotH) + ' ' + polyPoints + ' ' + coords[coords.length - 1].x + ',' + (padTop + plotH);
+
+        let circlesHtml = '';
+        coords.forEach(c => {
+            const shortDate = c.date.slice(5); // MM-DD
+            circlesHtml += '<circle cx="' + c.x + '" cy="' + c.y + '" r="5" fill="#4F46E5" stroke="#FFFFFF" stroke-width="2"/>';
+            circlesHtml += '<text x="' + c.x + '" y="' + (c.y - 10) + '" text-anchor="middle" font-size="11" font-weight="bold" fill="#1F2937">' + c.val + unit + '</text>';
+            circlesHtml += '<text x="' + c.x + '" y="' + (padTop + plotH + 20) + '" text-anchor="middle" font-size="11" fill="#6B7280">' + shortDate + '</text>';
+        });
+
+        return '<svg viewBox="0 0 ' + width + ' ' + height + '" class="svg-chart">' +
+            '<defs>' +
+                '<linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">' +
+                    '<stop offset="0%" stop-color="#4F46E5" stop-opacity="0.25"/>' +
+                    '<stop offset="100%" stop-color="#4F46E5" stop-opacity="0.0"/>' +
+                '</linearGradient>' +
+            '</defs>' +
+            gridLines +
+            (coords.length > 1 ? '<polygon points="' + areaPoints + '" fill="url(#chartGrad)"/>' : '') +
+            (coords.length > 1 ? '<polyline fill="none" stroke="#4F46E5" stroke-width="3" points="' + polyPoints + '"/>' : '') +
+            circlesHtml +
+        '</svg>';
+    }
+
+    function renderBodyProgression() {
+        const metric = document.getElementById('select-body-metric').value;
+        const unitMap = { peso: 'kg', grasaPct: '%', magraKg: 'kg', grasaKg: 'kg', cintura: 'cm' };
+        const unit = unitMap[metric] || '';
+
+        const list = appState.bodyHistory || [];
+        const points = list.map(item => ({ date: item.date, val: Number(item[metric]) }));
+
+        document.getElementById('body-chart-container').innerHTML = buildSVGLineChart(points, unit);
+
+        // KPIs
+        const kpiContainer = document.getElementById('body-kpis');
+        if (points.length === 0) {
+            kpiContainer.innerHTML = '';
+        } else {
+            const first = points[0].val;
+            const last = points[points.length - 1].val;
+            const diff = (last - first).toFixed(1);
+            const sign = diff > 0 ? '+' : '';
+            kpiContainer.innerHTML =
+                '<div class="kpi-box"><div class="kpi-label">Inicial (' + list[0].date + ')</div><div class="kpi-val">' + first + ' ' + unit + '</div></div>' +
+                '<div class="kpi-box"><div class="kpi-label">Actual (' + list[list.length - 1].date + ')</div><div class="kpi-val">' + last + ' ' + unit + '</div></div>' +
+                '<div class="kpi-box"><div class="kpi-label">Diferencia Total</div><div class="kpi-val">' + sign + diff + ' ' + unit + '</div></div>';
+        }
+
+        // Tabla histórica
+        const tbody = document.getElementById('body-history-tbody');
+        tbody.innerHTML = '';
+        if (list.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="color:var(--text-light);">Sin registros. Calcula tu estado en la pestaña 1 y pulsa "Guardar Estado con Fecha".</td></tr>';
+        } else {
+            list.slice().reverse().forEach(row => {
+                tbody.innerHTML += '<tr>' +
+                    '<td><strong>' + row.date + '</strong></td>' +
+                    '<td>' + row.peso + ' kg</td>' +
+                    '<td>' + row.grasaPct + '%</td>' +
+                    '<td>' + row.magraKg + ' kg</td>' +
+                    '<td>' + row.cintura + ' cm</td>' +
+                    '<td>' + row.tdee + ' kcal</td>' +
+                    '<td><button type="button" class="btn-del-row" onclick="deleteBodyHistoryEntry(\'' + row.date + '\')" title="Eliminar fecha">✕</button></td>' +
+                '</tr>';
+            });
+        }
+    }
+
+    function deleteBodyHistoryEntry(dateStr) {
+        if (!confirm("¿Eliminar el registro corporal de la fecha " + dateStr + "?")) return;
+        appState.bodyHistory = appState.bodyHistory.filter(item => item.date !== dateStr);
+        localStorage.setItem('fitness_suite_autosave', JSON.stringify(appState));
+        renderBodyProgression();
+    }
+
+    function renderRMProgression() {
+        const exId = document.getElementById('select-ex-metric').value;
+        const allLogs = (appState.rmHistory || []).filter(item => item.exId === exId);
+        const points = allLogs.map(item => ({ date: item.date, val: Number(item.rm) }));
+
+        document.getElementById('rm-chart-container').innerHTML = buildSVGLineChart(points, 'kg');
+
+        const kpiContainer = document.getElementById('rm-kpis');
+        if (points.length === 0) {
+            kpiContainer.innerHTML = '';
+        } else {
+            const first = points[0].val;
+            const last = points[points.length - 1].val;
+            const maxPR = Math.max.apply(null, points.map(p => p.val));
+            const diff = (last - first).toFixed(1);
+            const sign = diff > 0 ? '+' : '';
+            kpiContainer.innerHTML =
+                '<div class="kpi-box"><div class="kpi-label">1RM Inicial</div><div class="kpi-val">' + first + ' kg</div></div>' +
+                '<div class="kpi-box"><div class="kpi-label">Mejor Récord (PR)</div><div class="kpi-val">' + maxPR + ' kg</div></div>' +
+                '<div class="kpi-box"><div class="kpi-label">Progreso Total</div><div class="kpi-val" style="color:' + (diff >= 0 ? 'var(--success)' : 'var(--danger)') + ';">' + sign + diff + ' kg</div></div>';
+        }
+
+        const tbody = document.getElementById('rm-history-tbody');
+        tbody.innerHTML = '';
+        if (allLogs.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="color:var(--text-light);">Sin registros para este ejercicio. Apunta tus series en la pestaña 2 y pulsa "Registrar Mejores 1RM en Historial".</td></tr>';
+        } else {
+            const baseRM = allLogs[0].rm;
+            allLogs.slice().reverse().forEach(row => {
+                const diff = (row.rm - baseRM).toFixed(1);
+                const sign = diff > 0 ? '+' : '';
+                const color = diff > 0 ? 'var(--success)' : (diff < 0 ? 'var(--danger)' : 'var(--text-light)');
+                tbody.innerHTML += '<tr>' +
+                    '<td><strong>' + row.date + '</strong></td>' +
+                    '<td>' + row.exName + '</td>' +
+                    '<td>' + (row.bestSet || '--') + '</td>' +
+                    '<td><strong style="color:var(--primary);">' + row.rm + ' kg</strong></td>' +
+                    '<td style="color:' + color + '; font-weight:700;">' + sign + diff + ' kg</td>' +
+                    '<td><button type="button" class="btn-del-row" onclick="deleteRMHistoryEntry(\'' + row.date + '\', \'' + row.exId + '\')" title="Eliminar registro">✕</button></td>' +
+                '</tr>';
+            });
+        }
+    }
+
+    function deleteRMHistoryEntry(dateStr, exId) {
+        if (!confirm("¿Eliminar este registro de 1RM del día " + dateStr + "?")) return;
+        appState.rmHistory = appState.rmHistory.filter(item => !(item.date === dateStr && item.exId === exId));
+        localStorage.setItem('fitness_suite_autosave', JSON.stringify(appState));
+        renderRMProgression();
+    }
+
+    // =========================================================================
+    // GUARDAR Y DESCARGAR ARCHIVO .TXT (INCLUYE TODO EL HISTORIAL POR FECHAS)
+    // =========================================================================
+    function saveAndDownloadTxt() {
+        syncFitCalcState();
+        const nowStr = new Date().toLocaleString('es-ES');
+        appState.lastSaved = nowStr;
+        document.getElementById('display-last-save').innerText = "Último guardado: " + nowStr;
+        localStorage.setItem('fitness_suite_autosave', JSON.stringify(appState));
+
+        const NL = String.fromCharCode(10);
+        let lines = [];
+        lines.push("====================================================================");
+        lines.push("                 FITNESS SUITE PRO - REGISTRO DE USUARIO            ");
+        lines.push("====================================================================");
+        lines.push("Atleta: " + appState.userName);
+        lines.push("Fecha de exportación: " + nowStr);
+        lines.push("");
+        lines.push("--- 1. HISTORIAL DE CONDICIÓN FÍSICA POR FECHAS ---");
+        if (appState.bodyHistory.length === 0) {
+            lines.push("Sin registros históricos corporales.");
+        } else {
+            appState.bodyHistory.forEach(b => {
+                lines.push("[" + b.date + "] Peso: " + b.peso + " kg | Grasa: " + b.grasaPct + "% (" + b.grasaKg + " kg) | Masa Magra: " + b.magraKg + " kg | Cintura: " + b.cintura + " cm | TDEE: " + b.tdee + " kcal");
+            });
+        }
+
+        lines.push("");
+        lines.push("--- 2. HISTORIAL DE 1RM POR FECHAS ---");
+        if (appState.rmHistory.length === 0) {
+            lines.push("Sin registros históricos de 1RM.");
+        } else {
+            appState.rmHistory.forEach(r => {
+                lines.push("[" + r.date + "] " + r.exName + " -> 1RM: " + r.rm + " kg (Mejor serie: " + (r.bestSet || "--") + ")");
+            });
+        }
+
+        lines.push("");
+        lines.push("--- 3. ESTADO DE LA SESIÓN ACTUAL EN CURSO ---");
+        Object.keys(defaultRoutines).forEach(sKey => {
+            const group = defaultRoutines[sKey];
+            lines.push("");
+            lines.push("[" + group.label.toUpperCase() + "]");
+            group.exercises.forEach(ex => {
+                const exData = appState.exercises[ex.id];
+                const bestToday = getExerciseBestRM(ex.id);
+                const prevRM = parseFloat(exData.prevRM) || 0;
+                lines.push("• " + exData.customName + ": Mejor 1RM Hoy = " + (bestToday > 0 ? bestToday.toFixed(1) + " kg" : "--") + " | 1RM Sem. Anterior = " + (prevRM > 0 ? prevRM.toFixed(1) + " kg" : "--"));
+            });
+        });
+
+        lines.push("");
+        lines.push("====================================================================");
+        lines.push("NO BORRAR EL SIGUIENTE BLOQUE (NECESARIO PARA CARGAR EN LA APP):");
+        lines.push("=== INICIO_DATOS_SISTEMA_JSON ===");
+        lines.push(JSON.stringify(appState));
+        lines.push("=== FIN_DATOS_SISTEMA_JSON ===");
+
+        const txtBlob = new Blob([lines.join(NL)], { type: "text/plain;charset=utf-8" });
+        const safeUser = appState.userName.replace(/[^a-z0-9_-]/gi, '_').toLowerCase();
+        const dateTag = getTodayISO();
+        const fileName = "registro_" + safeUser + "_" + dateTag + ".txt";
+
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(txtBlob);
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
+    }
+
+    // =========================================================================
+    // MODAL DE TABLA RIR
+    // =========================================================================
     function openModal(exId) {
         const exData = appState.exercises[exId];
         const bestToday = getExerciseBestRM(exId);
