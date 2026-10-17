@@ -77,6 +77,8 @@
         <!-- COPIA Y PEGA UNA LÍNEA DEBAJO PARA AÑADIR NUEVOS BOTONES -->
         <a href="https://Dolvper.github.io/dani.html" class="boton">dani</a>
         <a href="https://Dolvper.github.io/fit.html" class="boton">fit</a>
+                <a href="https://Dolvper.github.io/red.html" class="boton">red</a>
+                        <a href="https://Dolvper.github.io/papel.html" class="boton">papel</a>
         
     </div>
 
