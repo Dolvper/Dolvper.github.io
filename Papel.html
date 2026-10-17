@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manual Operativo: Parte Húmeda & Calidad</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background-color: #0f172a; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
+    .card-content { max-height: 0; overflow: hidden; transition: max-height 0.35s ease-out; }
+    .card-open .card-content { max-height: 1000px; transition: max-height 0.5s ease-in; }
+    .tab-active { border-bottom: 3px solid #38bdf8; color: #38bdf8; font-weight: 700; background-color: rgba(56, 189, 248, 0.1); }
+  </style>
+</head>
+<body class="min-h-screen pb-12">
+
+  <!-- Encabezado Sala de Control -->
+  <header class="bg-slate-900 border-b border-slate-700 sticky top-0 z-50 shadow-lg">
+    <div class="max-w-5xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+      <div class="flex items-center gap-3">
+        <span class="text-3xl">🏭</span>
+        <div>
+          <h1 class="text-xl font-bold tracking-wide text-sky-400">PANEL EXPERTO: PARTE HÚMEDA</h1>
+          <p class="text-xs text-slate-400">Guía de Química, Física y Diagnóstico en Máquina (pH Neutro)</p>
+        </div>
+      </div>
+      <!-- Buscador rápido -->
+      <div class="w-full sm:w-72 relative">
+        <input type="text" id="searchInput" onkeyup="filterCards()" placeholder="Buscar (ej. ASA, Cobb, amperios...)" 
+          class="w-full bg-slate-800 text-sm text-white rounded-lg pl-9 pr-4 py-2 border border-slate-600 focus:outline-none focus:border-sky-400">
+        <span class="absolute left-3 top-2.5 text-slate-400">🔍</span>
+      </div>
+    </div>
+
+    <!-- Navegación por Categorías -->
+    <nav class="max-w-5xl mx-auto px-4 flex overflow-x-auto text-sm text-slate-300 border-t border-slate-800">
+      <button onclick="switchTab('all')" id="tab-all" class="tab-btn tab-active px-4 py-3 whitespace-nowrap">📚 Todo el Mapa</button>
+      <button onclick="switchTab('quimica')" id="tab-quimica" class="tab-btn px-4 py-3 whitespace-nowrap">🧲 Cargas y Retención</button>
+      <button onclick="switchTab('resistencia')" id="tab-resistencia" class="tab-btn px-4 py-3 whitespace-nowrap">🕸️ Resistencia y Encolado</button>
+      <button onclick="switchTab('limpieza')" id="tab-limpieza" class="tab-btn px-4 py-3 whitespace-nowrap">🦠 Slime y Stickies</button>
+      <button onclick="switchTab('fisica')" id="tab-fisica" class="tab-btn px-4 py-3 whitespace-nowrap">📊 Física y Laboratorio</button>
+      <button onclick="switchTab('simulador')" id="tab-simulador" class="tab-btn px-4 py-3 whitespace-nowrap text-amber-400 font-semibold">🚨 Diagnóstico Rápido</button>
+    </nav>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-4 mt-6">
+
+    <!-- SECCIÓN SIMULADOR DE DIAGNÓSTICO (Oculta por defecto salvo al pulsar su pestaña o ver todo) -->
+    <section id="sec-simulador" class="mb-8 bg-slate-800/90 border border-amber-500/40 rounded-xl p-5 shadow-lg">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="text-2xl">🚨</span>
+        <h2 class="text-lg font-bold text-amber-400">Simulador de Emergencias en Turno</h2>
+      </div>
+      <p class="text-sm text-slate-300 mb-4">Selecciona el síntoma que estás viendo en la máquina o en el laboratorio para ver la causa raíz y qué revisar:</p>
+      
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 mb-4">
+        <button onclick="showDiag('cobb')" class="bg-slate-700 hover:bg-slate-600 text-left p-3 rounded-lg text-sm border border-slate-600 transition">💧 <b>Cobb muy alto</b> (Papel chupa agua)</button>
+        <button onclick="showDiag('mullen')" class="bg-slate-700 hover:bg-slate-600 text-left p-3 rounded-lg text-sm border border-slate-600 transition">💥 <b>Mullen bajo</b> (Hoja sin fuerza en seco)</button>
+        <button onclick="showDiag('humedo')" class="bg-slate-700 hover:bg-slate-600 text-left p-3 rounded-lg text-sm border border-slate-600 transition">🏋️‍♂️ <b>Fallo Tracción Húmedo</b> (Bomba Kymene OK)</button>
+        <button onclick="showDiag('amperios')" class="bg-slate-700 hover:bg-slate-600 text-left p-3 rounded-lg text-sm border border-slate-600 transition">⚡ <b>Subida de Amperios / ΔP</b> en Depuradores</button>
+        <button onclick="showDiag('rotura_negra')" class="bg-slate-700 hover:bg-slate-600 text-left p-3 rounded-lg text-sm border border-slate-600 transition">🦠 <b>Manchas oscuras / Agujeros</b> y roturas</button>
+        <button onclick="showDiag('reventon')" class="bg-slate-700 hover:bg-slate-600 text-left p-3 rounded-lg text-sm border border-slate-600 transition">🪨 <b>Puntos húmedos y reventón</b> en prensas</button>
+      </div>
+
+      <div id="diagResult" class="hidden bg-slate-900 border-l-4 border-sky-400 p-4 rounded-r-lg text-sm space-y-2"></div>
+    </section>
+
+    <!-- CONTENEDOR DE TARJETAS DE CONOCIMIENTO -->
+    <div id="cardsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+      <!-- 1. QUÍMICA Y RETENCIÓN -->
+      <div class="topic-card bg-slate-800 border border-slate-700 rounded-xl p-4 cursor-pointer hover:border-sky-500/50 transition" data-category="quimica" onclick="toggleCard(this)">
+        <div class="flex justify-between items-center">
+          <div class="flex items-center gap-3">
+            <span class="text-2xl">🧲</span>
+            <div>
+              <span class="text-xs uppercase px-2 py-0.5 rounded bg-sky-900 text-sky-300">Cargas y Retención</span>
+              <h3 class="font-bold text-base mt-1">Regla de Oro: Celulosa (-) y Cato (+)</h3>
+            </div>
+          </div>
+          <span class="text-slate-400 text-xl font-bold">+</span>
+        </div>
+        <div class="card-content mt-3 pt-3 border-t border-slate-700 text-sm text-slate-300 space-y-2">
+          <p><b>Naturaleza de la fibra:</b> La fibra de celulosa y las cargas minerales tienen carga eléctrica <b>negativa (-)</b> en el agua. Tienden a repelerse entre sí.</p>
+          <p><b>Función del Cato (Almidón Catiónico):</b> Tiene carga <b>positiva (+)</b>. Actúa como un imán uniendo las fibras negativas y reteniendo los finos para dar resistencia interna.</p>
+          <p class="text-amber-300 text-xs">⚠️ <b>Efecto secundario:</b> Al ser una cadena de azúcares, el Cato es el alimento favorito de las bacterias (genera <i>slime</i>).</p>
+        </div>
+      </div>
+
+      <div class="topic-card bg-slate-800 border border-slate-700 rounded-xl p-4 cursor-pointer hover:border-sky-500/50 transition" data-category="quimica" onclick="toggleCard(this)">
+        <div class="flex justify-between items-center">
+          <div class="flex items-center gap-3">
+            <span class="text-2xl">🧹</span>
+            <div>
+              <span class="text-xs uppercase px-2 py-0.5 rounded bg-sky-900 text-sky-300">Cargas y Retención</span>
+              <h3 class="font-bold text-base mt-1">Alúmina y la "Basura Aniónica"</h3>
+            </div>
+          </div>
+          <span class="text-slate-400 text-xl font-bold">+</span>
+        </div>
+        <div class="card-content mt-3 pt-3 border-t border-slate-700 text-sm text-slate-300 space-y-2">
+          <p><b>El problema:</b> El circuito de aguas blancas acumula "basura aniónica" (partículas disueltas con carga negativa <b>-</b>). Si no se limpia, esta basura neutraliza los químicos caros (Cato, Kymene, cápsula del ASA) antes de que toquen la fibra.</p>
+          <p><b>Doble función de la Alúmina (+):</b></p>
+          <ul class="list-disc pl-5 space-y-1">
+            <li><b>Como "Sacrificio":</b> Atrapa y neutraliza la basura aniónica despejando el camino.</li>
+            <li><b>Junto a la cola (Caja de entrada):</b> En pH neutro forma una red gelatinosa (flóculos) que protege a las gotas de cola contra las fuertes turbulencias (cizalla) para que no se escapen por la tela.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 2. RESISTENCIA Y ENCOLADO -->
+      <div class="topic-card bg-slate-800 border border-slate-700 rounded-xl p-4 cursor-pointer hover:border-sky-500/50 transition" data-category="resistencia" onclick="toggleCard(this)">
+        <div class="flex justify-between items-center">
+          <div class="flex items-center gap-3">
+            <span class="text-2xl">🕸️</span>
+            <div>
+              <span class="text-xs uppercase px-2 py-0.5 rounded bg-indigo-900 text-indigo-300">Resistencia Estructural</span>
+              <h3 class="font-bold text-base mt-1">Sistema Dual: Kymene (+) y Fennobond (-)</h3>
+            </div>
+          </div>
+          <span class="text-slate-400 text-xl font-bold">+</span>
+        </div>
+        <div class="card-content mt-3 pt-3 border-t border-slate-700 text-sm text-slate-300 space-y-2">
+          <p><b>El Orden es Innegociable:</b></p>
+          <ol class="list-decimal pl-5 space-y-1">
+            <li>Primero entra el <b>Kymene (+)</b>: Se pega a la fibra negativa (-) y "pinta" su superficie de carga positiva. Da resistencia en húmedo formando enlaces covalentes.</li>
+            <li>Después entra el <b>Fennobond (-)</b>: Se ancla sobre el Kymene positivo formando una <b>malla 3D</b> súper resistente en seco.</li>
+          </ol>
+          <p class="text-rose-400 text-xs">❌ <b>¿Qué pasa si se invierte el orden?</b> Como la fibra es (-) y el Fennobond es (-), se repelerían al instante y el producto se perdería por las aguas blancas.</p>
+          <p class="text-sky-300 text-xs">🔥 <b>Requisito térmico:</b> El Kymene necesita calor en la batería de secadores (vapor) para "curar" y soldarse.</p>
+        </div>
+      </div>
+
+      <div class="topic-card bg-slate-800 border border-slate-700 rounded-xl p-4 cursor-pointer hover:border-sky-500/50 transition" data-category="resistencia" onclick="toggleCard(this)">
+        <div class="flex justify-between items-center">
+          <div class="flex items-center gap-3">
+            <span class="text-2xl">🌂</span>
+            <div>
+              <span class="text-xs uppercase px-2 py-0.5 rounded bg-indigo-900 text-indigo-300">Encolado Neutro</span>
+              <h3 class="font-bold text-base mt-1">Impermeabilización con ASA / AKD</h3>
+            </div>
+          </div>
+          <span class="text-slate-400 text-xl font-bold">+</span>
+        </div>
+        <div class="card-content mt-3 pt-3 border-t border-slate-700 text-sm text-slate-300 space-y-2">
+          <p><b>Estructura de "Alfiler":</b> Tienen una <b>cabeza reactiva</b> que se suelda a la fibra de celulosa y una <b>cola grasa/cera</b> hidrófoba que apunta hacia afuera repeliendo el agua.</p>
+          <p><b>El peligro de Hidrólisis (Cuenta atrás ⏱️):</b> El ASA es tan reactivo que si pasa tiempo en el circuito reacciona con el agua (se hidroliza), pierde su efecto impermeabilizante y forma manchas pegajosas en máquina.</p>
+          <p><b>Operativa:</b> Por eso se inyecta <b>directo a la caja de entrada</b>, emulsionado con una cápsula protectora de almidón catiónico (+) y ayudado por la alúmina.</p>
+        </div>
+      </div>
+
+      <!-- 3. MICROBIOLOGÍA Y CONTAMINANTES -->
+      <div class="topic-card bg-slate-800 border border-slate-700 rounded-xl p-4 cursor-pointer hover:border-sky-500/50 transition" data-category="limpieza" onclick="toggleCard(this)">
+        <div class="flex justify-between items-center">
+          <div class="flex items-center gap-3">
+            <span class="text-2xl">🦠</span>
+            <div>
+              <span class="text-xs uppercase px-2 py-0.5 rounded bg-emerald-900 text-emerald-300">Guerra Biológica</span>
+              <h3 class="font-bold text-base mt-1">Control de "Slime" (Limo) y Biocidas</h3>
+            </div>
+          </div>
+          <span class="text-slate-400 text-xl font-bold">+</span>
+        </div>
+        <div class="card-content mt-3 pt-3 border-t border-slate-700 text-sm text-slate-300 space-y-2">
+          <p><b>¿Por qué la máquina es un hotel 5 estrellas?</b> Tiene agua, temperatura ideal (40-50°C), pH neutro (~7) y comida infinita (el azúcar del almidón Cato).</p>
+          <p><b>El defecto:</b> Las bacterias crean una cápsula gelatinosa (<i>slime</i>). Si se suelta, se carameliza en los secadores (punto negro/translúcido) y como no tiene fibra ni enlaces, provoca agujeros o roturas en los tiros (<i>draws</i>).</p>
+          <p><b>Estrategia de ataque:</b></p>
+          <ul class="list-disc pl-5 space-y-1">
+            <li><b>Dosificación por Choque ⚡:</b> Inyecciones masivas en pocos minutos para atravesar su escudo antes de que se acostumbren.</li>
+            <li><b>Choque de pH 📉:</b> Bajar el pH puntualmente para destruir su hábitat neutro.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="topic-card bg-slate-800 border border-slate-700 rounded-xl p-4 cursor-pointer hover:border-sky-500/50 transition" data-category="limpieza" onclick="toggleCard(this)">
+        <div class="flex justify-between items-center">
+          <div class="flex items-center gap-3">
+            <span class="text-2xl">🪨</span>
+            <div>
+              <span class="text-xs uppercase px-2 py-0.5 rounded bg-emerald-900 text-emerald-300">Contaminantes</span>
+              <h3 class="font-bold text-base mt-1">Pitch, Stickies y Pasivación con Talco</h3>
+            </div>
+          </div>
+          <span class="text-slate-400 text-xl font-bold">+</span>
+        </div>
+        <div class="card-content mt-3 pt-3 border-t border-slate-700 text-sm text-slate-300 space-y-2">
+          <p><b>El enemigo:</b> El <i>Pitch</i> (resina de madera virgen) y los <i>Stickies</i> (pegamentos de recorte/reciclado) son "chicles" hidrófobos. Si taponan la tela formadora, impiden el drenaje, crean un charco y causan un <b>reventón (crushing)</b> en las prensas.</p>
+          <p><b>Cómo actúa el Talco (Efecto Harina 🍞):</b> El talco son láminas microscópicas hidrófobas. No rompe el pegamento, sino que lo envuelve y "empana" (<b>pasivación</b>). Así le quita la pegajosidad y la partícula viaja inerte dentro del papel hasta la bobina sin ensuciar la tela.</p>
+        </div>
+      </div>
+
+      <!-- 4. FÍSICA Y LABORATORIO -->
+      <div class="topic-card bg-slate-800 border border-slate-700 rounded-xl p-4 cursor-pointer hover:border-sky-500/50 transition" data-category="fisica" onclick="toggleCard(this)">
+        <div class="flex justify-between items-center">
+          <div class="flex items-center gap-3">
+            <span class="text-2xl">⚙️</span>
+            <div>
+              <span class="text-xs uppercase px-2 py-0.5 rounded bg-purple-900 text-purple-300">Física de Fluidos</span>
+              <h3 class="font-bold text-base mt-1">Viscosidad en Depuradores Verticales</h3>
+            </div>
+          </div>
+          <span class="text-slate-400 text-xl font-bold">+</span>
+        </div>
+        <div class="card-content mt-3 pt-3 border-t border-slate-700 text-sm text-slate-300 space-y-2">
+          <p><b>En la criba a presión:</b> El rotor empuja la fibra buena por las ranuras milimétricas de la camisa metálica.</p>
+          <p><b>Peligro por alta viscosidad / sobredosificación:</b> Si la pasta se vuelve muy espesa o gelatinosa (ej. exceso de flóculos), no fluye por las ranuras. Sube la presión diferencial (ΔP), <b>se disparan los amperios ⚡ del motor</b> y aumenta el desgaste (o riesgo de colapso) de la camisa.</p>
+        </div>
+      </div>
+
+      <div class="topic-card bg-slate-800 border border-slate-700 rounded-xl p-4 cursor-pointer hover:border-sky-500/50 transition" data-category="fisica" onclick="toggleCard(this)">
+        <div class="flex justify-between items-center">
+          <div class="flex items-center gap-3">
+            <span class="text-2xl">🔬</span>
+            <div>
+              <span class="text-xs uppercase px-2 py-0.5 rounded bg-purple-900 text-purple-300">Laboratorio de Calidad</span>
+              <h3 class="font-bold text-base mt-1">Cobb, Mullen y Tracción en Húmedo</h3>
+            </div>
+          </div>
+          <span class="text-slate-400 text-xl font-bold">+</span>
+        </div>
+        <div class="card-content mt-3 pt-3 border-t border-slate-700 text-sm text-slate-300 space-y-2">
+          <ul class="space-y-2">
+            <li>💧 <b>Test de Cobb (Absorción de agua):</b> Mide los g/m² de agua absorbidos en 60s. Depende del <b>ASA</b> y de que la <b>Alúmina</b> limpie la basura aniónica.</li>
+            <li>💥 <b>Test de Mullen (Estallido en seco):</b> El diafragma de goma infla el papel hasta reventarlo. Mide enlaces internos: depende del <b>Cato</b> y del <b>Fennobond</b>.</li>
+            <li>🏋️‍♂️ <b>Tracción en Húmedo (Wet Tensile):</b> Tira de la hoja empapada. Depende de la dosis de <b>Kymene</b> y de que haya suficiente <b>temperatura de vapor</b> en secadores para curarlo.</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    // Desplegar/plegar tarjetas
+    function toggleCard(card) {
+      card.classList.toggle('card-open');
+    }
+
+    // Filtrar por pestañas
+    function switchTab(cat) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('tab-active'));
+      document.getElementById('tab-' + cat).classList.add('tab-active');
+
+      const sim = document.getElementById('sec-simulador');
+      const cards = document.querySelectorAll('.topic-card');
+
+      if (cat === 'simulador') {
+        sim.style.display = 'block';
+        cards.forEach(c => c.style.display = 'none');
+      } else {
+        sim.style.display = (cat === 'all') ? 'block' : 'none';
+        cards.forEach(c => {
+          c.style.display = (cat === 'all' || c.dataset.category === cat) ? 'block' : 'none';
+        });
+      }
+    }
+
+    // Buscador en tiempo real
+    function filterCards() {
+      const q = document.getElementById('searchInput').value.toLowerCase();
+      document.querySelectorAll('.topic-card').forEach(card => {
+        const text = card.innerText.toLowerCase();
+        if (text.includes(q)) {
+          card.style.display = 'block';
+          if (q.length > 2) card.classList.add('card-open');
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+
+    // Lógica del Simulador de Diagnóstico
+    const diagnostics = {
+      cobb: "<b>💧 Diagnóstico Cobb Alto:</b> El papel absorbe demasiada agua.<br>1️⃣ Revisa el caudal de <b>ASA</b> y su emulsión con almidón.<br>2️⃣ Si subir la cola no mejora el Cobb, tienes un pico de <b>basura aniónica (-)</b> neutralizando la cola: <b>aumenta la Alúmina (+)</b> para limpiar el circuito y ayudar a anclar el ASA en la caja de entrada.",
+      mullen: "<b>💥 Diagnóstico Mullen Bajo:</b> Fallo de cohesión interna entre fibras.<br>1️⃣ Verifica de inmediato la bomba de <b>Cato (Almidón catiónico)</b>.<br>2️⃣ Si fabricas grado con resistencia especial, revisa la bomba de <b>Fennobond</b> y confirma que el <b>Kymene</b> esté entrando <i>antes</i> que el Fennobond.",
+      humedo: "<b>🏋️‍♂️ Diagnóstico Fallo en Húmedo (con bomba Kymene OK):</b><br>El Kymene es una resina termoendurecible. Si el químico entra bien pero el test falla, <b>revisa la presión de vapor en los cilindros secadores</b>. La hoja no está alcanzando la temperatura necesaria para que el Kymene cure sus enlaces covalentes.",
+      amperios: "<b>⚡ Diagnóstico Subida de Amperios en Depuradores Verticales:</b><br>La viscosidad o consistencia de la pasta ha subido y no pasa bien por las ranuras de la camisa.<br>1️⃣ Vigila el ΔP (presión diferencial) para no abollar ni desgastar la camisa.<br>2️⃣ Revisa posibles sobredosificaciones químicas (exceso de flóculos gelatinosos de alúmina/polímeros).",
+      rotura_negra: "<b>🦠 Diagnóstico Manchas Oscuras / Ventanas / Roturas en Tiros:</b><br>Desprendimiento de colonias de <b>Slime (limo bacteriano)</b> alimentadas por el Cato a pH neutro.<br>1️⃣ Aplica <b>tratamiento de choque con biocidas</b> para romper el escudo protector.<br>2️⃣ Valora un choque de pH o programar limpieza ácida.",
+      reventon: "<b>🪨 Diagnóstico Punto Húmedo y Reventón en Prensas (Crushing):</b><br>Un <b>Sticky o Pitch</b> ha taponado la tela formadora impidiendo el desagote.<br>1️⃣ Revisa la limpieza de duchas de la tela.<br>2️⃣ Ajusta la dosificación de <b>Talco</b> para pasivar ('empanar') las partículas pegajosas y que salgan inertes con el papel."
+    };
+
+    function showDiag(key) {
+      const box = document.getElementById('diagResult');
+      box.innerHTML = diagnostics[key];
+      box.classList.remove('hidden');
+    }
+  </script>
+</body>
+</html>
