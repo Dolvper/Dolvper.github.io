@@ -3,286 +3,570 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Manual Operativo: Parte Húmeda & Calidad</title>
+  <title>Enciclopedia Técnica: Química Coloidal, Física y Operación en Parte Húmeda</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body { background-color: #0f172a; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
-    .card-content { max-height: 0; overflow: hidden; transition: max-height 0.35s ease-out; }
-    .card-open .card-content { max-height: 1000px; transition: max-height 0.5s ease-in; }
-    .tab-active { border-bottom: 3px solid #38bdf8; color: #38bdf8; font-weight: 700; background-color: rgba(56, 189, 248, 0.1); }
+    body { background-color: #0b1120; color: #e2e8f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+    .article-body { display: none; }
+    .article-open .article-body { display: block; animation: fadeIn 0.25s ease-in-out; }
+    .article-open .chevron { transform: rotate(180deg); color: #38bdf8; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+    .nav-active { background-color: #0284c7; color: #ffffff; font-weight: 600; border-left: 4px solid #38bdf8; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #475569; }
   </style>
 </head>
-<body class="min-h-screen pb-12">
+<body class="min-h-screen flex flex-col lg:flex-row">
 
-  <!-- Encabezado Sala de Control -->
-  <header class="bg-slate-900 border-b border-slate-700 sticky top-0 z-50 shadow-lg">
-    <div class="max-w-5xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+  <!-- BARRA LATERAL DE NAVEGACIÓN (ÍNDICE ENCICLOPÉDICO) -->
+  <aside class="w-full lg:w-80 bg-slate-900 border-b lg:border-b-0 lg:border-r border-slate-800 lg:min-h-screen lg:sticky lg:top-0 lg:h-screen flex flex-col z-40">
+    <div class="p-5 border-b border-slate-800">
       <div class="flex items-center gap-3">
-        <span class="text-3xl">🏭</span>
+        <span class="text-3xl">🔬</span>
         <div>
-          <h1 class="text-xl font-bold tracking-wide text-sky-400">PANEL EXPERTO: PARTE HÚMEDA</h1>
-          <p class="text-xs text-slate-400">Guía de Química, Física y Diagnóstico en Máquina (pH Neutro)</p>
+          <h1 class="text-lg font-extrabold tracking-wider text-sky-400 uppercase">Enciclopedia Papelera</h1>
+          <p class="text-xs text-slate-400">Ingeniería de Parte Húmeda, Reología y Control de Calidad (pH Neutro)</p>
         </div>
       </div>
-      <!-- Buscador rápido -->
-      <div class="w-full sm:w-72 relative">
-        <input type="text" id="searchInput" onkeyup="filterCards()" placeholder="Buscar (ej. ASA, Cobb, amperios...)" 
-          class="w-full bg-slate-800 text-sm text-white rounded-lg pl-9 pr-4 py-2 border border-slate-600 focus:outline-none focus:border-sky-400">
-        <span class="absolute left-3 top-2.5 text-slate-400">🔍</span>
+      <!-- Buscador Profundo -->
+      <div class="mt-4 relative">
+        <input type="text" id="searchInput" onkeyup="searchEncyclopedia()" placeholder="Buscar molécula, efecto, fallo..." 
+          class="w-full bg-slate-950 text-sm text-slate-100 rounded-lg pl-9 pr-3 py-2.5 border border-slate-700 focus:outline-none focus:border-sky-400">
+        <span class="absolute left-3 top-3 text-slate-400 text-xs">🔍</span>
+      </div>
+      <div class="flex gap-2 mt-3">
+        <button onclick="expandAll(true)" class="w-1/2 text-xs bg-slate-800 hover:bg-slate-700 text-sky-300 py-1.5 rounded border border-slate-700 transition">Expandir Todo</button>
+        <button onclick="expandAll(false)" class="w-1/2 text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 py-1.5 rounded border border-slate-700 transition">Contraer Todo</button>
       </div>
     </div>
 
-    <!-- Navegación por Categorías -->
-    <nav class="max-w-5xl mx-auto px-4 flex overflow-x-auto text-sm text-slate-300 border-t border-slate-800">
-      <button onclick="switchTab('all')" id="tab-all" class="tab-btn tab-active px-4 py-3 whitespace-nowrap">📚 Todo el Mapa</button>
-      <button onclick="switchTab('quimica')" id="tab-quimica" class="tab-btn px-4 py-3 whitespace-nowrap">🧲 Cargas y Retención</button>
-      <button onclick="switchTab('resistencia')" id="tab-resistencia" class="tab-btn px-4 py-3 whitespace-nowrap">🕸️ Resistencia y Encolado</button>
-      <button onclick="switchTab('limpieza')" id="tab-limpieza" class="tab-btn px-4 py-3 whitespace-nowrap">🦠 Slime y Stickies</button>
-      <button onclick="switchTab('fisica')" id="tab-fisica" class="tab-btn px-4 py-3 whitespace-nowrap">📊 Física y Laboratorio</button>
-      <button onclick="switchTab('simulador')" id="tab-simulador" class="tab-btn px-4 py-3 whitespace-nowrap text-amber-400 font-semibold">🚨 Diagnóstico Rápido</button>
+    <!-- Menú de Capítulos -->
+    <nav class="flex-1 overflow-y-auto py-3 px-2 space-y-1 text-sm">
+      <button onclick="filterCategory('all')" id="nav-all" class="nav-btn nav-active w-full text-left px-3 py-2.5 rounded-r transition flex items-center gap-2">
+        <span>📖</span> <span>Ver Enciclopedia Completa</span>
+      </button>
+      <button onclick="filterCategory('electro')" id="nav-electro" class="nav-btn w-full text-left px-3 py-2.5 rounded-r text-slate-300 hover:bg-slate-800/60 transition flex items-center gap-2">
+        <span>🧲</span> <span>1. Electrocinética, Cato y Alúmina</span>
+      </button>
+      <button onclick="filterCategory('redes')" id="nav-redes" class="nav-btn w-full text-left px-3 py-2.5 rounded-r text-slate-300 hover:bg-slate-800/60 transition flex items-center gap-2">
+        <span>🕸️</span> <span>2. Polímeros: Kymene y Fennobond</span>
+      </button>
+      <button onclick="filterCategory('encolado')" id="nav-encolado" class="nav-btn w-full text-left px-3 py-2.5 rounded-r text-slate-300 hover:bg-slate-800/60 transition flex items-center gap-2">
+        <span>💧</span> <span>3. Encolado Reactivo (ASA / AKD)</span>
+      </button>
+      <button onclick="filterCategory('bio')" id="nav-bio" class="nav-btn w-full text-left px-3 py-2.5 rounded-r text-slate-300 hover:bg-slate-800/60 transition flex items-center gap-2">
+        <span>🦠</span> <span>4. Microbiología (Slime) y Biocidas</span>
+      </button>
+      <button onclick="filterCategory('contaminantes')" id="nav-contaminantes" class="nav-btn w-full text-left px-3 py-2.5 rounded-r text-slate-300 hover:bg-slate-800/60 transition flex items-center gap-2">
+        <span>🪨</span> <span>5. Pitch, Stickies y Pasivación</span>
+      </button>
+      <button onclick="filterCategory('reologia')" id="nav-reologia" class="nav-btn w-full text-left px-3 py-2.5 rounded-r text-slate-300 hover:bg-slate-800/60 transition flex items-center gap-2">
+        <span>⚙️</span> <span>6. Hidrodinámica y Depuradores</span>
+      </button>
+      <button onclick="filterCategory('calidad')" id="nav-calidad" class="nav-btn w-full text-left px-3 py-2.5 rounded-r text-slate-300 hover:bg-slate-800/60 transition flex items-center gap-2">
+        <span>📊</span> <span>7. Física de Ensayos y Laboratorio</span>
+      </button>
+      <button onclick="filterCategory('matriz')" id="nav-matriz" class="nav-btn w-full text-left px-3 py-2.5 rounded-r text-amber-400 hover:bg-slate-800/60 transition flex items-center gap-2 font-semibold">
+        <span>🚨</span> <span>8. Matriz Avanzada de Diagnóstico</span>
+      </button>
     </nav>
-  </header>
+  </aside>
 
-  <main class="max-w-5xl mx-auto px-4 mt-6">
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="flex-1 p-4 md:p-8 max-w-6xl mx-auto space-y-6">
 
-    <!-- SECCIÓN SIMULADOR DE DIAGNÓSTICO (Oculta por defecto salvo al pulsar su pestaña o ver todo) -->
-    <section id="sec-simulador" class="mb-8 bg-slate-800/90 border border-amber-500/40 rounded-xl p-5 shadow-lg">
-      <div class="flex items-center gap-2 mb-3">
-        <span class="text-2xl">🚨</span>
-        <h2 class="text-lg font-bold text-amber-400">Simulador de Emergencias en Turno</h2>
+    <!-- Banner Introductorio -->
+    <div class="bg-gradient-to-r from-slate-900 via-sky-950/40 to-slate-900 border border-slate-800 rounded-xl p-5 shadow-md">
+      <h2 class="text-lg font-bold text-white flex items-center gap-2">
+        <span>⚡</span> Fundamento Central de la Máquina de Papel
+      </h2>
+      <p class="text-sm text-slate-300 mt-1 leading-relaxed">
+        Toda operación en la parte húmeda (<i>Wet End</i>) se rige por el equilibrio entre <b>fuerzas electrostáticas coloidales</b> (atracción/repulsión entre cargas iónicas), <b>reacciones de enlaces covalentes</b> (activadas por temperatura en secadores) y <b>fuerzas hidrodinámicas de cizalla</b> (turbulencia en bombas, depuradores y caja de entrada). Haz clic en cada tratado técnico para desplegar su explicación molecular y operativa completa.
+      </p>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- CAPÍTULO 1: ELECTROCINÉTICA, CATO Y ALÚMINA                       -->
+    <!-- ================================================================= -->
+    <article class="enc-article article-open bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-lg" data-cat="electro">
+      <header onclick="toggleArticle(this)" class="p-5 bg-slate-800/70 hover:bg-slate-800 cursor-pointer flex justify-between items-center transition">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded bg-sky-950 text-sky-300 border border-sky-700/50">Capítulo 1 · Electrocinética y Retención</span>
+          <h3 class="text-lg font-bold text-white mt-1.5">1.1. Naturaleza Aniónica de la Celulosa y Rol Molecular del Almidón Catiónico (Cato)</h3>
+        </div>
+        <span class="chevron text-slate-400 text-xl transition-transform duration-300">▼</span>
+      </header>
+      <div class="article-body p-6 space-y-4 text-sm leading-relaxed text-slate-300 border-t border-slate-800">
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="bg-slate-950/60 p-4 rounded-lg border border-slate-800">
+            <h4 class="font-bold text-sky-400 mb-2">🔬 Nivel Molecular: ¿Por qué la fibra es negativa (-)?</h4>
+            <p>La fibra de celulosa es un polímero lineal de unidades de <b>D-glucosa</b> unidas por enlaces glucosídicos $\beta(1\rightarrow4)$. En su superficie abundan los grupos <b>hidroxilo (-OH)</b> y, debido al procesado de la madera y restos de hemicelulosas, grupos <b>carboxilo (-COOH)</b>.</p>
+            <p class="mt-2">Cuando la pasta está en el circuito a <b>pH neutro (~7.0)</b>, estos grupos carboxilo se disocian liberando un protón ($H^+$) al agua y quedando como iones <b>carboxilato ($-COO^-$)</b>. Esto recubre a todas las fibras, finos de celulosa y cargas minerales de una carga eléctrica neta <b>negativa (aniónica)</b>.</p>
+          </div>
+          <div class="bg-slate-950/60 p-4 rounded-lg border border-slate-800">
+            <h4 class="font-bold text-sky-400 mb-2">🧲 El Cato (+): Puente Electroestático e Hidrógeno</h4>
+            <p>Como cargas iguales se repelen, las fibras negativas tienden a rechazarse en el agua, y los finos escaparían por los agujeros de la tela formadora. Para evitarlo inyectamos <b>Almidón Catiónico (Cato)</b>.</p>
+            <p class="mt-2">El Cato es almidón natural modificado químicamente al que se le han injertado <b>grupos amonio cuaternario ($-NR_3^+$)</b>. Estos grupos mantienen su carga positiva (+) sin importar el pH del agua. Al entrar en la suspensión, la larga cadena del Cato actúa como un puente electrostático que neutraliza las cargas negativas, acerca las fibras entre sí y multiplica la superficie de contacto para que, al secarse la hoja, se formen millones de <b>puentes de hidrógeno</b> adicionales (resistencia en seco).</p>
+          </div>
+        </div>
+        <div class="bg-amber-950/30 border-l-4 border-amber-500 p-4 rounded-r-lg">
+          <h5 class="font-bold text-amber-300">⚠️ Contrapartida Operativa del Cato: El Buffet Bacteriano</h5>
+          <p class="mt-1">Químicamente, el almidón no es más que amilosa y amilopectina: enormes cadenas de <b>azúcares simples (glucosa)</b>. Si el Cato no se retiene al 100% en la hoja y queda recirculando en las aguas blancas, las enzimas extracelulares de las bacterias (amilasas) cortan esos enlaces y convierten el Cato en glucosa pura, disparando la formación de <i>slime</i>.</p>
+        </div>
       </div>
-      <p class="text-sm text-slate-300 mb-4">Selecciona el síntoma que estás viendo en la máquina o en el laboratorio para ver la causa raíz y qué revisar:</p>
-      
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 mb-4">
-        <button onclick="showDiag('cobb')" class="bg-slate-700 hover:bg-slate-600 text-left p-3 rounded-lg text-sm border border-slate-600 transition">💧 <b>Cobb muy alto</b> (Papel chupa agua)</button>
-        <button onclick="showDiag('mullen')" class="bg-slate-700 hover:bg-slate-600 text-left p-3 rounded-lg text-sm border border-slate-600 transition">💥 <b>Mullen bajo</b> (Hoja sin fuerza en seco)</button>
-        <button onclick="showDiag('humedo')" class="bg-slate-700 hover:bg-slate-600 text-left p-3 rounded-lg text-sm border border-slate-600 transition">🏋️‍♂️ <b>Fallo Tracción Húmedo</b> (Bomba Kymene OK)</button>
-        <button onclick="showDiag('amperios')" class="bg-slate-700 hover:bg-slate-600 text-left p-3 rounded-lg text-sm border border-slate-600 transition">⚡ <b>Subida de Amperios / ΔP</b> en Depuradores</button>
-        <button onclick="showDiag('rotura_negra')" class="bg-slate-700 hover:bg-slate-600 text-left p-3 rounded-lg text-sm border border-slate-600 transition">🦠 <b>Manchas oscuras / Agujeros</b> y roturas</button>
-        <button onclick="showDiag('reventon')" class="bg-slate-700 hover:bg-slate-600 text-left p-3 rounded-lg text-sm border border-slate-600 transition">🪨 <b>Puntos húmedos y reventón</b> en prensas</button>
+    </article>
+
+    <article class="enc-article article-open bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-lg" data-cat="electro">
+      <header onclick="toggleArticle(this)" class="p-5 bg-slate-800/70 hover:bg-slate-800 cursor-pointer flex justify-between items-center transition">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded bg-sky-950 text-sky-300 border border-sky-700/50">Capítulo 1 · Electrocinética y Retención</span>
+          <h3 class="text-lg font-bold text-white mt-1.5">1.2. Basura Aniónica (Anionic Trash) y la Doble Química de la Alúmina</h3>
+        </div>
+        <span class="chevron text-slate-400 text-xl transition-transform duration-300">▼</span>
+      </header>
+      <div class="article-body p-6 space-y-4 text-sm leading-relaxed text-slate-300 border-t border-slate-800">
+        <p>En el agua de proceso flotan millones de partículas microscópicas y polímeros disueltos o coloidales que provienen de la madera, del recorte (<i>broke</i>) o del agua fresca: fragmentos de hemicelulosas, ácidos grasos, lignina sulfonada y silicatos. Todo este conjunto tiene una <b>altísima densidad de carga negativa (-)</b> y se denomina <b>Basura Aniónica (Anionic Trash)</b>.</p>
+        
+        <div class="bg-rose-950/30 border border-rose-700/50 p-4 rounded-lg">
+          <h4 class="font-bold text-rose-300">💥 ¿Por qué la basura aniónica arruina la química de la máquina?</h4>
+          <p class="mt-1">Porque tiene un tamaño diminuto y una superficie específica gigantesca en comparación con la fibra de celulosa. Si inyectas aditivos caros con carga positiva (como <b>Cato (+), Kymene (+) o la emulsión de ASA (+)</b>) en un agua sucia, la basura aniónica los rodea y neutraliza instantáneamente antes de que puedan tocar la fibra. El aditivo queda "ciego" e inactivo flotando en el agua.</p>
+        </div>
+
+        <h4 class="font-bold text-sky-400 pt-2">🛡️ La Alúmina como Capturador de Basura (ATC - Anionic Trash Catcher)</h4>
+        <p>En el sistema ácido antiguo (pH 4.5), el sulfato de alúmina liberaba iones aluminio trivalentes libres ($Al^{3+}$) con una carga positiva brutal. Sin embargo, <b>en vuestro sistema de pH neutro (~7.0)</b>, la química del aluminio cambia radicalmente:</p>
+        <ul class="list-disc pl-6 space-y-2">
+          <li><b>1. Neutralización de sacrificio (al principio del proceso):</b> Al entrar en contacto con el agua, los complejos polinucleares de aluminio de alta densidad de carga (+) reaccionan de inmediato con la basura aniónica (-), coagulándola en pequeños precipitados eléctricamente neutros. Así "sacrificamos" alúmina barata para dejar el camino despejado al Cato y al Kymene.</li>
+          <li><b>2. Hidrólisis a Hidróxido de Aluminio $Al(OH)_3$ (en pH neutro):</b> A pH 7, el aluminio forma complejos hidroxilados que se polimerizan creando un <b>gel o flóculo tridimensional</b>. Este comportamiento físico es la clave de por qué también la inyectáis junto a la cola (ver foco especial en el Capítulo 3).</li>
+        </ul>
+      </div>
+    </article>
+
+    <!-- ================================================================= -->
+    <!-- CAPÍTULO 2: POLÍMEROS DE RESISTENCIA (KYMENE Y FENNOBOND)         -->
+    <!-- ================================================================= -->
+    <article class="enc-article article-open bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-lg" data-cat="redes">
+      <header onclick="toggleArticle(this)" class="p-5 bg-slate-800/70 hover:bg-slate-800 cursor-pointer flex justify-between items-center transition">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-700/50">Capítulo 2 · Redes Poliméricas 3D</span>
+          <h3 class="text-lg font-bold text-white mt-1.5">2.1. El Sistema Dual: Kymene (+) y Fennobond (-) [Orden y Termodinámica]</h3>
+        </div>
+        <span class="chevron text-slate-400 text-xl transition-transform duration-300">▼</span>
+      </header>
+      <div class="article-body p-6 space-y-4 text-sm leading-relaxed text-slate-300 border-t border-slate-800">
+        <p>Un papel normal mantiene sus fibras unidas por <b>puentes de hidrógeno</b>. El problema del puente de hidrógeno es que el agua lo destruye al instante: cuando el papel se moja, las moléculas de agua ($H_2O$) se infiltran entre las fibras, rompen los puentes entre celulosas y la hoja se deshace. Para fabricar papeles con resistencia estructural superior tanto en húmedo como en seco, utilizamos el complejo polielectrolito <b>Kymene + Fennobond</b>.</p>
+
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="bg-slate-950/60 p-4 rounded-lg border border-slate-800">
+            <h4 class="font-bold text-indigo-400 mb-2">1️⃣ Kymene (Resina PAE - Catiónica +)</h4>
+            <p>Químicamente es una resina de <b>Poliamidoamina-Epiclorhidrina (PAE)</b>. Su característica clave es que posee anillos de <b>azetidinio</b> de 4 miembros con carga positiva (+) permanente.</p>
+            <ul class="list-disc pl-5 mt-2 space-y-1 text-xs text-slate-300">
+              <li><b>En la parte húmeda:</b> Usa su carga positiva (+) para anclarse electrostáticamente a los grupos carboxilato ($-COO^-$) de la fibra.</li>
+              <li><b>En la sequería (Curado Térmico 🔥):</b> Cuando la hoja alcanza alta temperatura en los cilindros secadores con vapor, el anillo de azetidinio se abre y reacciona formando <b>enlaces covalentes tipo éster</b> directamente con la celulosa (homo-reticulación y co-reticulación). Este enlace es <b>insoluble e indestructible por el agua</b>.</li>
+            </ul>
+          </div>
+
+          <div class="bg-slate-950/60 p-4 rounded-lg border border-slate-800">
+            <h4 class="font-bold text-indigo-400 mb-2">2️⃣ Fennobond (Poliacrilamida Aniónica -)</h4>
+            <p>Es un polímero sintético de alto peso molecular con grupos aniónicos <b>negativos (-)</b> diseñado para potenciar la resistencia en seco (Mullen, tracción, estallido).</p>
+            <p class="mt-2">Cuando el Fennobond entra al circuito después del Kymene, sus largas cadenas negativas se enlazan iónicamente con los puntos positivos del Kymene que ya recubren la fibra, tejiendo una <b>macro-malla tridimensional (complejo polielectrolito)</b> que multiplica los puntos de unión entre fibras adyacentes.</p>
+          </div>
+        </div>
+
+        <!-- FOCO DE DUDA RESUELTA -->
+        <div class="bg-sky-950/40 border-l-4 border-sky-400 p-4 rounded-r-lg">
+          <h5 class="font-bold text-sky-300 flex items-center gap-2">💡 Foco Crítico que Deducimos: ¿Por qué el orden de adición es innegociable?</h5>
+          <p class="mt-1">Como dedujiste en nuestra conversación: si inyectáramos el <b>Fennobond (-)</b> primero o si se parara la bomba de Kymene, el Fennobond (negativo) se encontraría directamente con la fibra de celulosa desnuda (también negativa). Por la Ley de Coulomb, <b>cargas del mismo signo se repelen</b>. El Fennobond rebotaría contra la fibra, quedaría libre en el agua blanca, espumaría o ensuciaría el circuito y se perdería por el efluente sin aportar absolutamente nada de resistencia.</p>
+          <p class="mt-1">El <b>Kymene (+)</b> DEBE entrar primero para <b>invertir localmente la carga superficial de la fibra</b> (creando "parches" positivos sobre los cuales el Fennobond negativo sí puede soldarse).</p>
+        </div>
+      </div>
+    </article>
+
+    <!-- ================================================================= -->
+    <!-- CAPÍTULO 3: ENCOLADO REACTIVO EN MEDIO NEUTRO (ASA / AKD)         -->
+    <!-- ================================================================= -->
+    <article class="enc-article article-open bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-lg" data-cat="encolado">
+      <header onclick="toggleArticle(this)" class="p-5 bg-slate-800/70 hover:bg-slate-800 cursor-pointer flex justify-between items-center transition">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-700/50">Capítulo 3 · Impermeabilización y Encolado</span>
+          <h3 class="text-lg font-bold text-white mt-1.5">3.1. Química del ASA / AKD, el Peligro de Hidrólisis y el Rol Físico de la Alúmina</h3>
+        </div>
+        <span class="chevron text-slate-400 text-xl transition-transform duration-300">▼</span>
+      </header>
+      <div class="article-body p-6 space-y-5 text-sm leading-relaxed text-slate-300 border-t border-slate-800">
+        
+        <div>
+          <h4 class="font-bold text-cyan-400 mb-1">1. Estructura Anfipática ("El Alfiler Molecular")</h4>
+          <p>Para que el papel no absorba agua como una esponja (hidrofilia de los grupos $-OH$ de la celulosa), usamos encolantes reactivos en medio neutro como el <b>ASA (Anhídrido Alquenil Succínico)</b> o el <b>AKD (Dímero de Alquil Ceteno)</b>. Estas moléculas tienen dos partes opuestas:</p>
+          <ul class="list-disc pl-6 mt-2 space-y-1">
+            <li><b>La Cabeza Reactiva (Anillo Anhídrido de 5 miembros en el ASA):</b> Es altamente inestable y busca reaccionar con los grupos hidroxilo ($-OH$) de la celulosa durante el secado para formar un <b>enlace covalente éster</b> permanente.</li>
+            <li><b>La Cola Hidrófoba (Cadena de hidrocarburo insaturado de 16 a 20 carbonos):</b> Es una cadena grasa/cerosa que odia el agua. Una vez que la cabeza se ancla a la fibra, las colas quedan orientadas hacia el exterior de los poros del papel como un "paraguas microscópico", bajando la energía superficial de la hoja para que la gota de agua no pueda mojarla.</li>
+          </ul>
+        </div>
+
+        <!-- FOCO DE DUDA RESUELTA 1: HIDRÓLISIS VS BASURA ANIÓNICA -->
+        <div class="bg-amber-950/30 border-l-4 border-amber-500 p-4 rounded-r-lg space-y-2">
+          <h5 class="font-bold text-amber-300">💡 Foco Crítico 1 (Duda Resuelta): ¿Por qué el ASA entra directo a la Caja de Entrada? (Hidrólisis vs. Basura Aniónica)</h5>
+          <p>Durante la charla planteaste una hipótesis muy lógica: <i>"Si inyectamos el ASA muy atrás en el circuito, ¿se pegará a la basura aniónica por el camino?"</i>. Ahí desvelamos las dos caras de lo que ocurre realmente:</p>
+          <p><b>A) El Enemigo Químico Directo del ASA es el AGUA (Hidrólisis):</b> El anillo anhídrido de la cabeza del ASA es tan extremadamente reactivo que no distingue entre el grupo $-OH$ de una fibra de celulosa y el $-OH$ de una molécula de agua ($H_2O$). Desde el segundo exacto en que el aceite de ASA se emulsiona con agua, empieza una cuenta atrás (a 45-50°C dura apenas unos minutos). Si el ASA pasa demasiado tiempo nadando en las tuberías antes de llegar a los secadores, reacciona con el agua (<b>se hidroliza</b>) convirtiéndose en un <b>ácido dicarboxílico</b>:</p>
+          <ul class="list-disc pl-6 text-xs text-amber-200/90 space-y-1">
+            <li>Ese ácido hidrolizado <b>pierde por completo la capacidad de unirse a la fibra</b> (deja de encolar, disparando el test de Cobb).</li>
+            <li>Reacciona con el calcio ($Ca^{2+}$) y el magnesio del agua formando jabones cálcicos insolubles y viscosos que crean <b>depósitos pegajosos</b> brutales en telas, rodillos de prensa y cajas aspirantes.</li>
+          </ul>
+          <p><b>B) ¿Dónde sí afecta la Basura Aniónica al ASA?</b> Como el ASA puro es un aceite neutro e insoluble en agua, en la fábrica lo pasáis por una unidad emulsionadora junto a la máquina donde se envuelve cada micro-gota de ASA en una <b>cápsula protectora de Almidón Catiónico (+)</b>. Si hay mucha basura aniónica (-), esta ataca la <i>cápsula de almidón</i>, impidiendo que la gotita se acerque magnéticamente a la fibra y dejándola aún más expuesta a hidrolizarse en el agua.</p>
+        </div>
+
+        <!-- FOCO DE DUDA RESUELTA 2: ALÚMINA JUNTO A LA COLA -->
+        <div class="bg-sky-950/40 border-l-4 border-sky-400 p-4 rounded-r-lg space-y-2">
+          <h5 class="font-bold text-sky-300">💡 Foco Crítico 2 (Tu Gran Pregunta): "Si la emulsión de cola ya es positiva (+), ¿por qué añadimos Alúmina (+) junto a la cola? Por su forma no entiendo cómo ayuda a adherirse"</h5>
+          <p>Esta fue una de tus preguntas más brillantes. Si tanto la cápsula del ASA (+) como la Alúmina (+) son positivas, a primera vista no parece tener sentido que una ayude a pegar a la otra contra la fibra (-). La explicación reside en la <b>Hidrodinámica de Cizalla</b> y en la <b>Geometría de Floculación del Aluminio a pH Neutro</b>:</p>
+          <ol class="list-decimal pl-6 space-y-2">
+            <li><b>El Huracán en la Caja de Entrada (Fuerzas de Cizalla):</b> En el labio de la caja de entrada y al impactar sobre la tela formadora, la suspensión sufre aceleraciones y turbulencias extremas. La simple atracción electrostática de la pequeña cápsula de almidón del ASA es <b>demasiado débil</b> frente a ese chorro de agua a presión; el agua arrancaría las micro-gotas de ASA de la fibra y las colaría por la tela.</li>
+            <li><b>La Red Gelatinosa de Hidróxido de Aluminio:</b> Al inyectar alúmina en un medio de pH neutro (~7), el aluminio precipita instantáneamente formando <b>flóculos coloidales de hidróxido de aluminio amorfo $[Al(OH)_3]$</b> con cargas catiónicas superficiales. No es un ión suelto, sino una <b>estructura tridimensional gelatinosa y ramificada</b>.</li>
+            <li><b>Efecto Anclaje y Escudo Físico:</b> Esa red gelatinosa de alúmina atrapa físicamente las micro-gotas de ASA y las sujeta como una red de pesca o un "cemento viscoso" contra la superficie de la fibra de celulosa, resistiendo el lavado hidrodinámico en la tela formadora.</li>
+            <li><b>Efecto Catalizador en Secadores:</b> Además, los iones de aluminio retenidos junto a la gota de ASA actúan en los secadores como catalizadores ácidos de Lewis, acelerando la apertura del anillo del ASA para que se suelde más rápido a la fibra.</li>
+          </ol>
+        </div>
+
+      </div>
+    </article>
+
+    <!-- ================================================================= -->
+    <!-- CAPÍTULO 4: MICROBIOLOGÍA (SLIME) Y ESTRATEGIA BIOCIDA            -->
+    <!-- ================================================================= -->
+    <article class="enc-article article-open bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-lg" data-cat="bio">
+      <header onclick="toggleArticle(this)" class="p-5 bg-slate-800/70 hover:bg-slate-800 cursor-pointer flex justify-between items-center transition">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-700/50">Capítulo 4 · Microbiología Industrial</span>
+          <h3 class="text-lg font-bold text-white mt-1.5">4.1. Formación del Biofilm ("Slime"), Defectos Físicos y Dosificación por Choque</h3>
+        </div>
+        <span class="chevron text-slate-400 text-xl transition-transform duration-300">▼</span>
+      </header>
+      <div class="article-body p-6 space-y-4 text-sm leading-relaxed text-slate-300 border-t border-slate-800">
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="bg-slate-950/60 p-4 rounded-lg border border-slate-800">
+            <h4 class="font-bold text-emerald-400 mb-2">🧫 La Incubadora Perfecta en Máquina</h4>
+            <p>El circuito de aguas blancas reúne las 4 condiciones óptimas de cultivo microbiológico que identificaste:</p>
+            <ul class="list-disc pl-5 mt-2 space-y-1">
+              <li><b>Agua y Oxígeno:</b> Circulación masiva y aireación en cascadas y tela.</li>
+              <li><b>Nutrientes (Carbono):</b> El almidón catiónico (Cato) hidrolizado aporta glucosa asimilable de forma continua.</li>
+              <li><b>Temperatura Mesófila/Termófila:</b> Entre 40°C y 52°C por fricción mecánica de bombas y refinos, acelerando la división celular bacteriana cada 20 minutos.</li>
+              <li><b>pH Neutro (6.8 - 7.5):</b> Al abandonar la fabricación ácida antigua, desapareció la barrera química que inhibía a las bacterias.</li>
+            </ul>
+          </div>
+
+          <div class="bg-slate-950/60 p-4 rounded-lg border border-slate-800">
+            <h4 class="font-bold text-emerald-400 mb-2">🛡️ ¿Qué es exactamente el "Slime"?</h4>
+            <p>Las bacterias no nadan sueltas; para no ser arrastradas por la corriente se anclan a las paredes de tuberías, arcas y labios de la caja de entrada segregando <b>EPS (Sustancias Poliméricas Extracelulares)</b>: un hidrogel pegajoso de polisacáridos y proteínas conocido como <b>Slime o Limo</b>.</p>
+            <p class="mt-2">Este moco atrapa finos de celulosa y cargas minerales, engordando en la pared de la tubería hasta que su propio peso o una vibración hace que un "pegote" se desprenda y caiga sobre la tela formadora.</p>
+          </div>
+        </div>
+
+        <div class="bg-slate-950/80 p-4 rounded-lg border border-slate-700">
+          <h4 class="font-bold text-rose-400 mb-2">💥 Anatomía del Defecto: Del Punto Negro a la Rotura en los Tiros (Draws)</h4>
+          <p>Cuando un coágulo de <i>slime</i> se incrusta en la hoja húmeda ocurren dos fenómenos críticos en cadena:</p>
+          <ol class="list-decimal pl-6 mt-2 space-y-1">
+            <li><b>Caramelización Térmica (Mancha Oscura / Translúcida):</b> Al aplastarse en las prensas y entrar a los cilindros secadores a más de 100°C, los polisacáridos y proteínas del moco sufren una reacción de Maillard (se tuestan o caramelizan), dejando un <b>punto negro, pardo o una ventana translúcida</b> de aspecto grasiento.</li>
+            <li><b>Colapso Mecánico en el Tiro (Draw):</b> En el área ocupada por el pegote de <i>slime</i> <b>no hay red de fibras de celulosa entrelazadas</b> ni puentes de hidrógeno ni enlaces de Kymene; solo hay gel seco quebradizo con resistencia a la tracción cero. Cuando la hoja pasa de una sección a otra (ej. de prensas a secadores) sometida a la tensión longitudinal del <b>tiro (draw)</b>, la concentración de tensiones en los bordes de ese agujero rasga la hoja de lado a lado provocando la <b>rotura en máquina</b>.</li>
+          </ol>
+        </div>
+
+        <div class="bg-emerald-950/30 border-l-4 border-emerald-400 p-4 rounded-r-lg">
+          <h5 class="font-bold text-emerald-300">⚡ Estrategia de Erradicación (Tu Diseño Operativo): Choque de Biocida + Choque de pH</h5>
+          <ul class="list-disc pl-6 mt-1 space-y-1">
+            <li><b>Por qué falla la dosificación continua baja:</b> Si inyectas poco biocida todo el día, la capa externa de <i>slime</i> frena la difusión del químico. Las bacterias del interior detectan un estrés sub-letal, activan genes de defensa y segregan una capa de moco aún más gruesa, volviéndose inmunes.</li>
+            <li><b>Dosificación por Choque:</b> Inyectar una concentración altísima de biocida (oxidante como hipoclorito/bromuro o no oxidante como glutaraldehído/isotiazolinonas) durante 15-30 minutos cada ciertas horas genera un <b>gradiente de concentración masivo</b> (Ley de Fick) que perfora la cápsula de EPS y lisa la membrana celular bacteriana antes de que puedan defenderse.</li>
+            <li><b>Choque de pH:</b> Reducir drásticamente el pH de forma puntual o en limpiezas ácidas desnaturaliza las enzimas bacterianas adaptadas al pH 7, provocando un colapso osmótico total de la colonia.</li>
+          </ul>
+        </div>
+      </div>
+    </article>
+
+    <!-- ================================================================= -->
+    <!-- CAPÍTULO 5: CONTAMINANTES HIDRÓFOBOS (PITCH / STICKIES) Y TALCO   -->
+    <!-- ================================================================= -->
+    <article class="enc-article article-open bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-lg" data-cat="contaminantes">
+      <header onclick="toggleArticle(this)" class="p-5 bg-slate-800/70 hover:bg-slate-800 cursor-pointer flex justify-between items-center transition">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded bg-teal-950 text-teal-300 border border-teal-700/50">Capítulo 5 · Control de Contaminantes</span>
+          <h3 class="text-lg font-bold text-white mt-1.5">5.1. Pitch, Stickies, Reventón en Prensas (Crushing) y Pasivación con Talco</h3>
+        </div>
+        <span class="chevron text-slate-400 text-xl transition-transform duration-300">▼</span>
+      </header>
+      <div class="article-body p-6 space-y-4 text-sm leading-relaxed text-slate-300 border-t border-slate-800">
+        <p>En la suspensión conviven dos familias de contaminantes orgánicos insolubles en agua (fuertemente <b>hidrófobos</b> y lipófilos):</p>
+        <ul class="list-disc pl-6 space-y-1">
+          <li><b>Pitch (Resina natural):</b> Proviene de la pasta virgen de madera (ácidos resínicos, ácidos grasos insaturados, ésteres de esterol y triglicéridos).</li>
+          <li><b>Stickies (Adhesivos sintéticos):</b> Provienen del papel reciclado o del recorte estucado (polímeros de EVA, acrilatos, cauchos estireno-butadieno, colas <i>hot-melt</i>).</li>
+        </ul>
+
+        <div class="bg-rose-950/30 border border-rose-700/50 p-4 rounded-lg">
+          <h4 class="font-bold text-rose-300">💥 El Fenómeno de "Crushing" (Reventón Hidráulico en Prensas)</h4>
+          <p class="mt-1">Como el <i>pitch</i> y los <i>stickies</i> odian el agua, tienden a aglomerarse entre sí al chocar en las bombas y se pegan con fuerza a los monofilamentos plásticos de la <b>tela formadora</b> (que también tiene carácter hidrófobo). Al tapar un grupo de mallas de la tela:</p>
+          <ol class="list-decimal pl-6 mt-1 space-y-1">
+            <li>La pasta que cae encima de ese parche impermeable <b>no puede drenar su agua hacia abajo</b> ni en los <i>foils</i> ni en las cajas de vacío.</li>
+            <li>La hoja sale de la mesa plana con una "bolsa de agua" localizada (un punto con mucha más humedad que el resto del perfil).</li>
+            <li>Al entrar en el <i>nip</i> (línea de presión) de las prensas húmedas, los rodillos comprimen esa bolsa de agua a gran velocidad. Como el agua es incompresible y no le da tiempo a escapar verticalmente hacia el fieltro, <b>estalla lateralmente a alta presión</b>, desintegrando el entrelazado de fibras y causando un agujero irregular o la rotura de la banda (<i>crushing</i>).</li>
+          </ol>
+        </div>
+
+        <!-- FOCO DE DUDA RESUELTA: MECANISMO DEL TALCO -->
+        <div class="bg-sky-950/40 border-l-4 border-sky-400 p-4 rounded-r-lg space-y-2">
+          <h5 class="font-bold text-sky-300">💡 Foco Crítico (Duda Resuelta): ¿El talco rompe el Pitch en trozos pequeños o cómo evita que tape la tela?</h5>
+          <p>En nuestra conversación preguntaste si el talco actuaba rompiendo el <i>pitch</i> en fragmentos diminutos para que atravesaran la tela formadora. Aclaramos por qué su mecanismo real es mucho más inteligente (<b>Detackification / Pasivación por recubrimiento laminar</b>):</p>
+          <ul class="list-disc pl-6 space-y-2">
+            <li><b>1. Estructura Mineralógica del Talco:</b> El talco es un silicato de magnesio hidratado $[Mg_3Si_4O_{10}(OH)_2]$ con una estructura cristalina en forma de <b>láminas o escamas microscópicas</b> (como hojas de hojaldre). Las caras planas de estas escamas son naturalmente <b>hidrófobas</b> (odian el agua y aman las grasas/resinas).</li>
+            <li><b>2. El "Efecto Harina en Masa de Pizza":</b> Si el talco simplemente rompiera el pegamento y este cruzara la tela hacia las aguas blancas, volvería a recircular por las bombas, chocaría con otras gotas y se volvería a unir en un chicle gigante. En lugar de eso, cuando las escamas de talco chocan en el agua con una bola pegajosa de <i>pitch</i> o <i>sticky</i>, las láminas de talco se pegan de plano sobre toda la superficie exterior de la gota resinosa.</li>
+            <li><b>3. blindaje Inerte y Salida en la Bobina:</b> La partícula de pegamento queda completamente revestida por una coraza mineral resbaladiza ("empanada"). Pierde el 100% de su pegajosidad superficial (<i>tack</i>), ya no puede unirse a otras gotas de resina ni adherirse a los hilos de la tela formadora, y <b>queda retenida dentro de la matriz de fibras del papel</b>, saliendo de la máquina de forma inofensiva enrollada en la bobina final.</li>
+          </ul>
+        </div>
+      </div>
+    </article>
+
+    <!-- ================================================================= -->
+    <!-- CAPÍTULO 6: HIDRODINÁMICA, VISCOSIDAD Y DEPURADORES VERTICALES    -->
+    <!-- ================================================================= -->
+    <article class="enc-article article-open bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-lg" data-cat="reologia">
+      <header onclick="toggleArticle(this)" class="p-5 bg-slate-800/70 hover:bg-slate-800 cursor-pointer flex justify-between items-center transition">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded bg-purple-950 text-purple-300 border border-purple-700/50">Capítulo 6 · Mecánica de Fluidos y Equipos</span>
+          <h3 class="text-lg font-bold text-white mt-1.5">6.1. Reología de la Pasta, Viscosidad y Comportamiento en Depuradores Verticales</h3>
+        </div>
+        <span class="chevron text-slate-400 text-xl transition-transform duration-300">▼</span>
+      </header>
+      <div class="article-body p-6 space-y-4 text-sm leading-relaxed text-slate-300 border-t border-slate-800">
+        <p>La suspensión de celulosa y aditivos no se comporta como el agua pura; es un <b>fluido no newtoniano</b> cuya viscosidad aparente (resistencia interna a fluir o roce entre capas moleculares y fibrosas) depende de la consistencia de fibra, la temperatura y el grado de floculación química.</p>
+
+        <div class="bg-purple-950/30 border-l-4 border-purple-400 p-4 rounded-r-lg space-y-2">
+          <h5 class="font-bold text-purple-300">⚙️ Foco Operativo: ¿Qué ocurre exactamente dentro de tus Depuradores Verticales (Cribas a Presión)?</h5>
+          <p>Identificaste los depuradores verticales como el punto crítico donde sufres los cambios de viscosidad. Veamos la secuencia física y mecánica exacta:</p>
+          <ol class="list-decimal pl-6 space-y-2">
+            <li><b>Principio de Funcionamiento Normal:</b> La pasta entra tangencialmente y debe atravesar las ranuras o perforaciones milimétricas (de apenas 0.15 a 0.35 mm) de una <b>camisa metálica cilíndrica estática</b>. En el interior gira a alta velocidad un <b>rotor con perfiles hidrodinámicos (foils)</b>. Cuando el ala del rotor pasa rozando la camisa, genera primero un pulso de presión positiva (que empuja la fibra buena por la ranura hacia el aceptado) seguido inmediatamente de un pulso de succión o presión negativa (que levanta y limpia las fibras o contaminantes atascados en la boca de la ranura).</li>
+            <li><b>El Efecto de Alta Viscosidad / Sobredosificación Química:</b> Si aumenta la consistencia de la pasta o si hay una sobredosificación de alúmina, Cato o polímeros de retención que crean macro-flóculos gelatinosos muy fuertes, la viscosidad del fluido se dispara. A la suspensión le cuesta muchísimo deformarse para cruzar las estrechas ranuras de la camisa (se forma una manta fibrosa espesa o <i>matting</i> sobre el metal).</li>
+            <li><b>Disparo de $\Delta P$ (Presión Diferencial):</b> Como el flujo aceptado se frena en las ranuras, la presión en el lado de alimentación sube mientras que en el lado de salida cae. El $\Delta P$ aumenta peligrosamente.</li>
+            <li><b>Disparo de Amperios (Consumo del Motor ⚡):</b> El esfuerzo cortante ($\tau$) que debe vencer el rotor es directamente proporcional a la viscosidad ($\mu$) del fluido ($\tau = \mu \cdot \frac{du}{dy}$). Al girar dentro de una masa espesa y presurizada, el par resistente sobre las palas del rotor se multiplica y el motor eléctrico demanda <b>muchos más amperios</b> para mantener las revoluciones.</li>
+            <li><b>Desgaste Abrasivo y Colapso de Camisa:</b> La pasta espesa es empujada con enorme fuerza normal contra los bordes de las ranuras de la camisa, acelerando la erosión mecánica del acero cromado (desgaste de ranuras que deja pasar basura a la caja de entrada). Si el $\Delta P$ supera el límite estructural del cilindro metálico, la camisa sufre pandeo y <b>se abolla o revienta contra el rotor</b>.</li>
+          </ol>
+        </div>
+      </div>
+    </article>
+
+    <!-- ================================================================= -->
+    <!-- CAPÍTULO 7: FÍSICA DE ENSAYOS Y LABORATORIO DE CALIDAD            -->
+    <!-- ================================================================= -->
+    <article class="enc-article article-open bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-lg" data-cat="calidad">
+      <header onclick="toggleArticle(this)" class="p-5 bg-slate-800/70 hover:bg-slate-800 cursor-pointer flex justify-between items-center transition">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-700/50">Capítulo 7 · Control de Calidad y Laboratorio</span>
+          <h3 class="text-lg font-bold text-white mt-1.5">7.1. Traducción Química a Números de Laboratorio: Cobb, Mullen y Tracción en Húmedo</h3>
+        </div>
+        <span class="chevron text-slate-400 text-xl transition-transform duration-300">▼</span>
+      </header>
+      <div class="article-body p-6 space-y-5 text-sm leading-relaxed text-slate-300 border-t border-slate-800">
+        
+        <div class="grid md:grid-cols-3 gap-4">
+          <!-- COBB -->
+          <div class="bg-slate-950/70 p-4 rounded-lg border border-slate-800 flex flex-col justify-between">
+            <div>
+              <span class="text-2xl">💧</span>
+              <h4 class="font-bold text-sky-400 mt-2">1. Ensayo de Cobb ($g/m^2$)</h4>
+              <p class="text-xs text-slate-400 mt-1">Norma ISO 535 / TAPPI T441</p>
+              <p class="mt-2"><b>Física del ensayo:</b> Mide la masa de agua en gramos absorbida por $1\text{ m}^2$ de papel en un tiempo determinado (usualmente $\text{Cobb}_{60} = 60\text{ s}$) bajo una columna hidrostática de $1\text{ cm}$ de agua.</p>
+              <p class="mt-2"><b>Qué evalúa a nivel molecular:</b> Evalúa el ángulo de contacto y la densidad de colas hidrófobas de <b>ASA/AKD</b> ancladas covalentemente en la superficie capilar de la hoja.</p>
+            </div>
+            <div class="mt-4 pt-3 border-t border-slate-800 text-xs text-sky-200">
+              <b>Acción en Máquina si sale ALTO:</b><br>
+              1) Subir caudal de ASA.<br>
+              2) Si no responde, la basura aniónica está desactivando la cápsula de almidón del ASA o la cizalla lo lava en la tela: <b>subir Alúmina (+)</b> para limpiar el medio y fijar la emulsión.
+            </div>
+          </div>
+
+          <!-- MULLEN -->
+          <div class="bg-slate-950/70 p-4 rounded-lg border border-slate-800 flex flex-col justify-between">
+            <div>
+              <span class="text-2xl">💥</span>
+              <h4 class="font-bold text-indigo-400 mt-2">2. Ensayo de Mullen / Estallido ($kPa$)</h4>
+              <p class="text-xs text-slate-400 mt-1">Norma ISO 2758 / TAPPI T403</p>
+              <p class="mt-2"><b>Física del ensayo:</b> Una mordaza anular sujeta la hoja sobre un diafragma elástico de caucho. Se inyecta glicerina por debajo aplicando presión hidráulica creciente hasta que el papel se abomba y estalla.</p>
+              <p class="mt-2"><b>Qué evalúa a nivel molecular:</b> La resistencia de la red inter-fibra en todas las direcciones (puentes de hidrógeno + enlaces iónicos de <b>Cato</b> y la malla 3D de <b>Fennobond + Kymene</b>).</p>
+            </div>
+            <div class="mt-4 pt-3 border-t border-slate-800 text-xs text-indigo-200">
+              <b>Acción en Máquina si sale BAJO:</b><br>
+              1) Revisar de inmediato el caudal y cocción de la bomba de <b>Cato</b>.<br>
+              2) En grados con Kymene, verificar que la bomba de <b>Fennobond</b> esté operativa y entrando <i>después</i> del Kymene.
+            </div>
+          </div>
+
+          <!-- TRACCIÓN HÚMEDO -->
+          <div class="bg-slate-950/70 p-4 rounded-lg border border-slate-800 flex flex-col justify-between">
+            <div>
+              <span class="text-2xl">🏋️‍♂️</span>
+              <h4 class="font-bold text-emerald-400 mt-2">3. Tracción en Húmedo ($N/m$)</h4>
+              <p class="text-xs text-slate-400 mt-1">Norma ISO 3781 / TAPPI T456</p>
+              <p class="mt-2"><b>Física del ensayo:</b> Se satura una tira de papel en agua destilada (lo que disuelve y anula el 100% de los puentes de hidrógeno naturales) y se somete a tensión axial en un dinamómetro hasta la rotura.</p>
+              <p class="mt-2"><b>Qué evalúa a nivel molecular:</b> Mide exclusivamente la red de <b>enlaces covalentes éster insolubles</b> formados por los anillos de azetidinio del <b>Kymene (PAE)</b>.</p>
+            </div>
+            <div class="mt-4 pt-3 border-t border-slate-800 text-xs text-emerald-200">
+              <b>Acción en Máquina si sale BAJO (con bomba Kymene OK):</b><br>
+              ¡Fallo termodinámico de curado! Revisar de inmediato la <b>presión de vapor en los cilindros secadores</b>; a la hoja le falta temperatura para abrir el anillo de azetidinio y soldar el Kymene.
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </article>
+
+    <!-- ================================================================= -->
+    <!-- CAPÍTULO 8: MATRIZ AVANZADA DE DIAGNÓSTICO INTERACTIVO            -->
+    <!-- ================================================================= -->
+    <section id="sec-matriz" class="enc-article article-open bg-slate-900 border-2 border-amber-500/40 rounded-xl p-6 shadow-xl" data-cat="matriz">
+      <div class="flex items-center gap-3 mb-4">
+        <span class="text-3xl">🚨</span>
+        <div>
+          <h2 class="text-xl font-bold text-amber-400">8. Consola Interactiva de Diagnóstico de Causa Raíz</h2>
+          <p class="text-xs text-slate-400">Pulsa sobre cualquier anomalía operativa para desplegar el árbol completo de causas moleculares y acciones correctivas en planta.</p>
+        </div>
       </div>
 
-      <div id="diagResult" class="hidden bg-slate-900 border-l-4 border-sky-400 p-4 rounded-r-lg text-sm space-y-2"></div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-5">
+        <button onclick="loadCase('caso1')" class="text-left p-3.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 focus:border-amber-400 transition">
+          <div class="font-bold text-sky-400 text-sm">💧 Caso 1: Cobb disparado</div>
+          <div class="text-xs text-slate-400 mt-1">Subir la dosis de ASA no corrige la absorción de agua.</div>
+        </button>
+        <button onclick="loadCase('caso2')" class="text-left p-3.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 focus:border-amber-400 transition">
+          <div class="font-bold text-emerald-400 text-sm">🏋️‍♂️ Caso 2: Tracción Húmedo cae</div>
+          <div class="text-xs text-slate-400 mt-1">El caudalímetro de Kymene marca inyección perfecta.</div>
+        </button>
+        <button onclick="loadCase('caso3')" class="text-left p-3.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 focus:border-amber-400 transition">
+          <div class="font-bold text-indigo-400 text-sm">💥 Caso 3: Desplome de Mullen</div>
+          <div class="text-xs text-slate-400 mt-1">La hoja revienta a baja presión y pierde resistencia interna.</div>
+        </button>
+        <button onclick="loadCase('caso4')" class="text-left p-3.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 focus:border-amber-400 transition">
+          <div class="font-bold text-purple-400 text-sm">⚡ Caso 4: Amperios en Depurador</div>
+          <div class="text-xs text-slate-400 mt-1">Subida de $\Delta P$ y consumo eléctrico en cribas verticales.</div>
+        </button>
+        <button onclick="loadCase('caso5')" class="text-left p-3.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 focus:border-amber-400 transition">
+          <div class="font-bold text-rose-400 text-sm">🦠 Caso 5: Punto negro y rotura</div>
+          <div class="text-xs text-slate-400 mt-1">Manchas translúcidas/oscuras y cortes en los tiros (draws).</div>
+        </button>
+        <button onclick="loadCase('caso6')" class="text-left p-3.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 focus:border-amber-400 transition">
+          <div class="font-bold text-teal-400 text-sm">🪨 Caso 6: Reventón en Prensas</div>
+          <div class="text-xs text-slate-400 mt-1">Puntos húmedos localizados que estallan al prensar.</div>
+        </button>
+      </div>
+
+      <div id="caseOutput" class="bg-slate-950 border border-slate-800 rounded-lg p-5 text-sm leading-relaxed text-slate-200">
+        <span class="text-slate-400 italic">👆 Selecciona uno de los 6 casos operativos de arriba para ver el análisis ingenieril detallado.</span>
+      </div>
     </section>
 
-    <!-- CONTENEDOR DE TARJETAS DE CONOCIMIENTO -->
-    <div id="cardsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-      <!-- 1. QUÍMICA Y RETENCIÓN -->
-      <div class="topic-card bg-slate-800 border border-slate-700 rounded-xl p-4 cursor-pointer hover:border-sky-500/50 transition" data-category="quimica" onclick="toggleCard(this)">
-        <div class="flex justify-between items-center">
-          <div class="flex items-center gap-3">
-            <span class="text-2xl">🧲</span>
-            <div>
-              <span class="text-xs uppercase px-2 py-0.5 rounded bg-sky-900 text-sky-300">Cargas y Retención</span>
-              <h3 class="font-bold text-base mt-1">Regla de Oro: Celulosa (-) y Cato (+)</h3>
-            </div>
-          </div>
-          <span class="text-slate-400 text-xl font-bold">+</span>
-        </div>
-        <div class="card-content mt-3 pt-3 border-t border-slate-700 text-sm text-slate-300 space-y-2">
-          <p><b>Naturaleza de la fibra:</b> La fibra de celulosa y las cargas minerales tienen carga eléctrica <b>negativa (-)</b> en el agua. Tienden a repelerse entre sí.</p>
-          <p><b>Función del Cato (Almidón Catiónico):</b> Tiene carga <b>positiva (+)</b>. Actúa como un imán uniendo las fibras negativas y reteniendo los finos para dar resistencia interna.</p>
-          <p class="text-amber-300 text-xs">⚠️ <b>Efecto secundario:</b> Al ser una cadena de azúcares, el Cato es el alimento favorito de las bacterias (genera <i>slime</i>).</p>
-        </div>
-      </div>
-
-      <div class="topic-card bg-slate-800 border border-slate-700 rounded-xl p-4 cursor-pointer hover:border-sky-500/50 transition" data-category="quimica" onclick="toggleCard(this)">
-        <div class="flex justify-between items-center">
-          <div class="flex items-center gap-3">
-            <span class="text-2xl">🧹</span>
-            <div>
-              <span class="text-xs uppercase px-2 py-0.5 rounded bg-sky-900 text-sky-300">Cargas y Retención</span>
-              <h3 class="font-bold text-base mt-1">Alúmina y la "Basura Aniónica"</h3>
-            </div>
-          </div>
-          <span class="text-slate-400 text-xl font-bold">+</span>
-        </div>
-        <div class="card-content mt-3 pt-3 border-t border-slate-700 text-sm text-slate-300 space-y-2">
-          <p><b>El problema:</b> El circuito de aguas blancas acumula "basura aniónica" (partículas disueltas con carga negativa <b>-</b>). Si no se limpia, esta basura neutraliza los químicos caros (Cato, Kymene, cápsula del ASA) antes de que toquen la fibra.</p>
-          <p><b>Doble función de la Alúmina (+):</b></p>
-          <ul class="list-disc pl-5 space-y-1">
-            <li><b>Como "Sacrificio":</b> Atrapa y neutraliza la basura aniónica despejando el camino.</li>
-            <li><b>Junto a la cola (Caja de entrada):</b> En pH neutro forma una red gelatinosa (flóculos) que protege a las gotas de cola contra las fuertes turbulencias (cizalla) para que no se escapen por la tela.</li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- 2. RESISTENCIA Y ENCOLADO -->
-      <div class="topic-card bg-slate-800 border border-slate-700 rounded-xl p-4 cursor-pointer hover:border-sky-500/50 transition" data-category="resistencia" onclick="toggleCard(this)">
-        <div class="flex justify-between items-center">
-          <div class="flex items-center gap-3">
-            <span class="text-2xl">🕸️</span>
-            <div>
-              <span class="text-xs uppercase px-2 py-0.5 rounded bg-indigo-900 text-indigo-300">Resistencia Estructural</span>
-              <h3 class="font-bold text-base mt-1">Sistema Dual: Kymene (+) y Fennobond (-)</h3>
-            </div>
-          </div>
-          <span class="text-slate-400 text-xl font-bold">+</span>
-        </div>
-        <div class="card-content mt-3 pt-3 border-t border-slate-700 text-sm text-slate-300 space-y-2">
-          <p><b>El Orden es Innegociable:</b></p>
-          <ol class="list-decimal pl-5 space-y-1">
-            <li>Primero entra el <b>Kymene (+)</b>: Se pega a la fibra negativa (-) y "pinta" su superficie de carga positiva. Da resistencia en húmedo formando enlaces covalentes.</li>
-            <li>Después entra el <b>Fennobond (-)</b>: Se ancla sobre el Kymene positivo formando una <b>malla 3D</b> súper resistente en seco.</li>
-          </ol>
-          <p class="text-rose-400 text-xs">❌ <b>¿Qué pasa si se invierte el orden?</b> Como la fibra es (-) y el Fennobond es (-), se repelerían al instante y el producto se perdería por las aguas blancas.</p>
-          <p class="text-sky-300 text-xs">🔥 <b>Requisito térmico:</b> El Kymene necesita calor en la batería de secadores (vapor) para "curar" y soldarse.</p>
-        </div>
-      </div>
-
-      <div class="topic-card bg-slate-800 border border-slate-700 rounded-xl p-4 cursor-pointer hover:border-sky-500/50 transition" data-category="resistencia" onclick="toggleCard(this)">
-        <div class="flex justify-between items-center">
-          <div class="flex items-center gap-3">
-            <span class="text-2xl">🌂</span>
-            <div>
-              <span class="text-xs uppercase px-2 py-0.5 rounded bg-indigo-900 text-indigo-300">Encolado Neutro</span>
-              <h3 class="font-bold text-base mt-1">Impermeabilización con ASA / AKD</h3>
-            </div>
-          </div>
-          <span class="text-slate-400 text-xl font-bold">+</span>
-        </div>
-        <div class="card-content mt-3 pt-3 border-t border-slate-700 text-sm text-slate-300 space-y-2">
-          <p><b>Estructura de "Alfiler":</b> Tienen una <b>cabeza reactiva</b> que se suelda a la fibra de celulosa y una <b>cola grasa/cera</b> hidrófoba que apunta hacia afuera repeliendo el agua.</p>
-          <p><b>El peligro de Hidrólisis (Cuenta atrás ⏱️):</b> El ASA es tan reactivo que si pasa tiempo en el circuito reacciona con el agua (se hidroliza), pierde su efecto impermeabilizante y forma manchas pegajosas en máquina.</p>
-          <p><b>Operativa:</b> Por eso se inyecta <b>directo a la caja de entrada</b>, emulsionado con una cápsula protectora de almidón catiónico (+) y ayudado por la alúmina.</p>
-        </div>
-      </div>
-
-      <!-- 3. MICROBIOLOGÍA Y CONTAMINANTES -->
-      <div class="topic-card bg-slate-800 border border-slate-700 rounded-xl p-4 cursor-pointer hover:border-sky-500/50 transition" data-category="limpieza" onclick="toggleCard(this)">
-        <div class="flex justify-between items-center">
-          <div class="flex items-center gap-3">
-            <span class="text-2xl">🦠</span>
-            <div>
-              <span class="text-xs uppercase px-2 py-0.5 rounded bg-emerald-900 text-emerald-300">Guerra Biológica</span>
-              <h3 class="font-bold text-base mt-1">Control de "Slime" (Limo) y Biocidas</h3>
-            </div>
-          </div>
-          <span class="text-slate-400 text-xl font-bold">+</span>
-        </div>
-        <div class="card-content mt-3 pt-3 border-t border-slate-700 text-sm text-slate-300 space-y-2">
-          <p><b>¿Por qué la máquina es un hotel 5 estrellas?</b> Tiene agua, temperatura ideal (40-50°C), pH neutro (~7) y comida infinita (el azúcar del almidón Cato).</p>
-          <p><b>El defecto:</b> Las bacterias crean una cápsula gelatinosa (<i>slime</i>). Si se suelta, se carameliza en los secadores (punto negro/translúcido) y como no tiene fibra ni enlaces, provoca agujeros o roturas en los tiros (<i>draws</i>).</p>
-          <p><b>Estrategia de ataque:</b></p>
-          <ul class="list-disc pl-5 space-y-1">
-            <li><b>Dosificación por Choque ⚡:</b> Inyecciones masivas en pocos minutos para atravesar su escudo antes de que se acostumbren.</li>
-            <li><b>Choque de pH 📉:</b> Bajar el pH puntualmente para destruir su hábitat neutro.</li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="topic-card bg-slate-800 border border-slate-700 rounded-xl p-4 cursor-pointer hover:border-sky-500/50 transition" data-category="limpieza" onclick="toggleCard(this)">
-        <div class="flex justify-between items-center">
-          <div class="flex items-center gap-3">
-            <span class="text-2xl">🪨</span>
-            <div>
-              <span class="text-xs uppercase px-2 py-0.5 rounded bg-emerald-900 text-emerald-300">Contaminantes</span>
-              <h3 class="font-bold text-base mt-1">Pitch, Stickies y Pasivación con Talco</h3>
-            </div>
-          </div>
-          <span class="text-slate-400 text-xl font-bold">+</span>
-        </div>
-        <div class="card-content mt-3 pt-3 border-t border-slate-700 text-sm text-slate-300 space-y-2">
-          <p><b>El enemigo:</b> El <i>Pitch</i> (resina de madera virgen) y los <i>Stickies</i> (pegamentos de recorte/reciclado) son "chicles" hidrófobos. Si taponan la tela formadora, impiden el drenaje, crean un charco y causan un <b>reventón (crushing)</b> en las prensas.</p>
-          <p><b>Cómo actúa el Talco (Efecto Harina 🍞):</b> El talco son láminas microscópicas hidrófobas. No rompe el pegamento, sino que lo envuelve y "empana" (<b>pasivación</b>). Así le quita la pegajosidad y la partícula viaja inerte dentro del papel hasta la bobina sin ensuciar la tela.</p>
-        </div>
-      </div>
-
-      <!-- 4. FÍSICA Y LABORATORIO -->
-      <div class="topic-card bg-slate-800 border border-slate-700 rounded-xl p-4 cursor-pointer hover:border-sky-500/50 transition" data-category="fisica" onclick="toggleCard(this)">
-        <div class="flex justify-between items-center">
-          <div class="flex items-center gap-3">
-            <span class="text-2xl">⚙️</span>
-            <div>
-              <span class="text-xs uppercase px-2 py-0.5 rounded bg-purple-900 text-purple-300">Física de Fluidos</span>
-              <h3 class="font-bold text-base mt-1">Viscosidad en Depuradores Verticales</h3>
-            </div>
-          </div>
-          <span class="text-slate-400 text-xl font-bold">+</span>
-        </div>
-        <div class="card-content mt-3 pt-3 border-t border-slate-700 text-sm text-slate-300 space-y-2">
-          <p><b>En la criba a presión:</b> El rotor empuja la fibra buena por las ranuras milimétricas de la camisa metálica.</p>
-          <p><b>Peligro por alta viscosidad / sobredosificación:</b> Si la pasta se vuelve muy espesa o gelatinosa (ej. exceso de flóculos), no fluye por las ranuras. Sube la presión diferencial (ΔP), <b>se disparan los amperios ⚡ del motor</b> y aumenta el desgaste (o riesgo de colapso) de la camisa.</p>
-        </div>
-      </div>
-
-      <div class="topic-card bg-slate-800 border border-slate-700 rounded-xl p-4 cursor-pointer hover:border-sky-500/50 transition" data-category="fisica" onclick="toggleCard(this)">
-        <div class="flex justify-between items-center">
-          <div class="flex items-center gap-3">
-            <span class="text-2xl">🔬</span>
-            <div>
-              <span class="text-xs uppercase px-2 py-0.5 rounded bg-purple-900 text-purple-300">Laboratorio de Calidad</span>
-              <h3 class="font-bold text-base mt-1">Cobb, Mullen y Tracción en Húmedo</h3>
-            </div>
-          </div>
-          <span class="text-slate-400 text-xl font-bold">+</span>
-        </div>
-        <div class="card-content mt-3 pt-3 border-t border-slate-700 text-sm text-slate-300 space-y-2">
-          <ul class="space-y-2">
-            <li>💧 <b>Test de Cobb (Absorción de agua):</b> Mide los g/m² de agua absorbidos en 60s. Depende del <b>ASA</b> y de que la <b>Alúmina</b> limpie la basura aniónica.</li>
-            <li>💥 <b>Test de Mullen (Estallido en seco):</b> El diafragma de goma infla el papel hasta reventarlo. Mide enlaces internos: depende del <b>Cato</b> y del <b>Fennobond</b>.</li>
-            <li>🏋️‍♂️ <b>Tracción en Húmedo (Wet Tensile):</b> Tira de la hoja empapada. Depende de la dosis de <b>Kymene</b> y de que haya suficiente <b>temperatura de vapor</b> en secadores para curarlo.</li>
-          </ul>
-        </div>
-      </div>
-
-    </div>
   </main>
 
   <script>
-    // Desplegar/plegar tarjetas
-    function toggleCard(card) {
-      card.classList.toggle('card-open');
+    // Desplegar o contraer un artículo individual
+    function toggleArticle(headerEl) {
+      headerEl.parentElement.classList.toggle('article-open');
     }
 
-    // Filtrar por pestañas
-    function switchTab(cat) {
-      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('tab-active'));
-      document.getElementById('tab-' + cat).classList.add('tab-active');
-
-      const sim = document.getElementById('sec-simulador');
-      const cards = document.querySelectorAll('.topic-card');
-
-      if (cat === 'simulador') {
-        sim.style.display = 'block';
-        cards.forEach(c => c.style.display = 'none');
-      } else {
-        sim.style.display = (cat === 'all') ? 'block' : 'none';
-        cards.forEach(c => {
-          c.style.display = (cat === 'all' || c.dataset.category === cat) ? 'block' : 'none';
-        });
-      }
+    // Expandir o contraer todos los artículos
+    function expandAll(open) {
+      document.querySelectorAll('.enc-article').forEach(art => {
+        if (open) art.classList.add('article-open');
+        else art.classList.remove('article-open');
+      });
     }
 
-    // Buscador en tiempo real
-    function filterCards() {
-      const q = document.getElementById('searchInput').value.toLowerCase();
-      document.querySelectorAll('.topic-card').forEach(card => {
-        const text = card.innerText.toLowerCase();
-        if (text.includes(q)) {
-          card.style.display = 'block';
-          if (q.length > 2) card.classList.add('card-open');
+    // Filtrar por capítulo desde la barra lateral
+    function filterCategory(cat) {
+      document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('nav-active'));
+      document.getElementById('nav-' + cat).classList.add('nav-active');
+
+      document.querySelectorAll('.enc-article').forEach(art => {
+        if (cat === 'all' || art.dataset.cat === cat) {
+          art.style.display = 'block';
+          art.classList.add('article-open');
         } else {
-          card.style.display = 'none';
+          art.style.display = 'none';
         }
       });
     }
 
-    // Lógica del Simulador de Diagnóstico
-    const diagnostics = {
-      cobb: "<b>💧 Diagnóstico Cobb Alto:</b> El papel absorbe demasiada agua.<br>1️⃣ Revisa el caudal de <b>ASA</b> y su emulsión con almidón.<br>2️⃣ Si subir la cola no mejora el Cobb, tienes un pico de <b>basura aniónica (-)</b> neutralizando la cola: <b>aumenta la Alúmina (+)</b> para limpiar el circuito y ayudar a anclar el ASA en la caja de entrada.",
-      mullen: "<b>💥 Diagnóstico Mullen Bajo:</b> Fallo de cohesión interna entre fibras.<br>1️⃣ Verifica de inmediato la bomba de <b>Cato (Almidón catiónico)</b>.<br>2️⃣ Si fabricas grado con resistencia especial, revisa la bomba de <b>Fennobond</b> y confirma que el <b>Kymene</b> esté entrando <i>antes</i> que el Fennobond.",
-      humedo: "<b>🏋️‍♂️ Diagnóstico Fallo en Húmedo (con bomba Kymene OK):</b><br>El Kymene es una resina termoendurecible. Si el químico entra bien pero el test falla, <b>revisa la presión de vapor en los cilindros secadores</b>. La hoja no está alcanzando la temperatura necesaria para que el Kymene cure sus enlaces covalentes.",
-      amperios: "<b>⚡ Diagnóstico Subida de Amperios en Depuradores Verticales:</b><br>La viscosidad o consistencia de la pasta ha subido y no pasa bien por las ranuras de la camisa.<br>1️⃣ Vigila el ΔP (presión diferencial) para no abollar ni desgastar la camisa.<br>2️⃣ Revisa posibles sobredosificaciones químicas (exceso de flóculos gelatinosos de alúmina/polímeros).",
-      rotura_negra: "<b>🦠 Diagnóstico Manchas Oscuras / Ventanas / Roturas en Tiros:</b><br>Desprendimiento de colonias de <b>Slime (limo bacteriano)</b> alimentadas por el Cato a pH neutro.<br>1️⃣ Aplica <b>tratamiento de choque con biocidas</b> para romper el escudo protector.<br>2️⃣ Valora un choque de pH o programar limpieza ácida.",
-      reventon: "<b>🪨 Diagnóstico Punto Húmedo y Reventón en Prensas (Crushing):</b><br>Un <b>Sticky o Pitch</b> ha taponado la tela formadora impidiendo el desagote.<br>1️⃣ Revisa la limpieza de duchas de la tela.<br>2️⃣ Ajusta la dosificación de <b>Talco</b> para pasivar ('empanar') las partículas pegajosas y que salgan inertes con el papel."
+    // Buscador de texto profundo
+    function searchEncyclopedia() {
+      const q = document.getElementById('searchInput').value.toLowerCase().trim();
+      document.querySelectorAll('.enc-article').forEach(art => {
+        const content = art.innerText.toLowerCase();
+        if (content.includes(q)) {
+          art.style.display = 'block';
+          if (q.length > 1) art.classList.add('article-open');
+        } else {
+          art.style.display = 'none';
+        }
+      });
+    }
+
+    // Base de datos de la Consola de Diagnóstico Profundo
+    const casesDB = {
+      caso1: `
+        <h4 class="text-base font-bold text-sky-400 mb-2">💧 Análisis Ingenieril: Cobb Alto Inmune al Aumento de ASA</h4>
+        <p class="mb-2"><b>1. ¿Qué está pasando en el papel?</b> Las fibras de celulosa tienen sus grupos hidroxilo ($-OH$) desnudos y están absorbiendo agua por capilaridad durante los 60 segundos del test. El "paraguas" de colas hidrófobas del ASA no se ha formado en la hoja.</p>
+        <p class="mb-2"><b>2. ¿Por qué subir la bomba de ASA no sirve (e incluso empeora todo)?</b></p>
+        <ul class="list-disc pl-5 space-y-1 mb-2">
+          <li><b>Ataque de Basura Aniónica (-):</b> Ha entrado un pico de carga aniónica en el circuito que neutraliza la cápsula de almidón catiónico (+) que envuelve a las gotitas de ASA. Sin carga positiva, el ASA no se acerca a la fibra.</li>
+          <li><b>Lavado Hidrodinámico y Peligro de Hidrólisis:</b> Al no retenerse en la fibra a la primera pasada en la tela formadora, el ASA cae al agua blanca. Allí, a 45-50°C, el anillo anhídrido reacciona con el agua (<b>se hidroliza</b>), muere como encolante y forma jabones cálcicos pegajosos que ensuciarán la máquina.</li>
+        </ul>
+        <p class="text-amber-300 font-semibold">🔧 Protocolo de Actuación en Sala de Control:</p>
+        <p>No sigas subiendo el ASA a ciegas. <b>Aumenta la dosificación de Alúmina (+)</b>. La alúmina neutralizará la basura aniónica ("efecto sacrificio") y creará en la caja de entrada la red de flóculos de hidróxido de aluminio $[Al(OH)_3]$ necesaria para sujetar físicamente las gotas de ASA contra la fibra frente a las turbulencias de la tela.</p>
+      `,
+      caso2: `
+        <h4 class="text-base font-bold text-emerald-400 mb-2">🏋️‍♂️ Análisis Ingenieril: Fallo Catastrófico de Tracción en Húmedo con Dosis de Kymene Correcta</h4>
+        <p class="mb-2"><b>1. ¿Qué está pasando a nivel molecular?</b> El Kymene (resina PAE) sí se ha adherido electrostáticamente (+) a las fibras negativas (-) en la parte húmeda, pero sus anillos de <b>azetidinio</b> no se han abierto para formar los enlaces covalentes tipo éster insolubles en agua. Cuando el inspector sumerge la tira en agua, el agua disuelve los puentes de hidrógeno y la hoja se separa sin oponer fuerza.</p>
+        <p class="mb-2"><b>2. Causa Raíz Termodinámica:</b> El Kymene es una <b>resina termoendurecible</b>; requiere energía de activación térmica para reticular ("curar").</p>
+        <p class="text-amber-300 font-semibold">🔧 Protocolo de Actuación en Sala de Control:</p>
+        <ul class="list-disc pl-5 space-y-1">
+          <li>Revisa inmediatamente la <b>presión de vapor en los grupos de cilindros secadores</b>, posibles inundaciones de condensado en los sifones o si un aumento reciente de velocidad de máquina ha enfriado el perfil térmico de la hoja.</li>
+          <li><i>Verificación secundaria:</i> Si el vapor está bien, comprueba si un pico extremo de basura aniónica (falta de alúmina) ha secuestrado al Kymene antes de tocar la fibra.</li>
+        </ul>
+      `,
+      caso3: `
+        <h4 class="text-base font-bold text-indigo-400 mb-2">💥 Análisis Ingenieril: Caída en Picado del Ensayo de Estallido (Mullen)</h4>
+        <p class="mb-2"><b>1. ¿Qué está pasando físicamente?</b> Cuando el diafragma de goma del equipo Mullen empuja la hoja, las fibras deslizan unas sobre otras y se separan porque carecen de "soldaduras" en sus puntos de cruce.</p>
+        <p class="mb-2"><b>2. Causa Raíz Química (Fallo de Enlaces Inter-fibra):</b></p>
+        <ul class="list-disc pl-5 space-y-1 mb-2">
+          <li>En papeles estándar: Fallo en la aportación de <b>Almidón Catiónico (Cato)</b>, que es el responsable de multiplicar los puentes de hidrógeno entre fibras negativas.</li>
+          <li>En papeles con sistema dual: Fallo en la bomba de <b>Fennobond (-)</b>, o bien <b>fallo previo del Kymene (+)</b>. Recuerda: si el Kymene no entra antes para pintar la fibra de positivo, el Fennobond (-) es repelido electrostáticamente por la celulosa (-) y pasa de largo hacia el desagüe sin formar la malla 3D.</li>
+        </ul>
+        <p class="text-amber-300 font-semibold">🔧 Protocolo de Actuación en Sala de Control:</p>
+        <p>Verifica caudales de bombas de Cato y Fennobond, comprueba la secuencia de puntos de inyección (Kymene siempre aguas arriba del Fennobond) y revisa el grado de refino de la pasta.</p>
+      `,
+      caso4: `
+        <h4 class="text-base font-bold text-purple-400 mb-2">⚡ Análisis Ingenieril: Subida de Amperios y $\Delta P$ en Depuradores Verticales</h4>
+        <p class="mb-2"><b>1. Mecánica del fenómeno:</b> El rotor interior gira a alta velocidad creando pulsos hidrodinámicos para hacer pasar la fibra buena por las ranuras milimétricas de la camisa metálica.</p>
+        <p class="mb-2"><b>2. Causa Reológica (Viscosidad y Floculación):</b> Si hay un aumento brusco de consistencia o una <b>sobredosificación de alúmina/polímeros</b> que genera flóculos gelatinosos excesivamente grandes y viscosos, la suspensión ofrece una enorme resistencia a fluir por las ranuras.</p>
+        <p class="mb-2"><b>3. Consecuencias Mecánicas:</b> Se tapona parcialmente el paso (sube la presión diferencial $\Delta P$), el rotor tiene que batir un fluido mucho más espeso (se disparan los <b>amperios del motor</b>) y la pasta es empujada con violencia contra el metal, acelerando el <b>desgaste abrasivo de la camisa</b> o arriesgando su colapso estructural.</p>
+        <p class="text-amber-300 font-semibold">🔧 Protocolo de Actuación en Sala de Control:</p>
+        <p>Vigila la válvula de rechazos y la consistencia de entrada, y revisa que no exista sobredosificación química de coagulantes/floculantes aguas arriba del depurador.</p>
+      `,
+      caso5: `
+        <h4 class="text-base font-bold text-rose-400 mb-2">🦠 Análisis Ingenieril: Puntos Negros/Translúcidos y Roturas Misteriosas en los Tiros</h4>
+        <p class="mb-2"><b>1. Origen Biológico:</b> La combinación de agua tibia (40-50°C), pH neutro (~7) y el azúcar del almidón <b>Cato</b> ha disparado el crecimiento de colonias bacterianas en las paredes de las tuberías. Para protegerse han segregado cápsulas gelatinosas de polisacáridos (<b>Slime / Limo</b>).</p>
+        <p class="mb-2"><b>2. Por qué rompe la hoja:</b> Un pegote de ese moco se ha desprendido y ha caído en la tela. Al pasar por los secadores calientes se tuesta/carameliza (mancha oscura). Como en ese milímetro cuadrado solo hay gel quemado y <b>cero fibras entrelazadas</b>, cuando la hoja sufre el tirón longitudinal entre secciones (el <i>draw</i>), el punto cede dejando un agujero o partiendo la banda entera.</p>
+        <p class="text-amber-300 font-semibold">🔧 Protocolo de Actuación en Sala de Control:</p>
+        <p>Aplicar estrategia de <b>Choque de Biocidas</b> (dosis masiva en corto tiempo para perforar el escudo de moco antes de que las bacterias se adapten) y valorar un <b>choque de pH</b> o lavado ácido programado para destruir su entorno neutro.</p>
+      `,
+      caso6: `
+        <h4 class="text-base font-bold text-teal-400 mb-2">🪨 Análisis Ingenieril: Puntos Húmedos y Reventón en Prensas (Crushing)</h4>
+        <p class="mb-2"><b>1. Secuencia Física del Fallo:</b> Partículas hidrófobas pegajosas —<b>Pitch</b> (resina de madera virgen) o <b>Stickies</b> (adhesivos del recorte/reciclado)— se han adherido a los hilos plásticos de la tela formadora, cegando el drenaje en ese punto. La hoja sale de la tela con un "charco" interno que, al ser aplastado por los rodillos de las prensas, estalla lateralmente rompiendo el papel.</p>
+        <p class="mb-2"><b>2. El Papel Molecular del Talco:</b> El talco NO tritura el pegamento; sus micro-láminas planas hidrófobas se pegan alrededor de toda la superficie exterior de la gota de <i>pitch/sticky</i> como harina sobre masa de pan (<b>pasivación</b>). Al quitarle la pegajosidad, la bola recubierta ya no se pega a la tela y se marcha dentro del papel hacia la bobina final.</p>
+        <p class="text-amber-300 font-semibold">🔧 Protocolo de Actuación en Sala de Control:</p>
+        <p>Revisar presión y boquillas de las duchas de limpieza de la tela formadora, y <b>aumentar la dosificación de Talco</b> en la preparación de pastas para asegurar que toda la resina quede completamente "empanada" e inerte antes de llegar a la caja de entrada.</p>
+      `
     };
 
-    function showDiag(key) {
-      const box = document.getElementById('diagResult');
-      box.innerHTML = diagnostics[key];
-      box.classList.remove('hidden');
+    function loadCase(caseId) {
+      const box = document.getElementById('caseOutput');
+      box.innerHTML = casesDB[caseId];
     }
   </script>
 </body>
