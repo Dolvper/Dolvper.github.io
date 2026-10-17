@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NeuroPaper AI · Red Neuronal de Optimización de Máquina de Papel</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background-color: #090d16; color: #e2e8f0; font-family: 'Segoe UI', system-ui, sans-serif; }
+    input[type="number"], select { background-color: #0f172a; border: 1px solid #334155; color: #f8fafc; border-radius: 0.375rem; padding: 0.25rem 0.5rem; font-size: 0.8rem; width: 100%; }
+    input[type="number"]:focus { outline: none; border-color: #38bdf8; }
+    .tab-active { background-color: #0284c7; color: white; font-weight: 700; border-bottom: 3px solid #7dd3fc; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+  </style>
+</head>
+<body class="min-h-screen pb-10">
+
+  <!-- HEADER -->
+  <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-50 shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-3">
+      <div class="flex items-center gap-3">
+        <span class="text-3xl">🧠</span>
+        <div>
+          <h1 class="text-lg font-extrabold tracking-wider text-sky-400 uppercase">NeuroPaper AI · Optimizador Neuronal de Planta</h1>
+          <p class="text-xs text-slate-400">Perceptrón Multicapa (Backpropagation) · Química Parte Húmeda, Termodinámica y Calidad</p>
+        </div>
+      </div>
+
+      <!-- Botones Globales TXT -->
+      <div class="flex flex-wrap gap-2 text-xs">
+        <button onclick="exportDataTXT()" class="bg-emerald-700 hover:bg-emerald-600 text-white px-3 py-1.5 rounded font-semibold transition flex items-center gap-1">💾 Exportar Datos (.txt)</button>
+        <label class="bg-emerald-900/70 hover:bg-emerald-800 text-emerald-200 border border-emerald-600 px-3 py-1.5 rounded font-semibold cursor-pointer transition flex items-center gap-1">
+          📂 Subir Datos (.txt)
+          <input type="file" accept=".txt,.json" class="hidden" onchange="importDataTXT(event)">
+        </label>
+        <button onclick="exportWeightsTXT()" class="bg-indigo-700 hover:bg-indigo-600 text-white px-3 py-1.5 rounded font-semibold transition flex items-center gap-1">🧠 Exportar Neuronas (.txt)</button>
+        <label class="bg-indigo-900/70 hover:bg-indigo-800 text-indigo-200 border border-indigo-600 px-3 py-1.5 rounded font-semibold cursor-pointer transition flex items-center gap-1">
+          📥 Subir Neuronas (.txt)
+          <input type="file" accept=".txt,.json" class="hidden" onchange="importWeightsTXT(event)">
+        </label>
+      </div>
+    </div>
+
+    <!-- NAVEGACIÓN -->
+    <nav class="max-w-7xl mx-auto px-4 flex overflow-x-auto text-xs border-t border-slate-800 bg-slate-950/60">
+      <button onclick="showSection('registro')" id="btn-registro" class="tab-btn tab-active px-4 py-3 whitespace-nowrap">📝 1. Registrar Turno y Datos</button>
+      <button onclick="showSection('entrenamiento')" id="btn-entrenamiento" class="tab-btn px-4 py-3 whitespace-nowrap text-slate-300">⚡ 2. Entrenar Red y Ver Neuronas</button>
+      <button onclick="showSection('prediccion')" id="btn-prediccion" class="tab-btn px-4 py-3 whitespace-nowrap text-slate-300">🔮 3. Simulador Predictivo</button>
+      <button onclick="showSection('optimizador')" id="btn-optimizador" class="tab-btn px-4 py-3 whitespace-nowrap text-amber-400 font-semibold">🎯 4. Buscador del Ajuste Perfecto</button>
+    </nav>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 mt-6">
+
+    <!-- BARRA DE ESTADO RÁPIDO -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6 text-xs">
+      <div class="bg-slate-900 border border-slate-800 p-3 rounded-lg">
+        <span class="text-slate-400">Turnos en Memoria:</span>
+        <div id="stat-samples" class="text-xl font-bold text-sky-400 mt-0.5">0 registros</div>
+      </div>
+      <div class="bg-slate-900 border border-slate-800 p-3 rounded-lg">
+        <span class="text-slate-400">Arquitectura Red:</span>
+        <div id="stat-arch" class="text-xl font-bold text-indigo-400 mt-0.5">21 → 16 → 12</div>
+      </div>
+      <div class="bg-slate-900 border border-slate-800 p-3 rounded-lg">
+        <span class="text-slate-400">Error de Aprendizaje (MSE):</span>
+        <div id="stat-loss" class="text-xl font-bold text-emerald-400 mt-0.5">Sin entrenar</div>
+      </div>
+      <div class="bg-slate-900 border border-slate-800 p-3 rounded-lg flex flex-col justify-between">
+        <span class="text-slate-400">Prueba Rápida:</span>
+        <button onclick="generateExpertData(25)" class="mt-1 bg-amber-600/30 hover:bg-amber-600/50 border border-amber-500 text-amber-200 py-1 px-2 rounded font-semibold transition">
+          🧪 Generar 25 Turnos Basados en Física
+        </button>
+      </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- SECCIÓN 1: REGISTRO DE DATOS DE TURNO (ENTRADAS Y SALIDAS)        -->
+    <!-- ================================================================= -->
+    <section id="sec-registro" class="space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- COLUMNA ENTRADAS (X) - 21 PARÁMETROS -->
+        <div class="lg:col-span-7 bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg">
+          <div class="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
+            <div>
+              <h2 class="text-base font-bold text-sky-400">📥 ENTRADAS DE MÁQUINA Y QUÍMICOS (21 Neuronas X)</h2>
+              <p class="text-xs text-slate-400">Dosificaciones expresadas en L/h por kg de producción, presiones y ajuste mecánico</p>
+            </div>
+            <span class="text-xs bg-sky-950 text-sky-300 px-2 py-1 rounded border border-sky-700/50">Capa de Entrada</span>
+          </div>
+
+          <div class="space-y-4">
+            <!-- Subgrupo A: Máquina y Cabezal -->
+            <div>
+              <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">⚙️ A. Cabezal, Velocidad y Refino</h3>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5" id="form-inputs-a"></div>
+            </div>
+
+            <!-- Subgrupo B: Dosificación Química (L/h por kg) -->
+            <div>
+              <h3 class="text-xs font-bold uppercase tracking-wider text-indigo-400 mb-2">🧪 B. Dosificaciones Químicas (L/h por kg prod.) y Medio</h3>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5" id="form-inputs-b"></div>
+            </div>
+
+            <!-- Subgrupo C: Vapor, Prensas, Satinador y Depuradores -->
+            <div>
+              <h3 class="text-xs font-bold uppercase tracking-wider text-amber-400 mb-2">🔥 C. Cajas de Vapor, Presiones Sequería/Satinador y Depurador</h3>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5" id="form-inputs-c"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- COLUMNA SALIDAS (Y) - 12 PARÁMETROS -->
+        <div class="lg:col-span-5 bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
+              <div>
+                <h2 class="text-base font-bold text-emerald-400">📊 SALIDAS: LABORATORIO Y PROBLEMAS (12 Neuronas Y)</h2>
+                <p class="text-xs text-slate-400">Resultados de bobina y eventos registrados en el turno</p>
+              </div>
+              <span class="text-xs bg-emerald-950 text-emerald-300 px-2 py-1 rounded border border-emerald-700/50">Capa de Salida</span>
+            </div>
+
+            <div class="space-y-4">
+              <div>
+                <h3 class="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-2">🔬 A. Ensayos de Laboratorio y Circuito</h3>
+                <div class="grid grid-cols-2 sm:grid-cols-2 gap-2.5" id="form-outputs-a"></div>
+              </div>
+
+              <div>
+                <h3 class="text-xs font-bold uppercase tracking-wider text-rose-400 mb-2">🚨 B. Problemas Operativos Detectados (0 = No, 1 = Sí)</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5" id="form-outputs-b"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-6 pt-4 border-t border-slate-800 flex flex-col sm:flex-row gap-2">
+            <button onclick="saveCurrentSample()" class="flex-1 bg-sky-600 hover:bg-sky-500 text-white font-bold py-2.5 px-4 rounded-lg shadow transition text-sm">
+              ➕ Guardar este Turno en el Dataset
+            </button>
+            <button onclick="clearDataset()" class="bg-rose-950/60 hover:bg-rose-900 text-rose-300 border border-rose-700/50 py-2.5 px-3 rounded-lg text-xs transition">
+              🗑️ Vaciar
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- TABLA DE REGISTROS GUARDADOS -->
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg">
+        <h3 class="text-sm font-bold text-slate-200 mb-3">📋 Histórico de Turnos Cargados en Memoria</h3>
+        <div class="overflow-x-auto max-h-64">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="border-b border-slate-700 text-slate-400 bg-slate-950" id="table-header"></tr>
+            </thead>
+            <tbody id="table-body" class="divide-y divide-slate-800"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- SECCIÓN 2: ENTRENAMIENTO DE LA RED Y PESOS DE CADA NEURONA        -->
+    <!-- ================================================================= -->
+    <section id="sec-entrenamiento" class="hidden space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Panel de Control de Entrenamiento -->
+        <div class="lg:col-span-5 bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4">
+          <h2 class="text-base font-bold text-indigo-400">⚡ Configuración y Entrenamiento del Cerebro</h2>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            La red neuronal normaliza automáticamente tus datos entre 0 y 1 y ajusta los pesos sinápticos ($W_1, b_1, W_2, b_2$) mediante descenso de gradiente para descubrir las correlaciones ocultas entre químicos, vapor, refino y calidad.
+          </p>
+
+          <div class="grid grid-cols-3 gap-3 pt-2">
+            <div>
+              <label class="text-xs text-slate-400 block mb-1">Neuronas Ocultas</label>
+              <input type="number" id="cfg-hidden" value="16" min="4" max="64" onchange="rebuildNetwork()">
+            </div>
+            <div>
+              <label class="text-xs text-slate-400 block mb-1">Tasa Aprendizaje (LR)</label>
+              <input type="number" id="cfg-lr" value="0.08" step="0.01" min="0.001" max="1">
+            </div>
+            <div>
+              <label class="text-xs text-slate-400 block mb-1">Épocas por ciclo</label>
+              <input type="number" id="cfg-epochs" value="400" step="100" min="50" max="5000">
+            </div>
+          </div>
+
+          <div class="flex gap-2 pt-2">
+            <button onclick="trainNetwork()" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 px-4 rounded-lg transition text-sm">
+              🚀 Entrenar Red Neuronal Ahora
+            </button>
+            <button onclick="rebuildNetwork()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 py-2.5 px-3 rounded-lg text-xs border border-slate-700 transition">
+              🔄 Reiniciar Pesos
+            </button>
+          </div>
+
+          <!-- Curva de Aprendizaje -->
+          <div class="bg-slate-950 p-3 rounded-lg border border-slate-800">
+            <div class="flex justify-between text-xs text-slate-400 mb-1">
+              <span>Curva de Convergencia (Error MSE)</span>
+              <span id="loss-detail" class="text-emerald-400 font-mono">-</span>
+            </div>
+            <canvas id="lossCanvas" width="400" height="130" class="w-full bg-slate-950 rounded"></canvas>
+          </div>
+        </div>
+
+        <!-- Inspector y Editor Directo de Neuronas -->
+        <div class="lg:col-span-7 bg-slate-900 border border-slate-800 rounded-xl p-5 flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-center mb-3">
+              <div>
+                <h2 class="text-base font-bold text-sky-400">🔬 Inspector y Editor de Pesos por Neurona</h2>
+                <p class="text-xs text-slate-400">Puedes inspeccionar o ajustar manualmente el peso que cada neurona aplica a las variables.</p>
+              </div>
+              <select id="neuron-selector" onchange="renderNeuronInspector()" class="w-56 text-xs"></select>
+            </div>
+
+            <div id="neuron-weights-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-80 overflow-y-auto p-2 bg-slate-950 rounded-lg border border-slate-800"></div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-slate-800 flex justify-between items-center text-xs text-slate-400">
+            <span>Los cambios manuales en las cajas se guardan al instante en la red activa.</span>
+            <button onclick="exportWeightsTXT()" class="text-indigo-400 hover:underline font-semibold">Descargar este ajuste en .txt →</button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- SECCIÓN 3: SIMULADOR PREDICTIVO (QUÉ PASARÍA SI...)               -->
+    <!-- ================================================================= -->
+    <section id="sec-prediccion" class="hidden space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <div class="lg:col-span-7 bg-slate-900 border border-slate-800 rounded-xl p-5">
+          <div class="flex justify-between items-center mb-4">
+            <div>
+              <h2 class="text-base font-bold text-sky-400">🎛️ Consola de Simulación: Mueve los Mandos de Máquina</h2>
+              <p class="text-xs text-slate-400">Modifica cualquier dosificación, presión o velocidad para ver qué predice la red neuronal.</p>
+            </div>
+            <button onclick="runPrediction()" class="bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold px-3 py-2 rounded-lg">⚡ Recalcular</button>
+          </div>
+          <div id="sim-inputs-container" class="grid grid-cols-2 sm:grid-cols-3 gap-3"></div>
+        </div>
+
+        <div class="lg:col-span-5 bg-slate-900 border border-slate-800 rounded-xl p-5">
+          <h2 class="text-base font-bold text-emerald-400 mb-1">🔮 Predicción de Laboratorio y Riesgo de Fallos</h2>
+          <p class="text-xs text-slate-400 mb-4">Estimación calculada por las neuronas entrenadas:</p>
+          <div id="sim-outputs-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- SECCIÓN 4: BUSCADOR INVERSO DEL AJUSTE PERFECTO                   -->
+    <!-- ================================================================= -->
+    <section id="sec-optimizador" class="hidden space-y-6">
+      <div class="bg-gradient-to-r from-slate-900 via-amber-950/30 to-slate-900 border border-amber-500/40 rounded-xl p-5">
+        <h2 class="text-base font-bold text-amber-400">🎯 Optimizador Neuronal Inverso (Búsqueda de Receta Óptima)</h2>
+        <p class="text-xs text-slate-300 mt-1">
+          Fija la velocidad y producción que te pide fábrica, introduce los valores objetivo de laboratorio que deseas conseguir (ej. <b>Cobb bajo, Mullen alto y 0% problemas</b>) y el algoritmo rastreará a través de las neuronas la combinación óptima de químicos, refino y presiones de vapor.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Objetivos deseados -->
+        <div class="lg:col-span-5 bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4">
+          <h3 class="text-sm font-bold text-emerald-400 border-b border-slate-800 pb-2">1️⃣ Define tus Objetivos de Calidad (Target Y)</h3>
+          <div id="opt-targets-container" class="grid grid-cols-2 gap-2.5"></div>
+
+          <h3 class="text-sm font-bold text-sky-400 border-b border-slate-800 pb-2 pt-2">2️⃣ Fija Condiciones Impuestas de Máquina</h3>
+          <div class="grid grid-cols-2 gap-2.5 text-xs">
+            <div>
+              <label class="text-slate-400 block mb-1">Velocidad Fija (m/min)</label>
+              <input type="number" id="opt-fix-vel" value="850">
+            </div>
+            <div>
+              <label class="text-slate-400 block mb-1">Producción Fija (t/h)</label>
+              <input type="number" id="opt-fix-prod" value="28">
+            </div>
+          </div>
+
+          <button onclick="runReverseOptimizer()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold py-3 px-4 rounded-lg shadow-lg transition text-sm mt-3">
+            🔍 Buscar Ajuste Perfecto de Químicos y Presiones
+          </button>
+        </div>
+
+        <!-- Receta Recomendada -->
+        <div class="lg:col-span-7 bg-slate-900 border border-slate-800 rounded-xl p-5">
+          <h3 class="text-sm font-bold text-amber-400 border-b border-slate-800 pb-2 mb-3">🏆 Receta Óptima Calculada por la Red Neuronal</h3>
+          <div id="opt-results-container" class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
+            <p class="col-span-3 text-slate-400 italic py-8 text-center">Entrena primero la red en la Pestaña 2 y luego pulsa "Buscar Ajuste Perfecto" para ver las dosificaciones ideales.</p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // =========================================================================
+    // 1. DEFINICIÓN DE LAS 21 VARIABLES DE ENTRADA (X) Y 12 DE SALIDA (Y)
+    // =========================================================================
+    const INPUT_VARS = [
+      // Grupo A: Máquina y Cabezal
+      { id: 'velocidad', label: 'Velocidad (m/min)', group: 'a', min: 300, max: 1400, def: 850, step: 10 },
+      { id: 'produccion', label: 'Producción (t/h)', group: 'a', min: 5, max: 60, def: 28, step: 0.5 },
+      { id: 'flujo_caja', label: 'Flujo Caja (m³/h)', group: 'a', min: 800, max: 5000, def: 2400, step: 50 },
+      { id: 'apertura_labio', label: 'Apertura Labio (mm)', group: 'a', min: 6, max: 35, def: 14.5, step: 0.5 },
+      { id: 'traqueo', label: 'Traqueo / Shake (cpm)', group: 'a', min: 0, max: 400, def: 180, step: 10 },
+      { id: 'consistencia', label: 'Consistencia Cabeza (%)', group: 'a', min: 0.3, max: 1.5, def: 0.85, step: 0.05 },
+      { id: 'amp_refino', label: 'Amperaje Refino (A)', group: 'a', min: 50, max: 450, def: 210, step: 5 },
+
+      // Grupo B: Químicos (L/h por kg de producción) y Medio
+      { id: 'cato', label: 'Cato Almidón (L/h·kg)', group: 'b', min: 0, max: 25, def: 8.5, step: 0.5 },
+      { id: 'alumina', label: 'Alúmina (L/h·kg)', group: 'b', min: 0, max: 20, def: 6.0, step: 0.5 },
+      { id: 'asa', label: 'Cola ASA/AKD (L/h·kg)', group: 'b', min: 0, max: 10, def: 2.4, step: 0.1 },
+      { id: 'kymene', label: 'Kymene PAE (L/h·kg)', group: 'b', min: 0, max: 15, def: 4.5, step: 0.5 },
+      { id: 'fennobond', label: 'Fennobond (L/h·kg)', group: 'b', min: 0, max: 12, def: 3.0, step: 0.5 },
+      { id: 'talco', label: 'Talco Pasivador (L/h·kg)', group: 'b', min: 0, max: 15, def: 3.5, step: 0.5 },
+      { id: 'biocida', label: 'Biocida Choque (L/h·kg)', group: 'b', min: 0, max: 5, def: 1.2, step: 0.1 },
+      { id: 'ph_agua', label: 'pH Aguas Blancas', group: 'b', min: 5.5, max: 8.5, def: 7.1, step: 0.1 },
+
+      // Grupo C: Vapor, Presiones y Depuradores
+      { id: 'temp_agua', label: 'Temp. Aguas Blancas (°C)', group: 'c', min: 25, max: 60, def: 46, step: 1 },
+      { id: 'vapor_prensas', label: 'Caja Vapor Prensas (0/1)', group: 'c', min: 0, max: 1, def: 1, step: 1 },
+      { id: 'pres_preseq', label: 'Presión Pre-Sequería (bar)', group: 'c', min: 0.5, max: 5.0, def: 2.8, step: 0.1 },
+      { id: 'vapor_satin', label: 'Caja Vapor Satinador (0/1)', group: 'c', min: 0, max: 1, def: 1, step: 1 },
+      { id: 'pres_satin', label: 'Presión Satinador (kN/m)', group: 'c', min: 0, max: 300, def: 140, step: 5 },
+      { id: 'pres_postseq', label: 'Presión Post-Sequería (bar)', group: 'c', min: 0.5, max: 5.0, def: 3.2, step: 0.1 }
+    ];
+
+    const OUTPUT_VARS = [
+      // Grupo A: Laboratorio
+      { id: 'gramaje', label: 'Gramaje (g/m²)', group: 'a', min: 40, max: 250, def: 90, step: 1 },
+      { id: 'humedad', label: 'Humedad Final (%)', group: 'a', min: 3.0, max: 10.0, def: 6.2, step: 0.1 },
+      { id: 'refino_sr', label: 'Grado Refino (°SR)', group: 'a', min: 15, max: 60, def: 32, step: 1 },
+      { id: 'cobb', label: 'Test Cobb 60s (g/m²)', group: 'a', min: 15, max: 80, def: 24, step: 0.5 },
+      { id: 'demanda_ionica', label: 'Demanda Cat/Ani (µeq/L)', group: 'a', min: -500, max: 200, def: -45, step: 5 },
+      { id: 'mullen', label: 'Reventamiento Seco / Mullen (kPa)', group: 'a', min: 100, max: 600, def: 310, step: 5 },
+      { id: 'trac_humedo', label: 'Tracción Húmedo / Kymene (N/m)', group: 'a', min: 50, max: 500, def: 240, step: 5 },
+      { id: 'blancura', label: 'Blancura ISO (%)', group: 'a', min: 60, max: 98, def: 84, step: 0.5 },
+
+      // Grupo B: Problemas (0 = Sin problema, 1 = Problema presente)
+      { id: 'prob_rotura', label: 'Rotura de Hoja (0=No, 1=Sí)', group: 'b', min: 0, max: 1, def: 0, step: 1 },
+      { id: 'prob_slime', label: 'Mancha Slime / Agujero (0/1)', group: 'b', min: 0, max: 1, def: 0, step: 1 },
+      { id: 'prob_crushing', label: 'Reventón Prensa / Crushing (0/1)', group: 'b', min: 0, max: 1, def: 0, step: 1 },
+      { id: 'prob_depurador', label: 'Alerta ΔP / Amp. Depurador (0/1)', group: 'b', min: 0, max: 1, def: 0, step: 1 }
+    ];
+
+    // Estado Global
+    let dataset = [];
+    let nn = null;
+    let lossHistory = [];
+
+    // =========================================================================
+    // 2. ARQUITECTURA DE LA RED NEURONAL MULTICAPA (MLP)
+    // =========================================================================
+    function sigmoid(z) {
+      if (z < -15) return 0;
+      if (z > 15) return 1;
+      return 1 / (1 + Math.exp(-z));
+    }
+
+    function createNetwork(nIn, nHid, nOut) {
+      const rand = () => (Math.random() - 0.5) * 0.6;
+      return {
+        nIn, nHid, nOut,
+        W1: Array.from({ length: nHid }, () => Array.from({ length: nIn }, rand)),
+        b1: Array.from({ length: nHid }, rand),
+        W2: Array.from({ length: nOut }, () => Array.from({ length: nHid }, rand)),
+        b2: Array.from({ length: nOut }, rand)
+      };
+    }
+
+    function normalizeX(xArr) {
+      return xArr.map((val, i) => {
+        const v = INPUT_VARS[i];
+        return Math.max(0, Math.min(1, (val - v.min) / (v.max - v.min || 1)));
+      });
+    }
+
+    function normalizeY(yArr) {
+      return yArr.map((val, i) => {
+        const v = OUTPUT_VARS[i];
+        return Math.max(0, Math.min(1, (val - v.min) / (v.max - v.min || 1)));
+      });
+    }
+
+    function denormalizeY(yNormArr) {
+      return yNormArr.map((val, i) => {
+        const v = OUTPUT_VARS[i];
+        return v.min + val * (v.max - v.min);
+      });
+    }
+
+    function forwardPass(net, xNorm) {
+      const h = new Array(net.nHid);
+      for (let j = 0; j < net.nHid; j++) {
+        let sum = net.b1[j];
+        for (let i = 0; i < net.nIn; i++) sum += net.W1[j][i] * xNorm[i];
+        h[j] = sigmoid(sum);
+      }
+      const out = new Array(net.nOut);
+      for (let k = 0; k < net.nOut; k++) {
+        let sum = net.b2[k];
+        for (let j = 0; j < net.nHid; j++) sum += net.W2[k][j] * h[j];
+        out[k] = sigmoid(sum);
+      }
+      return { h, out };
+    }
+
+    // Entrenamiento Backpropagation
+    function trainNetwork() {
+      if (dataset.length === 0) {
+        alert("Primero añade turnos o pulsa 'Generar 25 Turnos Basados en Física' para tener datos con los que entrenar.");
+        return;
+      }
+      const lr = parseFloat(document.getElementById('cfg-lr').value) || 0.08;
+      const epochs = parseInt(document.getElementById('cfg-epochs').value) || 400;
+
+      const normData = dataset.map(d => ({
+        x: normalizeX(d.x),
+        y: normalizeY(d.y)
+      }));
+
+      for (let ep = 0; ep < epochs; ep++) {
+        let totalMSE = 0;
+        for (let s = 0; s < normData.length; s++) {
+          const { x, y } = normData[s];
+          const { h, out } = forwardPass(nn, x);
+
+          // Gradientes de capa de salida
+          const dOut = new Array(nn.nOut);
+          for (let k = 0; k < nn.nOut; k++) {
+            const err = out[k] - y[k];
+            totalMSE += err * err;
+            dOut[k] = err * out[k] * (1 - out[k]);
+          }
+
+          // Gradientes de capa oculta
+          const dHid = new Array(nn.nHid);
+          for (let j = 0; j < nn.nHid; j++) {
+            let sum = 0;
+            for (let k = 0; k < nn.nOut; k++) sum += nn.W2[k][j] * dOut[k];
+            dHid[j] = sum * h[j] * (1 - h[j]);
+          }
+
+          // Actualizar W2 y b2
+          for (let k = 0; k < nn.nOut; k++) {
+            nn.b2[k] -= lr * dOut[k];
+            for (let j = 0; j < nn.nHid; j++) {
+              nn.W2[k][j] -= lr * dOut[k] * h[j];
+            }
+          }
+
+          // Actualizar W1 y b1
+          for (let j = 0; j < nn.nHid; j++) {
+            nn.b1[j] -= lr * dHid[j];
+            for (let i = 0; i < nn.nIn; i++) {
+              nn.W1[j][i] -= lr * dHid[j] * x[i];
+            }
+          }
+        }
+        const mse = totalMSE / (normData.length * nn.nOut);
+        lossHistory.push(mse);
+      }
+
+      const lastLoss = lossHistory[lossHistory.length - 1];
+      document.getElementById('stat-loss').innerText = lastLoss.toFixed(5);
+      document.getElementById('loss-detail').innerText = `MSE actual: ${lastLoss.toFixed(6)}`;
+      drawLossChart();
+      renderNeuronInspector();
+      runPrediction();
+    }
+
+    // =========================================================================
+    // 3. GENERADOR DE TURNOS BASADOS EN LAS LEYES FÍSICAS Y QUÍMICAS DE LA CHARLA
+    // =========================================================================
+    function generateExpertData(count) {
+      for (let n = 0; n < count; n++) {
+        const x = INPUT_VARS.map(v => {
+          if (v.step === 1 && v.max === 1) return Math.random() > 0.25 ? 1 : 0;
+          const val = v.min + Math.random() * (v.max - v.min);
+          return Number(val.toFixed(2));
+        });
+
+        const getX = (id) => x[INPUT_VARS.findIndex(v => v.id === id)];
+
+        // Relaciones físico-químicas reales que aprendimos juntos:
+        const vel = getX('velocidad');
+        const prod = getX('produccion');
+        const consist = getX('consistencia');
+        const ampRef = getX('amp_refino');
+        const cato = getX('cato');
+        const alumina = getX('alumina');
+        const asa = getX('asa');
+        const kymene = getX('kymene');
+        const fennobond = getX('fennobond');
+        const talco = getX('talco');
+        const biocida = getX('biocida');
+        const temp = getX('temp_agua');
+        const vapPrensas = getX('vapor_prensas');
+        const presPre = getX('pres_preseq');
+        const presPost = getX('pres_postseq');
+
+        // 1. Gramaje y Humedad
+        const gramaje = Math.min(250, Math.max(40, (prod * 4000) / (vel * 1.4) + consist * 15));
+        const humedad = Math.min(10, Math.max(3, 8.8 - presPre * 0.55 - presPost * 0.6 - vapPrensas * 0.4 + (vel - 700) * 0.002));
+        const refinoSR = Math.min(60, Math.max(15, 14 + ampRef * 0.095));
+
+        // 2. Demanda Iónica (Alúmina y Cato limpian basura aniónica)
+        const demanda = Math.min(200, Math.max(-500, -280 + alumina * 18 + cato * 7 + kymene * 8));
+
+        // 3. Cobb (Depende de ASA, pero si falta Alúmina la basura aniónica inactiva el ASA)
+        const eficaciaAlumina = Math.min(1.2, alumina / 5.0);
+        const cobb = Math.min(80, Math.max(16, 65 - (asa * 7.5 * eficaciaAlumina) - presPost * 1.5));
+
+        // 4. Mullen (Cato + Refino + Sistema Dual Kymene->Fennobond)
+        // Si no hay Kymene suficiente, el Fennobond se repele con la fibra
+        const factorKymeneParaFenno = Math.min(1, kymene / 3.5);
+        const mullen = Math.min(600, Math.max(100, 110 + cato * 11 + (fennobond * 16 * factorKymeneParaFenno) + refinoSR * 2.2));
+
+        // 5. Tracción Húmedo (Kymene necesita calor de vapor en pre y post sequería para curar)
+        const factorCuradoVapor = Math.min(1.2, (presPre + presPost) / 4.8);
+        const tracHumedo = Math.min(500, Math.max(50, 55 + kymene * 28 * factorCuradoVapor));
+
+        // 6. Blancura
+        const blancura = Math.min(98, Math.max(60, 82 + talco * 0.4 - temp * 0.05));
+
+        // 7. Problemas Operativos
+        // Slime: mucho Cato (azúcar) + poco biocida + agua caliente
+        const probSlime = (cato > 12 && biocida < 1.2 && temp > 42) ? 1 : 0;
+        // Crushing en prensas: poco talco pasivador + alta velocidad
+        const probCrushing = (talco < 2.2 && vel > 800) ? 1 : 0;
+        // Alerta Depurador Vertical: alta consistencia + sobredosificación de alúmina/cato (viscosidad)
+        const probDepurador = (consist > 1.15 || (alumina + cato > 32)) ? 1 : 0;
+        // Rotura de hoja: si hay slime, crushing o Mullen muy bajo
+        const probRotura = (probSlime || probCrushing || mullen < 210) ? 1 : 0;
+
+        const y = [
+          Number(gramaje.toFixed(1)),
+          Number(humedad.toFixed(2)),
+          Number(refinoSR.toFixed(1)),
+          Number(cobb.toFixed(1)),
+          Number(demanda.toFixed(0)),
+          Number(mullen.toFixed(0)),
+          Number(tracHumedo.toFixed(0)),
+          Number(blancura.toFixed(1)),
+          probRotura,
+          probSlime,
+          probCrushing,
+          probDepurador
+        ];
+
+        dataset.push({ x, y });
+      }
+      updateDatasetUI();
+    }
+
+    // =========================================================================
+    // 4. OPTIMIZADOR INVERSO (BÚSQUEDA DE RECETA PERFECTA)
+    // =========================================================================
+    function runReverseOptimizer() {
+      const targetY = OUTPUT_VARS.map(v => parseFloat(document.getElementById('opt-t-' + v.id).value) || v.def);
+      const targetYNorm = normalizeY(targetY);
+
+      const fixVel = parseFloat(document.getElementById('opt-fix-vel').value) || 850;
+      const fixProd = parseFloat(document.getElementById('opt-fix-prod').value) || 28;
+
+      const idxVel = INPUT_VARS.findIndex(v => v.id === 'velocidad');
+      const idxProd = INPUT_VARS.findIndex(v => v.id === 'produccion');
+
+      let bestXNorm = INPUT_VARS.map(v => 0.5);
+      bestXNorm[idxVel] = (fixVel - INPUT_VARS[idxVel].min) / (INPUT_VARS[idxVel].max - INPUT_VARS[idxVel].min);
+      bestXNorm[idxProd] = (fixProd - INPUT_VARS[idxProd].min) / (INPUT_VARS[idxProd].max - INPUT_VARS[idxProd].min);
+
+      // Optimización por descenso de gradiente sobre las entradas X
+      const stepSize = 0.04;
+      for (let iter = 0; iter < 600; iter++) {
+        const { out } = forwardPass(nn, bestXNorm);
+        const gradX = new Array(nn.nIn).fill(0);
+
+        for (let i = 0; i < nn.nIn; i++) {
+          if (i === idxVel || i === idxProd) continue; // Mantener fijos velocidad y producción
+          const eps = 0.005;
+          const xPlus = [...bestXNorm];
+          xPlus[i] = Math.min(1, xPlus[i] + eps);
+          const outPlus = forwardPass(nn, xPlus).out;
+
+          let lossNow = 0, lossPlus = 0;
+          for (let k = 0; k < nn.nOut; k++) {
+            // Mayor peso a evitar problemas y clavar Cobb/Mullen/Húmedo
+            const weight = k >= 8 ? 2.5 : 1.0;
+            lossNow += weight * Math.pow(out[k] - targetYNorm[k], 2);
+            lossPlus += weight * Math.pow(outPlus[k] - targetYNorm[k], 2);
+          }
+          gradX[i] = (lossPlus - lossNow) / eps;
+        }
+
+        for (let i = 0; i < nn.nIn; i++) {
+          if (i === idxVel || i === idxProd) continue;
+          bestXNorm[i] = Math.max(0, Math.min(1, bestXNorm[i] - stepSize * gradX[i]));
+        }
+      }
+
+      // Mostrar receta encontrada
+      const container = document.getElementById('opt-results-container');
+      container.innerHTML = '';
+      INPUT_VARS.forEach((v, i) => {
+        let realVal = v.min + bestXNorm[i] * (v.max - v.min);
+        if (v.step === 1 && v.max === 1) realVal = realVal >= 0.5 ? 1 : 0;
+        const badgeColor = v.group === 'b' ? 'border-indigo-500/50 bg-indigo-950/30' : (v.group === 'c' ? 'border-amber-500/50 bg-amber-950/30' : 'border-slate-700 bg-slate-950');
+        container.innerHTML += `
+          <div class="p-3 rounded-lg border ${badgeColor}">
+            <div class="text-slate-400 text-[11px]">${v.label}</div>
+            <div class="text-base font-extrabold text-white mt-0.5">${realVal.toFixed(v.step < 1 ? 2 : 0)}</div>
+          </div>
+        `;
+      });
+    }
+
+    // =========================================================================
+    // 5. EXPORTACIÓN E IMPORTACIÓN EN .TXT (DATOS Y PESOS DE NEURONAS)
+    // =========================================================================
+    function downloadTXT(filename, textContent) {
+      const blob = new Blob([textContent], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function exportDataTXT() {
+      const payload = {
+        tipo: "NEUROPAPER_DATASET_TXT",
+        fecha: new Date().toISOString(),
+        columnas_entrada: INPUT_VARS.map(v => v.id),
+        columnas_salida: OUTPUT_VARS.map(v => v.id),
+        turnos: dataset
+      };
+      downloadTXT("datos_turnos_papel.txt", JSON.stringify(payload, null, 2));
+    }
+
+    function importDataTXT(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const obj = JSON.parse(e.target.result);
+          if (Array.isArray(obj.turnos)) {
+            dataset = obj.turnos;
+            updateDatasetUI();
+            alert(`Se han cargado correctamente ${dataset.length} turnos desde el archivo .txt`);
+          } else {
+            alert("El archivo .txt no tiene el formato de turnos esperado.");
+          }
+        } catch (err) {
+          alert("Error al leer el archivo .txt: " + err.message);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function exportWeightsTXT() {
+      const payload = {
+        tipo: "NEUROPAPER_NEURON_WEIGHTS_TXT",
+        fecha: new Date().toISOString(),
+        arquitectura: { nIn: nn.nIn, nHid: nn.nHid, nOut: nn.nOut },
+        pesos: nn,
+        historial_error: lossHistory
+      };
+      downloadTXT("ajuste_neuronas_papel.txt", JSON.stringify(payload, null, 2));
+    }
+
+    function importWeightsTXT(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const obj = JSON.parse(e.target.result);
+          if (obj.pesos && obj.pesos.W1 && obj.pesos.W2) {
+            nn = obj.pesos;
+            lossHistory = obj.historial_error || [];
+            document.getElementById('cfg-hidden').value = nn.nHid;
+            document.getElementById('stat-arch').innerText = `${nn.nIn} → ${nn.nHid} → ${nn.nOut}`;
+            populateNeuronSelector();
+            renderNeuronInspector();
+            drawLossChart();
+            runPrediction();
+            alert("Ajustes de neuronas cargados correctamente en el cerebro.");
+          }
+        } catch (err) {
+          alert("Error al leer el archivo de neuronas .txt: " + err.message);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    // =========================================================================
+    // 6. INTERFAZ GRÁFICA, INSPECTOR DE NEURONAS Y GRÁFICOS
+    // =========================================================================
+    function initForms() {
+      INPUT_VARS.forEach(v => {
+        const target = document.getElementById('form-inputs-' + v.group);
+        target.innerHTML += `
+          <div>
+            <label class="text-[11px] text-slate-300 block mb-0.5 truncate" title="${v.label}">${v.label}</label>
+            <input type="number" id="in-${v.id}" value="${v.def}" step="${v.step}">
+          </div>
+        `;
+      });
+
+      OUTPUT_VARS.forEach(v => {
+        const target = document.getElementById('form-outputs-' + v.group);
+        target.innerHTML += `
+          <div>
+            <label class="text-[11px] text-slate-300 block mb-0.5 truncate" title="${v.label}">${v.label}</label>
+            <input type="number" id="out-${v.id}" value="${v.def}" step="${v.step}">
+          </div>
+        `;
+      });
+
+      // Controles de Simulación Predictiva
+      const simIn = document.getElementById('sim-inputs-container');
+      INPUT_VARS.forEach(v => {
+        simIn.innerHTML += `
+          <div class="bg-slate-950 p-2.5 rounded border border-slate-800">
+            <label class="text-[11px] text-slate-400 block mb-1">${v.label}</label>
+            <input type="number" id="sim-in-${v.id}" value="${v.def}" step="${v.step}" oninput="runPrediction()">
+          </div>
+        `;
+      });
+
+      // Controles de Objetivos del Optimizador
+      const optTargets = document.getElementById('opt-targets-container');
+      OUTPUT_VARS.forEach(v => {
+        optTargets.innerHTML += `
+          <div>
+            <label class="text-[11px] text-slate-300 block mb-0.5 truncate">${v.label}</label>
+            <input type="number" id="opt-t-${v.id}" value="${v.def}" step="${v.step}">
+          </div>
+        `;
+      });
+
+      // Cabecera de tabla
+      const th = document.getElementById('table-header');
+      th.innerHTML = `<th class="p-2">#</th>` +
+        INPUT_VARS.slice(0, 6).map(v => `<th class="p-2">${v.id}</th>`).join('') +
+        OUTPUT_VARS.slice(0, 6).map(v => `<th class="p-2 text-emerald-400">${v.id}</th>`).join('') +
+        `<th class="p-2">Acción</th>`;
+    }
+
+    function saveCurrentSample() {
+      const x = INPUT_VARS.map(v => parseFloat(document.getElementById('in-' + v.id).value) || 0);
+      const y = OUTPUT_VARS.map(v => parseFloat(document.getElementById('out-' + v.id).value) || 0);
+      dataset.push({ x, y });
+      updateDatasetUI();
+    }
+
+    function clearDataset() {
+      dataset = [];
+      updateDatasetUI();
+    }
+
+    function removeSample(idx) {
+      dataset.splice(idx, 1);
+      updateDatasetUI();
+    }
+
+    function updateDatasetUI() {
+      document.getElementById('stat-samples').innerText = `${dataset.length} registros`;
+      const tbody = document.getElementById('table-body');
+      if (dataset.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="14" class="p-4 text-center text-slate-500 italic">No hay turnos guardados. Registra uno arriba o pulsa "Generar 25 Turnos Basados en Física".</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = dataset.map((d, idx) => `
+        <tr class="hover:bg-slate-800/50">
+          <td class="p-2 font-bold text-sky-400">${idx + 1}</td>
+          ${d.x.slice(0, 6).map(val => `<td class="p-2">${val}</td>`).join('')}
+          ${d.y.slice(0, 6).map(val => `<td class="p-2 text-emerald-300 font-semibold">${val}</td>`).join('')}
+          <td class="p-2"><button onclick="removeSample(${idx})" class="text-rose-400 hover:underline">Borrar</button></td>
+        </tr>
+      `).join('');
+    }
+
+    function rebuildNetwork() {
+      const nHid = parseInt(document.getElementById('cfg-hidden').value) || 16;
+      nn = createNetwork(INPUT_VARS.length, nHid, OUTPUT_VARS.length);
+      lossHistory = [];
+      document.getElementById('stat-arch').innerText = `${nn.nIn} → ${nn.nHid} → ${nn.nOut}`;
+      document.getElementById('stat-loss').innerText = 'Sin entrenar';
+      populateNeuronSelector();
+      renderNeuronInspector();
+      drawLossChart();
+    }
+
+    function populateNeuronSelector() {
+      const sel = document.getElementById('neuron-selector');
+      sel.innerHTML = '';
+      for (let j = 0; j < nn.nHid; j++) {
+        sel.innerHTML += `<option value="H-${j}">Neurona Oculta #${j + 1} (Recibe 21 Entradas)</option>`;
+      }
+      for (let k = 0; k < nn.nOut; k++) {
+        sel.innerHTML += `<option value="O-${k}">Neurona Salida: ${OUTPUT_VARS[k].label}</option>`;
+      }
+    }
+
+    function renderNeuronInspector() {
+      const val = document.getElementById('neuron-selector').value;
+      if (!val) return;
+      const [type, idxStr] = val.split('-');
+      const idx = parseInt(idxStr);
+      const grid = document.getElementById('neuron-weights-grid');
+
+      if (type === 'H') {
+        let html = `
+          <div class="col-span-full bg-indigo-950/40 p-2 rounded border border-indigo-700/40 flex justify-between items-center text-xs">
+            <span class="font-bold text-indigo-300">Sesgo (Bias b1) de Neurona Oculta #${idx + 1}</span>
+            <input type="number" step="0.05" value="${nn.b1[idx].toFixed(4)}" class="w-28" onchange="nn.b1[${idx}] = parseFloat(this.value)">
+          </div>
+        `;
+        INPUT_VARS.forEach((v, i) => {
+          html += `
+            <div class="bg-slate-900 p-2 rounded border border-slate-800 text-xs">
+              <div class="text-slate-400 truncate">${v.label}</div>
+              <input type="number" step="0.05" value="${nn.W1[idx][i].toFixed(4)}" class="mt-1" onchange="nn.W1[${idx}][${i}] = parseFloat(this.value)">
+            </div>
+          `;
+        });
+        grid.innerHTML = html;
+      } else {
+        let html = `
+          <div class="col-span-full bg-emerald-950/40 p-2 rounded border border-emerald-700/40 flex justify-between items-center text-xs">
+            <span class="font-bold text-emerald-300">Sesgo (Bias b2) de ${OUTPUT_VARS[idx].label}</span>
+            <input type="number" step="0.05" value="${nn.b2[idx].toFixed(4)}" class="w-28" onchange="nn.b2[${idx}] = parseFloat(this.value)">
+          </div>
+        `;
+        for (let j = 0; j < nn.nHid; j++) {
+          html += `
+            <div class="bg-slate-900 p-2 rounded border border-slate-800 text-xs">
+              <div class="text-slate-400">Peso desde Oculta #${j + 1}</div>
+              <input type="number" step="0.05" value="${nn.W2[idx][j].toFixed(4)}" class="mt-1" onchange="nn.W2[${idx}][${j}] = parseFloat(this.value)">
+            </div>
+          `;
+        }
+        grid.innerHTML = html;
+      }
+    }
+
+    function runPrediction() {
+      if (!nn) return;
+      const xRaw = INPUT_VARS.map(v => parseFloat(document.getElementById('sim-in-' + v.id).value) || 0);
+      const { out } = forwardPass(nn, normalizeX(xRaw));
+      const yPred = denormalizeY(out);
+
+      const container = document.getElementById('sim-outputs-container');
+      container.innerHTML = OUTPUT_VARS.map((v, k) => {
+        const isProb = v.group === 'b';
+        const val = yPred[k];
+        if (isProb) {
+          const pct = Math.round(out[k] * 100);
+          const color = pct > 50 ? 'border-rose-500 bg-rose-950/40 text-rose-300' : 'border-slate-800 bg-slate-950 text-emerald-400';
+          return `
+            <div class="p-3 rounded-lg border ${color}">
+              <div class="text-xs text-slate-400">${v.label}</div>
+              <div class="text-lg font-extrabold mt-0.5">${pct}% Riesgo</div>
+            </div>
+          `;
+        } else {
+          return `
+            <div class="p-3 rounded-lg border border-slate-800 bg-slate-950">
+              <div class="text-xs text-slate-400">${v.label}</div>
+              <div class="text-lg font-extrabold text-sky-400 mt-0.5">${val.toFixed(1)}</div>
+            </div>
+          `;
+        }
+      }).join('');
+    }
+
+    function drawLossChart() {
+      const canvas = document.getElementById('lossCanvas');
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (lossHistory.length < 2) return;
+
+      const maxLoss = Math.max(...lossHistory, 0.01);
+      const minLoss = Math.min(...lossHistory, 0);
+
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      lossHistory.forEach((l, i) => {
+        const x = (i / (lossHistory.length - 1)) * (canvas.width - 20) + 10;
+        const y = canvas.height - 15 - ((l - minLoss) / (maxLoss - minLoss || 1)) * (canvas.height - 30);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+    }
+
+    function showSection(sec) {
+      ['registro', 'entrenamiento', 'prediccion', 'optimizador'].forEach(s => {
+        document.getElementById('sec-' + s).classList.add('hidden');
+        document.getElementById('btn-' + s).classList.remove('tab-active');
+      });
+      document.getElementById('sec-' + sec).classList.remove('hidden');
+      document.getElementById('btn-' + sec).classList.add('tab-active');
+      if (sec === 'prediccion') runPrediction();
+    }
+
+    // Inicializar al abrir
+    window.onload = () => {
+      initForms();
+      rebuildNetwork();
+      updateDatasetUI();
+    };
+  </script>
+</body>
+</html>
