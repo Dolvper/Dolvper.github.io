@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>¡Aprende Jugando! - Colores y Temas</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      font-family: 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #e0f7fa 0%, #fff9c4 50%, #f8bbd0 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden;
+    }
+
+    /* Barra superior */
+    .top-bar {
+      width: 100%;
+      max-width: 900px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 15px;
+      gap: 8px;
+    }
+
+    .score-box {
+      background: #ffffff;
+      border: 4px solid #ffb300;
+      border-radius: 25px;
+      padding: 6px 16px;
+      font-size: 1.3rem;
+      font-weight: 900;
+      color: #ff6f00;
+      box-shadow: 0 4px 0 #ffb300;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .controls {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn-ctrl {
+      background: #ffffff;
+      border: 3px solid #4fc3f7;
+      border-radius: 20px;
+      padding: 8px 14px;
+      font-size: 1rem;
+      font-weight: 900;
+      color: #0277bd;
+      cursor: pointer;
+      box-shadow: 0 4px 0 #0288d1;
+      transition: transform 0.1s;
+    }
+
+    .btn-ctrl:active {
+      transform: translateY(4px);
+      box-shadow: 0 0 0 #0288d1;
+    }
+
+    .btn-ctrl.active {
+      background: #29b6f6;
+      color: #fff;
+      border-color: #0277bd;
+    }
+
+    /* Selector de Temas */
+    .theme-bar {
+      width: 100%;
+      max-width: 900px;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 5px 12px;
+    }
+
+    .theme-btn {
+      background: #fff;
+      border: 3px solid #ce93d8;
+      border-radius: 18px;
+      padding: 8px 14px;
+      font-size: 1rem;
+      font-weight: 900;
+      color: #6a1b9a;
+      cursor: pointer;
+      box-shadow: 0 4px 0 #ab47bc;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s;
+    }
+
+    .theme-btn.active {
+      background: #ab47bc;
+      color: #fff;
+      border-color: #6a1b9a;
+      transform: scale(1.05);
+    }
+
+    /* Zona de la palabra gigante */
+    .word-container {
+      margin: 12px auto;
+      background: rgba(255, 255, 255, 0.92);
+      border: 6px solid #fff;
+      border-radius: 35px;
+      padding: 15px 30px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      min-width: 300px;
+      max-width: 92%;
+      cursor: pointer;
+    }
+
+    .target-word {
+      font-size: clamp(3.2rem, 10vw, 5.5rem);
+      font-weight: 900;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      margin: 0;
+      line-height: 1.05;
+      /* Borde grueso para que colores claros como YELLOW o WHITE se lean siempre */
+      -webkit-text-stroke: 3.5px #222;
+      text-shadow: 
+        3px 3px 0 #222,
+        -2px -2px 0 #222,
+        2px -2px 0 #222,
+        -2px 2px 0 #222,
+        0 6px 0 rgba(0,0,0,0.25);
+      transition: transform 0.2s;
+    }
+
+    .word-container:active .target-word {
+      transform: scale(0.95);
+    }
+
+    .speak-btn {
+      background: #ff4081;
+      color: white;
+      border: 3px solid #c51162;
+      border-radius: 50px;
+      padding: 8px 22px;
+      font-size: 1.2rem;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 5px 0 #c51162;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .speak-btn:active {
+      transform: translateY(4px);
+      box-shadow: 0 1px 0 #c51162;
+    }
+
+    /* Cuadrícula de 4 opciones */
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 18px;
+      width: 100%;
+      max-width: 680px;
+      padding: 12px 20px 25px;
+      flex: 1;
+    }
+
+    .option-card {
+      background: #ffffff;
+      border: 6px solid #333;
+      border-radius: 32px;
+      min-height: 155px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      position: relative;
+      box-shadow: 0 10px 0 rgba(0,0,0,0.2);
+      transition: transform 0.15s, filter 0.15s;
+      padding: 12px;
+      overflow: hidden;
+    }
+
+    .option-card:hover {
+      transform: translateY(-3px);
+    }
+
+    .option-card:active {
+      transform: translateY(6px);
+      box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+    }
+
+    /* Ojos de monstruo para el modo colores */
+    .monster-eyes {
+      display: flex;
+      gap: 14px;
+      margin-bottom: 8px;
+      pointer-events: none;
+    }
+
+    .eye {
+      width: 38px;
+      height: 38px;
+      background: #fff;
+      border: 4px solid #222;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    .pupil {
+      width: 16px;
+      height: 16px;
+      background: #111;
+      border-radius: 50%;
+      animation: lookAround 3s infinite alternate ease-in-out;
+    }
+
+    .monster-mouth {
+      width: 44px;
+      height: 20px;
+      background: #222;
+      border-radius: 0 0 25px 25px;
+      position: relative;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .monster-mouth::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 10px;
+      width: 24px;
+      height: 14px;
+      background: #ff5252;
+      border-radius: 50%;
+    }
+
+    @keyframes lookAround {
+      0% { transform: translate(-4px, -2px); }
+      100% { transform: translate(4px, 2px); }
+    }
+
+    /* Iconos grandes para animales, formas, frutas, emociones */
+    .big-emoji {
+      font-size: clamp(3.4rem, 9vw, 4.8rem);
+      line-height: 1;
+      filter: drop-shadow(0 4px 4px rgba(0,0,0,0.25));
+      pointer-events: none;
+    }
+
+    /* Contenedor de objetos para contar en el tema Números */
+    .count-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+      max-width: 180px;
+      pointer-events: none;
+    }
+
+    .count-item {
+      font-size: 1.9rem;
+      line-height: 1;
+      filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2));
+    }
+
+    .number-badge {
+      position: absolute;
+      top: 8px;
+      right: 12px;
+      background: rgba(255,255,255,0.9);
+      border: 3px solid #222;
+      border-radius: 50%;
+      width: 38px;
+      height: 38px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 1.3rem;
+      font-weight: 900;
+      color: #222;
+    }
+
+    /* Animaciones de acierto y fallo */
+    .correct-anim {
+      animation: bounceWin 0.6s ease;
+    }
+
+    .wrong-anim {
+      animation: shakeWrong 0.45s ease;
+      opacity: 0.45;
+    }
+
+    @keyframes bounceWin {
+      0%, 100% { transform: scale(1); }
+      40% { transform: scale(1.18) rotate(4deg); }
+      70% { transform: scale(0.95) rotate(-4deg); }
+    }
+
+    @keyframes shakeWrong {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-12px); }
+      50% { transform: translateX(12px); }
+      75% { transform: translateX(-8px); }
+    }
+
+    /* Confeti */
+    .confetti {
+      position: fixed;
+      width: 14px;
+      height: 14px;
+      top: -20px;
+      border-radius: 4px;
+      z-index: 999;
+      pointer-events: none;
+      animation: fallDown 1.6s linear forwards;
+    }
+
+    @keyframes fallDown {
+      to {
+        transform: translateY(105vh) rotate(540deg);
+        opacity: 0;
+      }
+    }
+
+    /* Álbum de pegatinas inferior */
+    .stickers-bar {
+      width: 100%;
+      max-width: 680px;
+      background: rgba(255,255,255,0.85);
+      border: 4px dashed #ffb300;
+      border-radius: 22px;
+      padding: 8px 15px;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      min-height: 52px;
+    }
+
+    .sticker-title {
+      font-weight: 900;
+      color: #f57c00;
+      font-size: 1rem;
+    }
+
+    .sticker-item {
+      font-size: 1.8rem;
+      animation: popIn 0.4s ease;
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0); }
+      80% { transform: scale(1.3); }
+      100% { transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Barra Superior -->
+  <div class="top-bar">
+    <div class="score-box">
+      <span>⭐ <span id="scoreVal">0</span></span>
+      <span>🔥 <span id="streakVal">0</span></span>
+    </div>
+
+    <div class="controls">
+      <button class="btn-ctrl active" id="btnLangEN" onclick="setLanguage('en')">🇬🇧 ENGLISH</button>
+      <button class="btn-ctrl" id="btnLangES" onclick="setLanguage('es')">🇪🇸 ESPAÑOL</button>
+      <button class="btn-ctrl" id="btnMode" onclick="toggleHintMode()">💡 PISTA: SÍ</button>
+    </div>
+  </div>
+
+  <!-- Selector de 6 Temas para niños de 4 años -->
+  <div class="theme-bar">
+    <button class="theme-btn active" onclick="setTheme('colors', this)">🎨 COLORES</button>
+    <button class="theme-btn" onclick="setTheme('animals', this)">🐶 ANIMALES</button>
+    <button class="theme-btn" onclick="setTheme('numbers', this)">1️⃣ NÚMEROS</button>
+    <button class="theme-btn" onclick="setTheme('shapes', this)">⭐ FORMAS</button>
+    <button class="theme-btn" onclick="setTheme('fruits', this)">🍎 FRUTAS</button>
+    <button class="theme-btn" onclick="setTheme('emotions', this)">😊 EMOCIONES</button>
+  </div>
+
+  <!-- Palabra Gigante en MAYÚSCULAS y de su color -->
+  <div class="word-container" onclick="speakCurrentTarget()">
+    <h1 class="target-word" id="targetWord">PINK</h1>
+    <button class="speak-btn" type="button">
+      🔊 ESCUCHAR VOZ
+    </button>
+  </div>
+
+  <!-- 4 Opciones -->
+  <div class="options-grid" id="optionsGrid"></div>
+
+  <!-- Barra de Premios / Pegatinas -->
+  <div class="stickers-bar" id="stickersBar">
+    <span class="sticker-title">🏆 PREMIOS (cada 3 ⭐):</span>
+  </div>
+
+  <script>
+    // Base de datos de los 6 temas (siempre con textos en MAYÚSCULAS y su color asociado)
+    const THEMES = {
+      colors: [
+        { id: 'pink', en: 'PINK', es: 'ROSA', hex: '#ff66b2', voiceEn: 'Pink!', voiceEs: '¡Rosa!' },
+        { id: 'red', en: 'RED', es: 'ROJO', hex: '#ff2a2a', voiceEn: 'Red!', voiceEs: '¡Rojo!' },
+        { id: 'blue', en: 'BLUE', es: 'AZUL', hex: '#2979ff', voiceEn: 'Blue!', voiceEs: '¡Azul!' },
+        { id: 'green', en: 'GREEN', es: 'VERDE', hex: '#00c853', voiceEn: 'Green!', voiceEs: '¡Verde!' },
+        { id: 'yellow', en: 'YELLOW', es: 'AMARILLO', hex: '#ffd600', voiceEn: 'Yellow!', voiceEs: '¡Amarillo!' },
+        { id: 'orange', en: 'ORANGE', es: 'NARANJA', hex: '#ff6d00', voiceEn: 'Orange!', voiceEs: '¡Naranja!' },
+        { id: 'purple', en: 'PURPLE', es: 'MORADO', hex: '#aa00ff', voiceEn: 'Purple!', voiceEs: '¡Morado!' },
+        { id: 'brown', en: 'BROWN', es: 'MARRÓN', hex: '#8d5524', voiceEn: 'Brown!', voiceEs: '¡Marrón!' },
+        { id: 'black', en: 'BLACK', es: 'NEGRO', hex: '#2c2c2c', voiceEn: 'Black!', voiceEs: '¡Negro!' },
+        { id: 'white', en: 'WHITE', es: 'BLANCO', hex: '#ffffff', voiceEn: 'White!', voiceEs: '¡Blanco!' }
+      ],
+      animals: [
+        { id: 'dog', en: 'DOG', es: 'PERRO', hex: '#c68642', emoji: '🐶', voiceEn: 'Dog! Woof woof!', voiceEs: '¡Perro! ¡Guau guau!' },
+        { id: 'cat', en: 'CAT', es: 'GATO', hex: '#ff9800', emoji: '🐱', voiceEn: 'Cat! Meow!', voiceEs: '¡Gato! ¡Miau!' },
+        { id: 'cow', en: 'COW', es: 'VACA', hex: '#424242', emoji: '🐮', voiceEn: 'Cow! Moooo!', voiceEs: '¡Vaca! ¡Muuuu!' },
+        { id: 'pig', en: 'PIG', es: 'CERDO', hex: '#ff80ab', emoji: '🐷', voiceEn: 'Pig! Oink oink!', voiceEs: '¡Cerdo! ¡Oink oink!' },
+        { id: 'lion', en: 'LION', es: 'LEÓN', hex: '#ffb300', emoji: '🦁', voiceEn: 'Lion! Roar!', voiceEs: '¡León! ¡Grrrr!' },
+        { id: 'frog', en: 'FROG', es: 'RANA', hex: '#00c853', emoji: '🐸', voiceEn: 'Frog! Ribbit!', voiceEs: '¡Rana! ¡Croac croac!' },
+        { id: 'duck', en: 'DUCK', es: 'PATO', hex: '#ffd600', emoji: '🦆', voiceEn: 'Duck! Quack quack!', voiceEs: '¡Pato! ¡Cuac cuac!' },
+        { id: 'monkey', en: 'MONKEY', es: 'MONO', hex: '#8d6e63', emoji: '🐵', voiceEn: 'Monkey! Ooh ooh aah aah!', voiceEs: '¡Mono! ¡Uuu uuu aaa!' }
+      ],
+      numbers: [
+        { id: 'n1', count: 1, en: 'ONE', es: 'UNO', hex: '#ff2a2a', emoji: '⭐', voiceEn: 'One!', voiceEs: '¡Uno!' },
+        { id: 'n2', count: 2, en: 'TWO', es: 'DOS', hex: '#ff6d00', emoji: '🍎', voiceEn: 'Two!', voiceEs: '¡Dos!' },
+        { id: 'n3', count: 3, en: 'THREE', es: 'TRES', hex: '#ffd600', emoji: '🎈', voiceEn: 'Three!', voiceEs: '¡Tres!' },
+        { id: 'n4', count: 4, en: 'FOUR', es: 'CUATRO', hex: '#00c853', emoji: '🚗', voiceEn: 'Four!', voiceEs: '¡Cuatro!' },
+        { id: 'n5', count: 5, en: 'FIVE', es: 'CINCO', hex: '#2979ff', emoji: '🦋', voiceEn: 'Five!', voiceEs: '¡Cinco!' },
+        { id: 'n6', count: 6, en: 'SIX', es: 'SEIS', hex: '#aa00ff', emoji: '🍓', voiceEn: 'Six!', voiceEs: '¡Seis!' },
+        { id: 'n7', count: 7, en: 'SEVEN', es: 'SIETE', hex: '#ff66b2', emoji: '🐠', voiceEn: 'Seven!', voiceEs: '¡Siete!' },
+        { id: 'n8', count: 8, en: 'EIGHT', es: 'OCHO', hex: '#00bcd4', emoji: '⚽', voiceEn: 'Eight!', voiceEs: '¡Ocho!' }
+      ],
+      shapes: [
+        { id: 'circle', en: 'CIRCLE', es: 'CÍRCULO', hex: '#ff2a2a', emoji: '🔴', voiceEn: 'Circle!', voiceEs: '¡Círculo!' },
+        { id: 'square', en: 'SQUARE', es: 'CUADRADO', hex: '#2979ff', emoji: '🟦', voiceEn: 'Square!', voiceEs: '¡Cuadrado!' },
+        { id: 'triangle', en: 'TRIANGLE', es: 'TRIÁNGULO', hex: '#00c853', emoji: '🔺', voiceEn: 'Triangle!', voiceEs: '¡Triángulo!' },
+        { id: 'star', en: 'STAR', es: 'ESTRELLA', hex: '#ffd600', emoji: '⭐', voiceEn: 'Star!', voiceEs: '¡Estrella!' },
+        { id: 'heart', en: 'HEART', es: 'CORAZÓN', hex: '#ff4081', emoji: '❤️', voiceEn: 'Heart!', voiceEs: '¡Corazón!' },
+        { id: 'diamond', en: 'DIAMOND', es: 'ROMBO', hex: '#ff6d00', emoji: '🔶', voiceEn: 'Diamond!', voiceEs: '¡Rombo!' },
+        { id: 'moon', en: 'MOON', es: 'LUNA', hex: '#aa00ff', emoji: '🌙', voiceEn: 'Moon!', voiceEs: '¡Luna!' }
+      ],
+      fruits: [
+        { id: 'apple', en: 'APPLE', es: 'MANZANA', hex: '#ff2a2a', emoji: '🍎', voiceEn: 'Apple!', voiceEs: '¡Manzana!' },
+        { id: 'banana', en: 'BANANA', es: 'PLÁTANO', hex: '#ffd600', emoji: '🍌', voiceEn: 'Banana!', voiceEs: '¡Plátano!' },
+        { id: 'strawberry', en: 'STRAWBERRY', es: 'FRESA', hex: '#ff4081', emoji: '🍓', voiceEn: 'Strawberry!', voiceEs: '¡Fresa!' },
+        { id: 'orange_f', en: 'ORANGE', es: 'NARANJA', hex: '#ff6d00', emoji: '🍊', voiceEn: 'Orange!', voiceEs: '¡Naranja!' },
+        { id: 'grapes', en: 'GRAPES', es: 'UVAS', hex: '#aa00ff', emoji: '🍇', voiceEn: 'Grapes!', voiceEs: '¡Uvas!' },
+        { id: 'watermelon', en: 'WATERMELON', es: 'SANDÍA', hex: '#00c853', emoji: '🍉', voiceEn: 'Watermelon!', voiceEs: '¡Sandía!' },
+        { id: 'icecream', en: 'ICE CREAM', es: 'HELADO', hex: '#ff80ab', emoji: '🍦', voiceEn: 'Ice cream!', voiceEs: '¡Helado!' }
+      ],
+      emotions: [
+        { id: 'happy', en: 'HAPPY', es: 'FELIZ', hex: '#ffd600', emoji: '😄', voiceEn: 'Happy!', voiceEs: '¡Feliz!' },
+        { id: 'sad', en: 'SAD', es: 'TRISTE', hex: '#2979ff', emoji: '😢', voiceEn: 'Sad!', voiceEs: '¡Triste!' },
+        { id: 'angry', en: 'ANGRY', es: 'ENFADADO', hex: '#ff2a2a', emoji: '😠', voiceEn: 'Angry!', voiceEs: '¡Enfadado!' },
+        { id: 'sleepy', en: 'SLEEPY', es: 'DORMIDO', hex: '#aa00ff', emoji: '😴', voiceEn: 'Sleepy!', voiceEs: '¡Dormido!' },
+        { id: 'surprised', en: 'SURPRISED', es: 'SORPRENDIDO', hex: '#ff6d00', emoji: '😮', voiceEn: 'Surprised!', voiceEs: '¡Sorprendido!' },
+        { id: 'love', en: 'IN LOVE', es: 'ENAMORADO', hex: '#ff4081', emoji: '😍', voiceEn: 'In love!', voiceEs: '¡Enamorado!' }
+      ]
+    };
+
+    const REWARD_STICKERS = ['🦄', '🦖', '🚀', '🌈', '👑', '🍭', '🐬', '🎸', '🏆', '🧸', '🦊', '🍕'];
+
+    let currentLang = 'en';
+    let currentTheme = 'colors';
+    let hintMode = true; // Si es true, las letras se pintan del color de la respuesta
+    let currentTarget = null;
+    let score = 0;
+    let streak = 0;
+    let locked = false;
+    let firstRound = true;
+    let audioCtx = null;
+
+    // Inicializar AudioContext al primer toque en cualquier parte de la pantalla
+    function ensureAudioContext() {
+      if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) {
+          audioCtx = new AudioContextClass();
+        }
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    // Efectos musicales con sintetizador Web Audio (funciona incluso sin voces instaladas)
+    function playNote(freq, duration = 0.18, type = 'sine', delay = 0) {
+      try {
+        ensureAudioContext();
+        if (!audioCtx) return;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime + delay);
+
+        gain.gain.setValueAtTime(0.22, audioCtx.currentTime + delay);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + delay + duration);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start(audioCtx.currentTime + delay);
+        osc.stop(audioCtx.currentTime + delay + duration);
+      } catch (e) {}
+    }
+
+    function playWinSound() {
+      playNote(523.25, 0.14, 'triangle', 0);    // Do
+      playNote(659.25, 0.14, 'triangle', 0.1);  // Mi
+      playNote(783.99, 0.14, 'triangle', 0.2);  // Sol
+      playNote(1046.50, 0.35, 'triangle', 0.3); // Do alto
+    }
+
+    function playWrongSound() {
+      playNote(240, 0.2, 'sawtooth', 0);
+      playNote(180, 0.25, 'sawtooth', 0.15);
+    }
+
+    function playPopSound() {
+      playNote(600, 0.08, 'sine', 0);
+    }
+
+    // Síntesis de Voz robusta compatible con PC, Android e iOS
+    function speakText(text, langCode) {
+      playPopSound();
+      if (!('speechSynthesis' in window)) return;
+
+      try {
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = langCode === 'es' ? 'es-ES' : 'en-US';
+        utter.rate = 0.9;
+        utter.pitch = 1.15;
+
+        const voices = window.speechSynthesis.getVoices();
+        if (voices && voices.length > 0) {
+          const prefix = langCode === 'es' ? 'es' : 'en';
+          const matched = voices.find(v => v.lang.toLowerCase().startsWith(prefix));
+          if (matched) utter.voice = matched;
+        }
+
+        // Guardamos referencia global para evitar que Chrome la borre antes de terminar
+        window._activeUtterance = utter;
+        window.speechSynthesis.speak(utter);
+      } catch (e) {}
+    }
+
+    function speakCurrentTarget() {
+      if (!currentTarget) return;
+      const text = currentLang === 'es' ? currentTarget.voiceEs : currentTarget.voiceEn;
+      speakText(text, currentLang);
+    }
+
+    // Cambiar idioma
+    function setLanguage(lang) {
+      currentLang = lang;
+      document.getElementById('btnLangEN').classList.toggle('active', lang === 'en');
+      document.getElementById('btnLangES').classList.toggle('active', lang === 'es');
+      updateWordBanner();
+      speakCurrentTarget();
+    }
+
+    // Cambiar modo de pista de color en las letras
+    function toggleHintMode() {
+      hintMode = !hintMode;
+      const btn = document.getElementById('btnMode');
+      btn.textContent = hintMode ? '💡 PISTA: SÍ' : '🎲 PISTA: NO';
+      btn.classList.toggle('active', !hintMode);
+      updateWordBanner();
+    }
+
+    // Cambiar Tema
+    function setTheme(themeKey, btnEl) {
+      currentTheme = themeKey;
+      document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+      if (btnEl) btnEl.classList.add('active');
+      nextRound();
+    }
+
+    function updateWordBanner() {
+      if (!currentTarget) return;
+      const wordEl = document.getElementById('targetWord');
+      wordEl.textContent = currentLang === 'es' ? currentTarget.es : currentTarget.en;
+
+      if (hintMode) {
+        wordEl.style.color = currentTarget.hex;
+      } else {
+        // En modo sin pista, las letras se ponen blancas para que se guíe por la voz o lectura
+        wordEl.style.color = '#ffffff';
+      }
+    }
+
+    // Generar ronda con 4 opciones
+    function nextRound() {
+      locked = false;
+      const pool = THEMES[currentTheme];
+
+      // En la primera partida empezamos con PINK como pediste en el ejemplo
+      if (firstRound && currentTheme === 'colors') {
+        currentTarget = pool[0]; // PINK
+        firstRound = false;
+      } else {
+        const candidates = pool.filter(item => !currentTarget || item.id !== currentTarget.id);
+        currentTarget = candidates[Math.floor(Math.random() * candidates.length)];
+      }
+
+      // Elegir 3 distractores distintos
+      const others = pool
+        .filter(item => item.id !== currentTarget.id)
+        .sort(() => Math.random() - 0.5)
+        .slice(0, 3);
+
+      const options = [currentTarget, ...others].sort(() => Math.random() - 0.5);
+
+      updateWordBanner();
+      renderOptions(options);
+
+      // Pronunciar tras un breve instante
+      setTimeout(() => {
+        speakCurrentTarget();
+      }, 200);
+    }
+
+    function renderOptions(options) {
+      const grid = document.getElementById('optionsGrid');
+      grid.innerHTML = '';
+
+      options.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'option-card';
+
+        if (currentTheme === 'colors') {
+          // Tarjeta rellena del color con carita de monstruo simpático
+          card.style.backgroundColor = item.hex;
+          card.innerHTML = `
+            <div class="monster-eyes">
+              <div class="eye"><div class="pupil"></div></div>
+              <div class="eye"><div class="pupil"></div></div>
+            </div>
+            <div class="monster-mouth"></div>
+          `;
+        } else if (currentTheme === 'numbers') {
+          // Tarjeta con objetos para contar con el dedo + número en la esquina
+          card.style.backgroundColor = '#ffffff';
+          card.style.borderColor = item.hex;
+          let itemsHtml = '';
+          for (let i = 0; i < item.count; i++) {
+            itemsHtml += `<span class="count-item">${item.emoji}</span>`;
+          }
+          card.innerHTML = `
+            <div class="number-badge" style="background:${item.hex}; color:#fff;">${item.count}</div>
+            <div class="count-container">${itemsHtml}</div>
+          `;
+        } else {
+          // Animales, Formas, Frutas y Emociones
+          card.style.backgroundColor = '#ffffff';
+          card.style.borderColor = item.hex;
+          card.
