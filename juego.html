@@ -1,688 +1,1432 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>¡Aprende Jugando! - Colores y Temas</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      user-select: none;
-      -webkit-user-select: none;
-      font-family: 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', sans-serif;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>¡Súper Aventura Educativa! - Juego para 4 Años</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Fredoka para un estilo infantil, redondeado y súper legible -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome para iconos grandes y claros -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    body {
-      margin: 0;
-      padding: 0;
-      background: linear-gradient(135deg, #e0f7fa 0%, #fff9c4 50%, #f8bbd0 100%);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      overflow-x: hidden;
-    }
+    <style>
+        * {
+            font-family: 'Fredoka', sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+        }
 
-    /* Barra superior */
-    .top-bar {
-      width: 100%;
-      max-width: 900px;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px 15px;
-      gap: 8px;
-    }
+        body {
+            background: linear-gradient(135deg, #e0f2fe 0%, #fef3c7 50%, #fce7f3 100%);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
 
-    .score-box {
-      background: #ffffff;
-      border: 4px solid #ffb300;
-      border-radius: 25px;
-      padding: 6px 16px;
-      font-size: 1.3rem;
-      font-weight: 900;
-      color: #ff6f00;
-      box-shadow: 0 4px 0 #ffb300;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
+        /* Estilo de texto gigante con borde grueso para lectura perfecta (incluso en blanco o amarillo) */
+        .color-word {
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            -webkit-text-stroke: 3.5px #1e293b;
+            paint-order: stroke fill;
+            filter: drop-shadow(0px 6px 0px #1e293b) drop-shadow(0px 10px 15px rgba(0,0,0,0.18));
+            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            line-height: 1.05;
+        }
 
-    .controls {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
+        @media (min-width: 640px) {
+            .color-word {
+                -webkit-text-stroke: 5.5px #1e293b;
+                filter: drop-shadow(0px 8px 0px #1e293b) drop-shadow(0px 14px 20px rgba(0,0,0,0.2));
+            }
+        }
 
-    .btn-ctrl {
-      background: #ffffff;
-      border: 3px solid #4fc3f7;
-      border-radius: 20px;
-      padding: 8px 14px;
-      font-size: 1rem;
-      font-weight: 900;
-      color: #0277bd;
-      cursor: pointer;
-      box-shadow: 0 4px 0 #0288d1;
-      transition: transform 0.1s;
-    }
+        /* Botones estilo juguete 3D */
+        .toy-btn {
+            border: 3px solid #1e293b;
+            box-shadow: 0 5px 0 #1e293b, 0 8px 15px rgba(0,0,0,0.12);
+            transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.12s ease, background-color 0.2s ease;
+        }
 
-    .btn-ctrl:active {
-      transform: translateY(4px);
-      box-shadow: 0 0 0 #0288d1;
-    }
+        .toy-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 1px 0 #1e293b, 0 3px 6px rgba(0,0,0,0.1);
+        }
 
-    .btn-ctrl.active {
-      background: #29b6f6;
-      color: #fff;
-      border-color: #0277bd;
-    }
+        /* Botones de Categoría */
+        .theme-tab {
+            border: 3px solid #1e293b;
+            box-shadow: 0 4px 0 #1e293b;
+            transition: all 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
 
-    /* Selector de Temas */
-    .theme-bar {
-      width: 100%;
-      max-width: 900px;
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 8px;
-      padding: 5px 12px;
-    }
+        .theme-tab.active-tab {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 7px 0 #1e293b, 0 10px 15px rgba(0,0,0,0.15);
+            border-width: 3.5px;
+        }
 
-    .theme-btn {
-      background: #fff;
-      border: 3px solid #ce93d8;
-      border-radius: 18px;
-      padding: 8px 14px;
-      font-size: 1rem;
-      font-weight: 900;
-      color: #6a1b9a;
-      cursor: pointer;
-      box-shadow: 0 4px 0 #ab47bc;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      transition: all 0.15s;
-    }
+        /* Tarjetas de opciones */
+        .monster-card {
+            border: 4px solid #1e293b;
+            box-shadow: 0 8px 0 #1e293b, 0 12px 20px rgba(0,0,0,0.12);
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, background-color 0.2s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
 
-    .theme-btn.active {
-      background: #ab47bc;
-      color: #fff;
-      border-color: #6a1b9a;
-      transform: scale(1.05);
-    }
+        .monster-card:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 12px 0 #1e293b, 0 16px 25px rgba(0,0,0,0.15);
+        }
 
-    /* Zona de la palabra gigante */
-    .word-container {
-      margin: 12px auto;
-      background: rgba(255, 255, 255, 0.92);
-      border: 6px solid #fff;
-      border-radius: 35px;
-      padding: 15px 30px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.12);
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-      min-width: 300px;
-      max-width: 92%;
-      cursor: pointer;
-    }
+        .monster-card:active {
+            transform: translateY(6px) scale(0.97);
+            box-shadow: 0 2px 0 #1e293b, 0 4px 8px rgba(0,0,0,0.1);
+        }
 
-    .target-word {
-      font-size: clamp(3.2rem, 10vw, 5.5rem);
-      font-weight: 900;
-      letter-spacing: 4px;
-      text-transform: uppercase;
-      margin: 0;
-      line-height: 1.05;
-      /* Borde grueso para que colores claros como YELLOW o WHITE se lean siempre */
-      -webkit-text-stroke: 3.5px #222;
-      text-shadow: 
-        3px 3px 0 #222,
-        -2px -2px 0 #222,
-        2px -2px 0 #222,
-        -2px 2px 0 #222,
-        0 6px 0 rgba(0,0,0,0.25);
-      transition: transform 0.2s;
-    }
+        /* Animación de flotación para el Modo Reto */
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            25% { transform: translateY(-6px) rotate(-1.5deg); }
+            75% { transform: translateY(5px) rotate(1.5deg); }
+        }
 
-    .word-container:active .target-word {
-      transform: scale(0.95);
-    }
+        .floating-monster {
+            animation: floatSlow 3.2s ease-in-out infinite;
+        }
 
-    .speak-btn {
-      background: #ff4081;
-      color: white;
-      border: 3px solid #c51162;
-      border-radius: 50px;
-      padding: 8px 22px;
-      font-size: 1.2rem;
-      font-weight: 900;
-      cursor: pointer;
-      box-shadow: 0 5px 0 #c51162;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+        /* Animación de rebote alegre */
+        @keyframes happyJump {
+            0%, 100% { transform: scale(1) translateY(0); }
+            30% { transform: scale(1.18, 0.85) translateY(6px); }
+            60% { transform: scale(0.92, 1.15) translateY(-20px); }
+        }
 
-    .speak-btn:active {
-      transform: translateY(4px);
-      box-shadow: 0 1px 0 #c51162;
-    }
+        .animate-happy {
+            animation: happyJump 0.65s ease-in-out;
+        }
 
-    /* Cuadrícula de 4 opciones */
-    .options-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 18px;
-      width: 100%;
-      max-width: 680px;
-      padding: 12px 20px 25px;
-      flex: 1;
-    }
+        /* Animación de sacudida suave cuando se equivoca */
+        @keyframes gentleShake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-10px) rotate(-4deg); }
+            40% { transform: translateX(10px) rotate(4deg); }
+            60% { transform: translateX(-7px) rotate(-2deg); }
+            80% { transform: translateX(7px) rotate(2deg); }
+        }
 
-    .option-card {
-      background: #ffffff;
-      border: 6px solid #333;
-      border-radius: 32px;
-      min-height: 155px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      cursor: pointer;
-      position: relative;
-      box-shadow: 0 10px 0 rgba(0,0,0,0.2);
-      transition: transform 0.15s, filter 0.15s;
-      padding: 12px;
-      overflow: hidden;
-    }
+        .animate-wrong {
+            animation: gentleShake 0.45s ease-in-out;
+            opacity: 0.45;
+            pointer-events: none;
+        }
 
-    .option-card:hover {
-      transform: translateY(-3px);
-    }
+        /* Pista luminosa */
+        @keyframes hintPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 8px 0 #1e293b, 0 0 0 0 rgba(250, 204, 21, 0.85); }
+            50% { transform: scale(1.05); box-shadow: 0 8px 0 #1e293b, 0 0 0 16px rgba(250, 204, 21, 0); }
+        }
 
-    .option-card:active {
-      transform: translateY(6px);
-      box-shadow: 0 4px 0 rgba(0,0,0,0.2);
-    }
+        .hint-glow {
+            animation: hintPulse 1.4s infinite;
+            border-color: #eab308 !important;
+        }
 
-    /* Ojos de monstruo para el modo colores */
-    .monster-eyes {
-      display: flex;
-      gap: 14px;
-      margin-bottom: 8px;
-      pointer-events: none;
-    }
+        /* Altavoz hablando */
+        @keyframes speakerWave {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.16) rotate(-5deg); box-shadow: 0 0 0 10px rgba(251, 113, 133, 0.35), 0 5px 0 #1e293b; }
+        }
 
-    .eye {
-      width: 38px;
-      height: 38px;
-      background: #fff;
-      border: 4px solid #222;
-      border-radius: 50%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      position: relative;
-    }
+        .speaking-pulse {
+            animation: speakerWave 0.45s ease-in-out infinite !important;
+            background-color: #f43f5e !important;
+        }
 
-    .pupil {
-      width: 16px;
-      height: 16px;
-      background: #111;
-      border-radius: 50%;
-      animation: lookAround 3s infinite alternate ease-in-out;
-    }
+        /* Parpadeo de los ojitos */
+        @keyframes blinkEyes {
+            0%, 94%, 98%, 100% { transform: scaleY(1); }
+            96% { transform: scaleY(0.1); }
+        }
 
-    .monster-mouth {
-      width: 44px;
-      height: 20px;
-      background: #222;
-      border-radius: 0 0 25px 25px;
-      position: relative;
-      overflow: hidden;
-      pointer-events: none;
-    }
+        .monster-eyes {
+            transform-origin: center;
+            animation: blinkEyes 4s infinite;
+        }
 
-    .monster-mouth::after {
-      content: '';
-      position: absolute;
-      bottom: -4px;
-      left: 10px;
-      width: 24px;
-      height: 14px;
-      background: #ff5252;
-      border-radius: 50%;
-    }
+        /* Ocultar barra de scroll en selector de categorías móvil */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
 
-    @keyframes lookAround {
-      0% { transform: translate(-4px, -2px); }
-      100% { transform: translate(4px, 2px); }
-    }
-
-    /* Iconos grandes para animales, formas, frutas, emociones */
-    .big-emoji {
-      font-size: clamp(3.4rem, 9vw, 4.8rem);
-      line-height: 1;
-      filter: drop-shadow(0 4px 4px rgba(0,0,0,0.25));
-      pointer-events: none;
-    }
-
-    /* Contenedor de objetos para contar en el tema Números */
-    .count-container {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      align-items: center;
-      gap: 6px;
-      max-width: 180px;
-      pointer-events: none;
-    }
-
-    .count-item {
-      font-size: 1.9rem;
-      line-height: 1;
-      filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2));
-    }
-
-    .number-badge {
-      position: absolute;
-      top: 8px;
-      right: 12px;
-      background: rgba(255,255,255,0.9);
-      border: 3px solid #222;
-      border-radius: 50%;
-      width: 38px;
-      height: 38px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 1.3rem;
-      font-weight: 900;
-      color: #222;
-    }
-
-    /* Animaciones de acierto y fallo */
-    .correct-anim {
-      animation: bounceWin 0.6s ease;
-    }
-
-    .wrong-anim {
-      animation: shakeWrong 0.45s ease;
-      opacity: 0.45;
-    }
-
-    @keyframes bounceWin {
-      0%, 100% { transform: scale(1); }
-      40% { transform: scale(1.18) rotate(4deg); }
-      70% { transform: scale(0.95) rotate(-4deg); }
-    }
-
-    @keyframes shakeWrong {
-      0%, 100% { transform: translateX(0); }
-      25% { transform: translateX(-12px); }
-      50% { transform: translateX(12px); }
-      75% { transform: translateX(-8px); }
-    }
-
-    /* Confeti */
-    .confetti {
-      position: fixed;
-      width: 14px;
-      height: 14px;
-      top: -20px;
-      border-radius: 4px;
-      z-index: 999;
-      pointer-events: none;
-      animation: fallDown 1.6s linear forwards;
-    }
-
-    @keyframes fallDown {
-      to {
-        transform: translateY(105vh) rotate(540deg);
-        opacity: 0;
-      }
-    }
-
-    /* Álbum de pegatinas inferior */
-    .stickers-bar {
-      width: 100%;
-      max-width: 680px;
-      background: rgba(255,255,255,0.85);
-      border: 4px dashed #ffb300;
-      border-radius: 22px;
-      padding: 8px 15px;
-      margin-bottom: 15px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      flex-wrap: wrap;
-      min-height: 52px;
-    }
-
-    .sticker-title {
-      font-weight: 900;
-      color: #f57c00;
-      font-size: 1rem;
-    }
-
-    .sticker-item {
-      font-size: 1.8rem;
-      animation: popIn 0.4s ease;
-    }
-
-    @keyframes popIn {
-      0% { transform: scale(0); }
-      80% { transform: scale(1.3); }
-      100% { transform: scale(1); }
-    }
-  </style>
+        /* Nubes decorativas de fondo */
+        .bg-cloud {
+            position: fixed;
+            background: rgba(255, 255, 255, 0.65);
+            border-radius: 9999px;
+            z-index: -1;
+            pointer-events: none;
+        }
+    </style>
 </head>
-<body>
+<body class="flex flex-col justify-between items-center p-2 sm:p-3 min-h-screen relative">
 
-  <!-- Barra Superior -->
-  <div class="top-bar">
-    <div class="score-box">
-      <span>⭐ <span id="scoreVal">0</span></span>
-      <span>🔥 <span id="streakVal">0</span></span>
-    </div>
-
-    <div class="controls">
-      <button class="btn-ctrl active" id="btnLangEN" onclick="setLanguage('en')">🇬🇧 ENGLISH</button>
-      <button class="btn-ctrl" id="btnLangES" onclick="setLanguage('es')">🇪🇸 ESPAÑOL</button>
-      <button class="btn-ctrl" id="btnMode" onclick="toggleHintMode()">💡 PISTA: SÍ</button>
-    </div>
-  </div>
-
-  <!-- Selector de 6 Temas para niños de 4 años -->
-  <div class="theme-bar">
-    <button class="theme-btn active" onclick="setTheme('colors', this)">🎨 COLORES</button>
-    <button class="theme-btn" onclick="setTheme('animals', this)">🐶 ANIMALES</button>
-    <button class="theme-btn" onclick="setTheme('numbers', this)">1️⃣ NÚMEROS</button>
-    <button class="theme-btn" onclick="setTheme('shapes', this)">⭐ FORMAS</button>
-    <button class="theme-btn" onclick="setTheme('fruits', this)">🍎 FRUTAS</button>
-    <button class="theme-btn" onclick="setTheme('emotions', this)">😊 EMOCIONES</button>
-  </div>
-
-  <!-- Palabra Gigante en MAYÚSCULAS y de su color -->
-  <div class="word-container" onclick="speakCurrentTarget()">
-    <h1 class="target-word" id="targetWord">PINK</h1>
-    <button class="speak-btn" type="button">
-      🔊 ESCUCHAR VOZ
-    </button>
-  </div>
-
-  <!-- 4 Opciones -->
-  <div class="options-grid" id="optionsGrid"></div>
-
-  <!-- Barra de Premios / Pegatinas -->
-  <div class="stickers-bar" id="stickersBar">
-    <span class="sticker-title">🏆 PREMIOS (cada 3 ⭐):</span>
-  </div>
-
-  <script>
-    // Base de datos de los 6 temas (siempre con textos en MAYÚSCULAS y su color asociado)
-    const THEMES = {
-      colors: [
-        { id: 'pink', en: 'PINK', es: 'ROSA', hex: '#ff66b2', voiceEn: 'Pink!', voiceEs: '¡Rosa!' },
-        { id: 'red', en: 'RED', es: 'ROJO', hex: '#ff2a2a', voiceEn: 'Red!', voiceEs: '¡Rojo!' },
-        { id: 'blue', en: 'BLUE', es: 'AZUL', hex: '#2979ff', voiceEn: 'Blue!', voiceEs: '¡Azul!' },
-        { id: 'green', en: 'GREEN', es: 'VERDE', hex: '#00c853', voiceEn: 'Green!', voiceEs: '¡Verde!' },
-        { id: 'yellow', en: 'YELLOW', es: 'AMARILLO', hex: '#ffd600', voiceEn: 'Yellow!', voiceEs: '¡Amarillo!' },
-        { id: 'orange', en: 'ORANGE', es: 'NARANJA', hex: '#ff6d00', voiceEn: 'Orange!', voiceEs: '¡Naranja!' },
-        { id: 'purple', en: 'PURPLE', es: 'MORADO', hex: '#aa00ff', voiceEn: 'Purple!', voiceEs: '¡Morado!' },
-        { id: 'brown', en: 'BROWN', es: 'MARRÓN', hex: '#8d5524', voiceEn: 'Brown!', voiceEs: '¡Marrón!' },
-        { id: 'black', en: 'BLACK', es: 'NEGRO', hex: '#2c2c2c', voiceEn: 'Black!', voiceEs: '¡Negro!' },
-        { id: 'white', en: 'WHITE', es: 'BLANCO', hex: '#ffffff', voiceEn: 'White!', voiceEs: '¡Blanco!' }
-      ],
-      animals: [
-        { id: 'dog', en: 'DOG', es: 'PERRO', hex: '#c68642', emoji: '🐶', voiceEn: 'Dog! Woof woof!', voiceEs: '¡Perro! ¡Guau guau!' },
-        { id: 'cat', en: 'CAT', es: 'GATO', hex: '#ff9800', emoji: '🐱', voiceEn: 'Cat! Meow!', voiceEs: '¡Gato! ¡Miau!' },
-        { id: 'cow', en: 'COW', es: 'VACA', hex: '#424242', emoji: '🐮', voiceEn: 'Cow! Moooo!', voiceEs: '¡Vaca! ¡Muuuu!' },
-        { id: 'pig', en: 'PIG', es: 'CERDO', hex: '#ff80ab', emoji: '🐷', voiceEn: 'Pig! Oink oink!', voiceEs: '¡Cerdo! ¡Oink oink!' },
-        { id: 'lion', en: 'LION', es: 'LEÓN', hex: '#ffb300', emoji: '🦁', voiceEn: 'Lion! Roar!', voiceEs: '¡León! ¡Grrrr!' },
-        { id: 'frog', en: 'FROG', es: 'RANA', hex: '#00c853', emoji: '🐸', voiceEn: 'Frog! Ribbit!', voiceEs: '¡Rana! ¡Croac croac!' },
-        { id: 'duck', en: 'DUCK', es: 'PATO', hex: '#ffd600', emoji: '🦆', voiceEn: 'Duck! Quack quack!', voiceEs: '¡Pato! ¡Cuac cuac!' },
-        { id: 'monkey', en: 'MONKEY', es: 'MONO', hex: '#8d6e63', emoji: '🐵', voiceEn: 'Monkey! Ooh ooh aah aah!', voiceEs: '¡Mono! ¡Uuu uuu aaa!' }
-      ],
-      numbers: [
-        { id: 'n1', count: 1, en: 'ONE', es: 'UNO', hex: '#ff2a2a', emoji: '⭐', voiceEn: 'One!', voiceEs: '¡Uno!' },
-        { id: 'n2', count: 2, en: 'TWO', es: 'DOS', hex: '#ff6d00', emoji: '🍎', voiceEn: 'Two!', voiceEs: '¡Dos!' },
-        { id: 'n3', count: 3, en: 'THREE', es: 'TRES', hex: '#ffd600', emoji: '🎈', voiceEn: 'Three!', voiceEs: '¡Tres!' },
-        { id: 'n4', count: 4, en: 'FOUR', es: 'CUATRO', hex: '#00c853', emoji: '🚗', voiceEn: 'Four!', voiceEs: '¡Cuatro!' },
-        { id: 'n5', count: 5, en: 'FIVE', es: 'CINCO', hex: '#2979ff', emoji: '🦋', voiceEn: 'Five!', voiceEs: '¡Cinco!' },
-        { id: 'n6', count: 6, en: 'SIX', es: 'SEIS', hex: '#aa00ff', emoji: '🍓', voiceEn: 'Six!', voiceEs: '¡Seis!' },
-        { id: 'n7', count: 7, en: 'SEVEN', es: 'SIETE', hex: '#ff66b2', emoji: '🐠', voiceEn: 'Seven!', voiceEs: '¡Siete!' },
-        { id: 'n8', count: 8, en: 'EIGHT', es: 'OCHO', hex: '#00bcd4', emoji: '⚽', voiceEn: 'Eight!', voiceEs: '¡Ocho!' }
-      ],
-      shapes: [
-        { id: 'circle', en: 'CIRCLE', es: 'CÍRCULO', hex: '#ff2a2a', emoji: '🔴', voiceEn: 'Circle!', voiceEs: '¡Círculo!' },
-        { id: 'square', en: 'SQUARE', es: 'CUADRADO', hex: '#2979ff', emoji: '🟦', voiceEn: 'Square!', voiceEs: '¡Cuadrado!' },
-        { id: 'triangle', en: 'TRIANGLE', es: 'TRIÁNGULO', hex: '#00c853', emoji: '🔺', voiceEn: 'Triangle!', voiceEs: '¡Triángulo!' },
-        { id: 'star', en: 'STAR', es: 'ESTRELLA', hex: '#ffd600', emoji: '⭐', voiceEn: 'Star!', voiceEs: '¡Estrella!' },
-        { id: 'heart', en: 'HEART', es: 'CORAZÓN', hex: '#ff4081', emoji: '❤️', voiceEn: 'Heart!', voiceEs: '¡Corazón!' },
-        { id: 'diamond', en: 'DIAMOND', es: 'ROMBO', hex: '#ff6d00', emoji: '🔶', voiceEn: 'Diamond!', voiceEs: '¡Rombo!' },
-        { id: 'moon', en: 'MOON', es: 'LUNA', hex: '#aa00ff', emoji: '🌙', voiceEn: 'Moon!', voiceEs: '¡Luna!' }
-      ],
-      fruits: [
-        { id: 'apple', en: 'APPLE', es: 'MANZANA', hex: '#ff2a2a', emoji: '🍎', voiceEn: 'Apple!', voiceEs: '¡Manzana!' },
-        { id: 'banana', en: 'BANANA', es: 'PLÁTANO', hex: '#ffd600', emoji: '🍌', voiceEn: 'Banana!', voiceEs: '¡Plátano!' },
-        { id: 'strawberry', en: 'STRAWBERRY', es: 'FRESA', hex: '#ff4081', emoji: '🍓', voiceEn: 'Strawberry!', voiceEs: '¡Fresa!' },
-        { id: 'orange_f', en: 'ORANGE', es: 'NARANJA', hex: '#ff6d00', emoji: '🍊', voiceEn: 'Orange!', voiceEs: '¡Naranja!' },
-        { id: 'grapes', en: 'GRAPES', es: 'UVAS', hex: '#aa00ff', emoji: '🍇', voiceEn: 'Grapes!', voiceEs: '¡Uvas!' },
-        { id: 'watermelon', en: 'WATERMELON', es: 'SANDÍA', hex: '#00c853', emoji: '🍉', voiceEn: 'Watermelon!', voiceEs: '¡Sandía!' },
-        { id: 'icecream', en: 'ICE CREAM', es: 'HELADO', hex: '#ff80ab', emoji: '🍦', voiceEn: 'Ice cream!', voiceEs: '¡Helado!' }
-      ],
-      emotions: [
-        { id: 'happy', en: 'HAPPY', es: 'FELIZ', hex: '#ffd600', emoji: '😄', voiceEn: 'Happy!', voiceEs: '¡Feliz!' },
-        { id: 'sad', en: 'SAD', es: 'TRISTE', hex: '#2979ff', emoji: '😢', voiceEn: 'Sad!', voiceEs: '¡Triste!' },
-        { id: 'angry', en: 'ANGRY', es: 'ENFADADO', hex: '#ff2a2a', emoji: '😠', voiceEn: 'Angry!', voiceEs: '¡Enfadado!' },
-        { id: 'sleepy', en: 'SLEEPY', es: 'DORMIDO', hex: '#aa00ff', emoji: '😴', voiceEn: 'Sleepy!', voiceEs: '¡Dormido!' },
-        { id: 'surprised', en: 'SURPRISED', es: 'SORPRENDIDO', hex: '#ff6d00', emoji: '😮', voiceEn: 'Surprised!', voiceEs: '¡Sorprendido!' },
-        { id: 'love', en: 'IN LOVE', es: 'ENAMORADO', hex: '#ff4081', emoji: '😍', voiceEn: 'In love!', voiceEs: '¡Enamorado!' }
-      ]
-    };
-
-    const REWARD_STICKERS = ['🦄', '🦖', '🚀', '🌈', '👑', '🍭', '🐬', '🎸', '🏆', '🧸', '🦊', '🍕'];
-
-    let currentLang = 'en';
-    let currentTheme = 'colors';
-    let hintMode = true; // Si es true, las letras se pintan del color de la respuesta
-    let currentTarget = null;
-    let score = 0;
-    let streak = 0;
-    let locked = false;
-    let firstRound = true;
-    let audioCtx = null;
-
-    // Inicializar AudioContext al primer toque en cualquier parte de la pantalla
-    function ensureAudioContext() {
-      if (!audioCtx) {
-        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-        if (AudioContextClass) {
-          audioCtx = new AudioContextClass();
-        }
-      }
-      if (audioCtx && audioCtx.state === 'suspended') {
-        audioCtx.resume();
-      }
-    }
-
-    // Efectos musicales con sintetizador Web Audio (funciona incluso sin voces instaladas)
-    function playNote(freq, duration = 0.18, type = 'sine', delay = 0) {
-      try {
-        ensureAudioContext();
-        if (!audioCtx) return;
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = type;
-        osc.frequency.setValueAtTime(freq, audioCtx.currentTime + delay);
-
-        gain.gain.setValueAtTime(0.22, audioCtx.currentTime + delay);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + delay + duration);
-
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-
-        osc.start(audioCtx.currentTime + delay);
-        osc.stop(audioCtx.currentTime + delay + duration);
-      } catch (e) {}
-    }
-
-    function playWinSound() {
-      playNote(523.25, 0.14, 'triangle', 0);    // Do
-      playNote(659.25, 0.14, 'triangle', 0.1);  // Mi
-      playNote(783.99, 0.14, 'triangle', 0.2);  // Sol
-      playNote(1046.50, 0.35, 'triangle', 0.3); // Do alto
-    }
-
-    function playWrongSound() {
-      playNote(240, 0.2, 'sawtooth', 0);
-      playNote(180, 0.25, 'sawtooth', 0.15);
-    }
-
-    function playPopSound() {
-      playNote(600, 0.08, 'sine', 0);
-    }
-
-    // Síntesis de Voz robusta compatible con PC, Android e iOS
-    function speakText(text, langCode) {
-      playPopSound();
-      if (!('speechSynthesis' in window)) return;
-
-      try {
-        window.speechSynthesis.cancel();
-        const utter = new SpeechSynthesisUtterance(text);
-        utter.lang = langCode === 'es' ? 'es-ES' : 'en-US';
-        utter.rate = 0.9;
-        utter.pitch = 1.15;
-
-        const voices = window.speechSynthesis.getVoices();
-        if (voices && voices.length > 0) {
-          const prefix = langCode === 'es' ? 'es' : 'en';
-          const matched = voices.find(v => v.lang.toLowerCase().startsWith(prefix));
-          if (matched) utter.voice = matched;
-        }
-
-        // Guardamos referencia global para evitar que Chrome la borre antes de terminar
-        window._activeUtterance = utter;
-        window.speechSynthesis.speak(utter);
-      } catch (e) {}
-    }
-
-    function speakCurrentTarget() {
-      if (!currentTarget) return;
-      const text = currentLang === 'es' ? currentTarget.voiceEs : currentTarget.voiceEn;
-      speakText(text, currentLang);
-    }
-
-    // Cambiar idioma
-    function setLanguage(lang) {
-      currentLang = lang;
-      document.getElementById('btnLangEN').classList.toggle('active', lang === 'en');
-      document.getElementById('btnLangES').classList.toggle('active', lang === 'es');
-      updateWordBanner();
-      speakCurrentTarget();
-    }
-
-    // Cambiar modo de pista de color en las letras
-    function toggleHintMode() {
-      hintMode = !hintMode;
-      const btn = document.getElementById('btnMode');
-      btn.textContent = hintMode ? '💡 PISTA: SÍ' : '🎲 PISTA: NO';
-      btn.classList.toggle('active', !hintMode);
-      updateWordBanner();
-    }
-
-    // Cambiar Tema
-    function setTheme(themeKey, btnEl) {
-      currentTheme = themeKey;
-      document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
-      if (btnEl) btnEl.classList.add('active');
-      nextRound();
-    }
-
-    function updateWordBanner() {
-      if (!currentTarget) return;
-      const wordEl = document.getElementById('targetWord');
-      wordEl.textContent = currentLang === 'es' ? currentTarget.es : currentTarget.en;
-
-      if (hintMode) {
-        wordEl.style.color = currentTarget.hex;
-      } else {
-        // En modo sin pista, las letras se ponen blancas para que se guíe por la voz o lectura
-        wordEl.style.color = '#ffffff';
-      }
-    }
-
-    // Generar ronda con 4 opciones
-    function nextRound() {
-      locked = false;
-      const pool = THEMES[currentTheme];
-
-      // En la primera partida empezamos con PINK como pediste en el ejemplo
-      if (firstRound && currentTheme === 'colors') {
-        currentTarget = pool[0]; // PINK
-        firstRound = false;
-      } else {
-        const candidates = pool.filter(item => !currentTarget || item.id !== currentTarget.id);
-        currentTarget = candidates[Math.floor(Math.random() * candidates.length)];
-      }
-
-      // Elegir 3 distractores distintos
-      const others = pool
-        .filter(item => item.id !== currentTarget.id)
-        .sort(() => Math.random() - 0.5)
-        .slice(0, 3);
-
-      const options = [currentTarget, ...others].sort(() => Math.random() - 0.5);
-
-      updateWordBanner();
-      renderOptions(options);
-
-      // Pronunciar tras un breve instante
-      setTimeout(() => {
-        speakCurrentTarget();
-      }, 200);
-    }
-
-    function renderOptions(options) {
-      const grid = document.getElementById('optionsGrid');
-      grid.innerHTML = '';
-
-      options.forEach(item => {
-        const card = document.createElement('div');
-        card.className = 'option-card';
-
-        if (currentTheme === 'colors') {
-          // Tarjeta rellena del color con carita de monstruo simpático
-          card.style.backgroundColor = item.hex;
-          card.innerHTML = `
-            <div class="monster-eyes">
-              <div class="eye"><div class="pupil"></div></div>
-              <div class="eye"><div class="pupil"></div></div>
+    <!-- PANTALLA DE BIENVENIDA PARA DESBLOQUEAR AUDIO Y VOZ EN MÓVILES Y TABLETS -->
+    <div id="welcome-overlay" class="fixed inset-0 z-50 bg-gradient-to-br from-sky-300 via-amber-200 to-pink-300 flex flex-col items-center justify-center p-4 text-center">
+        <div class="bg-white/95 border-4 border-slate-800 rounded-[2.5rem] shadow-[0_12px_0_#1e293b] max-w-lg w-full p-6 sm:p-8 flex flex-col items-center">
+            <!-- Iconos animados de bienvenida -->
+            <div class="flex items-center justify-center gap-3 text-5xl sm:text-6xl mb-4 animate-bounce">
+                <span>🎨</span>
+                <span>🐶</span>
+                <span>1️⃣</span>
+                <span>⭐</span>
             </div>
-            <div class="monster-mouth"></div>
-          `;
-        } else if (currentTheme === 'numbers') {
-          // Tarjeta con objetos para contar con el dedo + número en la esquina
-          card.style.backgroundColor = '#ffffff';
-          card.style.borderColor = item.hex;
-          let itemsHtml = '';
-          for (let i = 0; i < item.count; i++) {
-            itemsHtml += `<span class="count-item">${item.emoji}</span>`;
-          }
-          card.innerHTML = `
-            <div class="number-badge" style="background:${item.hex}; color:#fff;">${item.count}</div>
-            <div class="count-container">${itemsHtml}</div>
-          `;
-        } else {
-          // Animales, Formas, Frutas y Emociones
-          card.style.backgroundColor = '#ffffff';
-          card.style.borderColor = item.hex;
-          card.
+
+            <h1 class="color-word text-4xl sm:text-6xl text-pink-500 mb-3 uppercase">
+                ¡HOLA! / HELLO!
+            </h1>
+
+            <p class="text-slate-700 font-extrabold text-base sm:text-xl mb-5 leading-snug">
+                ¡Toca el botón gigante para activar la <span class="text-rose-500 underline">VOZ y la MÚSICA</span>! 🔊
+            </p>
+
+            <!-- Selector rápido de idioma inicial -->
+            <div class="flex items-center gap-3 mb-6 w-full justify-center">
+                <button id="welcome-lang-en" onclick="setInitialLang('en')" class="toy-btn bg-sky-400 text-slate-900 font-extrabold px-4 py-2.5 rounded-2xl flex items-center gap-2 text-base sm:text-lg ring-4 ring-amber-400">
+                    <span class="text-2xl">🇬🇧</span> ENGLISH
+                </button>
+                <button id="welcome-lang-es" onclick="setInitialLang('es')" class="toy-btn bg-white text-slate-700 font-extrabold px-4 py-2.5 rounded-2xl flex items-center gap-2 text-base sm:text-lg">
+                    <span class="text-2xl">🇪🇸</span> ESPAÑOL
+                </button>
+            </div>
+
+            <!-- Botón Gigante para Desbloquear Audio -->
+            <button onclick="unlockAudioAndStart()" class="toy-btn bg-emerald-400 hover:bg-emerald-300 active:bg-emerald-500 text-slate-900 font-extrabold text-2xl sm:text-4xl py-4 px-8 rounded-3xl w-full flex items-center justify-center gap-3 animate-pulse">
+                <i class="fa-solid fa-circle-play text-3xl sm:text-5xl text-white drop-shadow-[0_2px_0_#1e293b]"></i>
+                <span>¡JUGAR! / PLAY!</span>
+                <span class="text-3xl sm:text-4xl">🔊</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Nubes decorativas suaves -->
+    <div class="bg-cloud w-40 h-16 top-8 left-6 blur-[1px]"></div>
+    <div class="bg-cloud w-56 h-20 top-24 right-8 blur-[1px]"></div>
+    <div class="bg-cloud w-48 h-16 bottom-12 left-12 blur-[1px]"></div>
+
+    <!-- Lienzo de Confeti -->
+    <canvas id="confetti-canvas" class="fixed inset-0 pointer-events-none z-40 w-full h-full"></canvas>
+
+    <!-- BARRA SUPERIOR: Controles amigables y Puntuación -->
+    <header class="w-full max-w-4xl flex flex-col gap-2">
+        <div class="w-full flex flex-wrap items-center justify-between gap-2 bg-white/90 backdrop-blur-md p-2 sm:p-3 rounded-3xl border-4 border-slate-800 shadow-[0_5px_0_#1e293b]">
+            
+            <!-- Selector de Idioma y Modo -->
+            <div class="flex items-center gap-2 flex-wrap">
+                <!-- Botón Idioma (EN / ES) -->
+                <button id="lang-btn" onclick="toggleLanguage()" class="toy-btn bg-sky-400 hover:bg-sky-300 text-slate-900 font-extrabold px-3 py-1.5 rounded-2xl flex items-center gap-1.5 text-xs sm:text-base" title="Cambiar Idioma">
+                    <span id="lang-flag" class="text-lg sm:text-2xl">🇬🇧</span>
+                    <span id="lang-label">ENGLISH</span>
+                </button>
+
+                <!-- Botón Modo de Juego -->
+                <button id="mode-btn" onclick="cycleGameMode()" class="toy-btn bg-purple-400 hover:bg-purple-300 text-slate-900 font-extrabold px-3 py-1.5 rounded-2xl flex items-center gap-1.5 text-xs sm:text-base" title="Cambiar Modo de Juego">
+                    <span id="mode-icon" class="text-lg sm:text-2xl">🎨</span>
+                    <span id="mode-label">LEARN</span>
+                </button>
+            </div>
+
+            <!-- Marcadores: Racha, Estrellas y Sonido -->
+            <div class="flex items-center gap-2 ml-auto">
+                <!-- Contador de Racha (Combo) -->
+                <div id="streak-badge" class="hidden items-center gap-1 bg-orange-400 border-3 border-slate-800 px-2.5 py-1 rounded-2xl font-extrabold text-slate-900 text-xs sm:text-base shadow-[0_3px_0_#1e293b] animate-bounce">
+                    <span>🔥</span>
+                    <span id="streak-count">0</span>
+                </div>
+
+                <!-- Contador de Estrellas -->
+                <div onclick="openStickerModal()" class="toy-btn cursor-pointer bg-amber-300 hover:bg-amber-200 px-3 py-1 rounded-2xl flex items-center gap-1.5 font-extrabold text-slate-900 text-sm sm:text-lg" title="Ver mis premios">
+                    <i class="fa-solid fa-star text-amber-500 text-lg sm:text-xl drop-shadow-[0_2px_0_#1e293b]" style="-webkit-text-stroke: 1.5px #1e293b;"></i>
+                    <span id="star-count">0</span>
+                </div>
+
+                <!-- Botón Probar/Silenciar Sonido -->
+                <button id="sound-btn" onclick="toggleMute()" class="toy-btn bg-emerald-400 hover:bg-emerald-300 text-slate-900 w-9 h-9 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center text-base sm:text-xl" title="Activar/Desactivar Sonidos">
+                    <i id="sound-icon" class="fa-solid fa-volume-high"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- SELECTOR DE TEMAS PARA NIÑOS DE 4 AÑOS -->
+        <nav id="theme-selector" class="w-full flex items-center gap-2 overflow-x-auto no-scrollbar py-1 px-1">
+            <!-- Generado dinámicamente por JS: Colores, Animales, Números, Formas, Frutas, Emociones -->
+        </nav>
+    </header>
+
+    <!-- ÁREA PRINCIPAL DEL JUEGO -->
+    <main class="w-full max-w-4xl flex-1 flex flex-col justify-center items-center my-1.5 sm:my-3 gap-2.5 sm:gap-4">
+        
+        <!-- TARJETA DE LA PALABRA GIGANTE -->
+        <section class="w-full bg-white/95 backdrop-blur-md rounded-[2rem] border-4 border-slate-800 shadow-[0_7px_0_#1e293b] p-3 sm:p-5 flex flex-col items-center justify-center relative overflow-hidden">
+            
+            <!-- Indicador de progreso de regalo (5 aciertos = premio) -->
+            <div class="w-full flex items-center justify-between mb-1 px-1">
+                <span id="instruction-text" class="text-xs sm:text-sm font-bold text-slate-500 uppercase tracking-wider truncate mr-2">
+                    ¡Toca la respuesta correcta!
+                </span>
+                <div class="flex items-center gap-1 shrink-0" id="gift-progress" title="Consigue 5 estrellas para una medalla">
+                    <span class="text-xs font-bold text-slate-500 mr-1">🎁</span>
+                    <div class="flex gap-1" id="progress-dots"></div>
+                </div>
+            </div>
+
+            <!-- Contenedor de la Palabra en Mayúsculas y Botón de Voz -->
+            <div class="flex items-center justify-center gap-2.5 sm:gap-5 my-1 sm:my-2 w-full">
+                
+                <!-- Botón Altavoz Gigante -->
+                <button id="speaker-btn" onclick="speakCurrentItem(true)" class="toy-btn bg-rose-400 hover:bg-rose-300 active:bg-rose-500 text-white w-14 h-14 sm:w-20 sm:h-20 rounded-3xl flex flex-col items-center justify-center shrink-0 group" title="Escuchar pronunciación">
+                    <i id="speaker-icon" class="fa-solid fa-volume-high text-2xl sm:text-4xl group-hover:scale-110 transition-transform drop-shadow-[0_2px_0_#1e293b]"></i>
+                    <span class="text-[10px] sm:text-xs font-extrabold uppercase tracking-tighter mt-0.5 text-slate-900">VOZ</span>
+                </button>
+
+                <!-- Palabra en MAYÚSCULAS GIGANTES -->
+                <div onclick="speakCurrentItem(true)" class="cursor-pointer text-center select-none px-1 py-1 flex flex-col items-center justify-center min-w-0 flex-1">
+                    <h1 id="target-word" class="color-word text-4xl sm:text-6xl md:text-7xl tracking-wider uppercase break-words max-w-full">
+                        PINK
+                    </h1>
+                    <!-- Subtítulo fonético / onomatopeya o puntos para contar en Números -->
+                    <div id="target-helper-sub" class="mt-1 flex items-center justify-center gap-1 text-lg sm:text-2xl font-extrabold text-slate-600 min-h-[28px]">
+                    </div>
+                </div>
+
+                <!-- Pista visual lateral (visible en Modo Aprender, oculta en Modo Reto/Loco) -->
+                <div id="learning-splat-hint" onclick="speakCurrentItem(true)" class="cursor-pointer w-14 h-14 sm:w-20 sm:h-20 shrink-0 transition-transform hover:scale-110 flex items-center justify-center" title="Pista visual">
+                </div>
+            </div>
+
+            <!-- Mensaje de ánimo dinámico -->
+            <div id="feedback-banner" class="h-6 sm:h-7 flex items-center justify-center">
+                <p id="feedback-text" class="text-sm sm:text-lg font-extrabold text-slate-700 transition-all duration-200 text-center">
+                    🔊 ¡Escucha y toca el dibujo correcto!
+                </p>
+            </div>
+        </section>
+
+        <!-- CUADRÍCULA DE 4 OPCIONES -->
+        <section id="options-grid" class="w-full grid grid-cols-2 gap-3 sm:gap-4 flex-1 min-h-[240px] max-h-[410px]">
+            <!-- Las 4 tarjetas se generan dinámicamente con JS -->
+        </section>
+
+    </main>
+
+    <!-- PIE DE PÁGINA: Colección rápida de medallas desbloqueadas -->
+    <footer class="w-full max-w-4xl bg-white/85 backdrop-blur-sm rounded-2xl border-3 border-slate-800 px-3 py-1.5 flex items-center justify-between text-xs sm:text-sm font-bold text-slate-700 shadow-[0_4px_0_#1e293b]">
+        <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5" id="sticker-tray">
+            <span class="text-slate-500 shrink-0">Premios:</span>
+            <span id="empty-stickers-msg" class="text-slate-400 italic truncate">¡Acierta 5 veces para ganar una pegatina! 🎁</span>
+        </div>
+        <div class="flex items-center gap-2 shrink-0 ml-2">
+            <button onclick="speakCurrentItem(true)" class="toy-btn bg-sky-300 hover:bg-sky-200 text-slate-900 px-2.5 py-1 rounded-xl flex items-center gap-1 text-xs sm:text-sm">
+                <i class="fa-solid fa-ear-listen text-sky-800"></i>
+                <span class="hidden sm:inline">Repetir Voz</span>
+            </button>
+            <button onclick="triggerManualHint()" class="toy-btn bg-yellow-300 hover:bg-yellow-200 text-slate-900 px-2.5 py-1 rounded-xl flex items-center gap-1 text-xs sm:text-sm">
+                <i class="fa-solid fa-lightbulb text-amber-600"></i>
+                <span>Pista</span>
+            </button>
+        </div>
+    </footer>
+
+    <!-- MODAL DE PREMIO / ÁLBUM DE PEGATINAS -->
+    <div id="reward-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 hidden items-center justify-center p-4">
+        <div class="bg-white border-4 border-slate-800 rounded-[2.5rem] shadow-[0_12px_0_#1e293b] max-w-md w-full p-6 text-center flex flex-col items-center animate-happy">
+            <div class="text-6xl sm:text-7xl mb-3" id="reward-emoji">🦄</div>
+            <h2 id="reward-title" class="text-2xl sm:text-3xl font-extrabold text-slate-800 mb-2">
+                ¡NUEVO PREMIO!
+            </h2>
+            <p id="reward-desc" class="text-slate-600 font-bold mb-5 text-base sm:text-lg">
+                ¡Lo estás haciendo súper bien!
+            </p>
+            <div id="modal-stickers-grid" class="w-full bg-amber-50 border-3 border-slate-800 rounded-2xl p-3 mb-5 flex flex-wrap items-center justify-center gap-2 min-h-[64px]">
+            </div>
+            <button onclick="closeStickerModal()" class="toy-btn bg-emerald-400 hover:bg-emerald-300 text-slate-900 font-extrabold text-xl px-8 py-3 rounded-2xl w-full">
+                ¡SEGUIR JUGANDO! 🚀
+            </button>
+        </div>
+    </div>
+
+    <script>
+        /* =========================================================================
+           1. BASES DE DATOS DE LOS 6 TEMAS PARA NIÑOS DE 4 AÑOS
+           ========================================================================= */
+        const THEMES_META = [
+            { id: 'colors',   icon: '🎨', es: 'COLORES',   en: 'COLORS',   bg: 'bg-pink-400' },
+            { id: 'animals',  icon: '🐶', es: 'ANIMALES',  en: 'ANIMALS',  bg: 'bg-amber-400' },
+            { id: 'numbers',  icon: '1️⃣', es: 'NÚMEROS',   en: 'NUMBERS',  bg: 'bg-sky-400' },
+            { id: 'shapes',   icon: '⭐', es: 'FORMAS',    en: 'SHAPES',   bg: 'bg-purple-400' },
+            { id: 'fruits',   icon: '🍎', es: 'FRUTAS',    en: 'FRUITS',   bg: 'bg-emerald-400' },
+            { id: 'emotions', icon: '😊', es: 'EMOCIONES', en: 'FEELINGS', bg: 'bg-yellow-300' }
+        ];
+
+        const ITEMS_DB = {
+            // 1. COLORES (Con monstruos de pintura)
+            colors: [
+                { id: 'pink',      en: 'PINK',   es: 'ROSA',     hex: '#FF4D94', lightHex: '#FF85B3', cardBg: '#FFF0F6', type: 'color' },
+                { id: 'red',       en: 'RED',    es: 'ROJO',     hex: '#EF4444', lightHex: '#F87171', cardBg: '#FEF2F2', type: 'color' },
+                { id: 'blue',      en: 'BLUE',   es: 'AZUL',     hex: '#3B82F6', lightHex: '#60A5FA', cardBg: '#EFF6FF', type: 'color' },
+                { id: 'green',     en: 'GREEN',  es: 'VERDE',    hex: '#22C55E', lightHex: '#4ADE80', cardBg: '#F0FDF4', type: 'color' },
+                { id: 'yellow',    en: 'YELLOW', es: 'AMARILLO', hex: '#FACC15', lightHex: '#FEF08A', cardBg: '#FEFCE8', type: 'color' },
+                { id: 'orange',    en: 'ORANGE', es: 'NARANJA',  hex: '#F97316', lightHex: '#FB923C', cardBg: '#FFF7ED', type: 'color' },
+                { id: 'purple',    en: 'PURPLE', es: 'MORADO',   hex: '#A855F7', lightHex: '#C084FC', cardBg: '#FAF5FF', type: 'color' },
+                { id: 'brown',     en: 'BROWN',  es: 'MARRÓN',   hex: '#92400E', lightHex: '#B45309', cardBg: '#FEF3C7', type: 'color' },
+                { id: 'black',     en: 'BLACK',  es: 'NEGRO',    hex: '#334155', lightHex: '#64748B', cardBg: '#F1F5F9', type: 'color' },
+                { id: 'white',     en: 'WHITE',  es: 'BLANCO',   hex: '#FFFFFF', lightHex: '#FFFFFF', cardBg: '#F8FAFC', type: 'color' }
+            ],
+
+            // 2. ANIMALES (Con sus sonidos divertidos)
+            animals: [
+                { id: 'dog',      en: 'DOG',      es: 'PERRO',    soundEn: 'Woof woof!',   soundEs: '¡Guau guau!',   emoji: '🐶', hex: '#D97706', cardBg: '#FEF3C7', type: 'emoji' },
+                { id: 'cat',      en: 'CAT',      es: 'GATO',     soundEn: 'Meow!',        soundEs: '¡Miau miau!',   emoji: '🐱', hex: '#FB923C', cardBg: '#FFF7ED', type: 'emoji' },
+                { id: 'lion',     en: 'LION',     es: 'LEÓN',     soundEn: 'Roar!',        soundEs: '¡Grrrr!',       emoji: '🦁', hex: '#EAB308', cardBg: '#FEFCE8', type: 'emoji' },
+                { id: 'cow',      en: 'COW',      es: 'VACA',     soundEn: 'Moooo!',       soundEs: '¡Muuuu!',       emoji: '🐮', hex: '#475569', cardBg: '#F8FAFC', type: 'emoji' },
+                { id: 'pig',      en: 'PIG',      es: 'CERDO',    soundEn: 'Oink oink!',   soundEs: '¡Oink oink!',   emoji: '🐷', hex: '#F472B6', cardBg: '#FDF2F8', type: 'emoji' },
+                { id: 'frog',     en: 'FROG',     es: 'RANA',     soundEn: 'Ribbit!',      soundEs: '¡Croac croac!', emoji: '🐸', hex: '#22C55E', cardBg: '#F0FDF4', type: 'emoji' },
+                { id: 'duck',     en: 'DUCK',     es: 'PATO',     soundEn: 'Quack quack!', soundEs: '¡Cuac cuac!',   emoji: '🦆', hex: '#FACC15', cardBg: '#FEFCE8', type: 'emoji' },
+                { id: 'monkey',   en: 'MONKEY',   es: 'MONO',     soundEn: 'Ooh ooh aah!', soundEs: '¡Uuu uuu aaa!', emoji: '🐵', hex: '#92400E', cardBg: '#FEF3C7', type: 'emoji' },
+                { id: 'elephant', en: 'ELEPHANT', es: 'ELEFANTE', soundEn: 'Pawoo!',       soundEs: '¡Pruuuu!',      emoji: '🐘', hex: '#60A5FA', cardBg: '#EFF6FF', type: 'emoji' },
+                { id: 'sheep',    en: 'SHEEP',    es: 'OVEJA',    soundEn: 'Baaaa!',       soundEs: '¡Beeee!',       emoji: '🐑', hex: '#94A3B8', cardBg: '#F1F5F9', type: 'emoji' }
+            ],
+
+            // 3. NÚMEROS DEL 1 AL 10 (Con objetos para contar)
+            numbers: [
+                { id: 'num1', num: 1,  en: 'ONE',   es: 'UNO',    countEmoji: '⭐', hex: '#EF4444', cardBg: '#FEF2F2', type: 'number' },
+                { id: 'num2', num: 2,  en: 'TWO',   es: 'DOS',    countEmoji: '🍎', hex: '#F97316', cardBg: '#FFF7ED', type: 'number' },
+                { id: 'num3', num: 3,  en: 'THREE', es: 'TRES',   countEmoji: '🎈', hex: '#FACC15', cardBg: '#FEFCE8', type: 'number' },
+                { id: 'num4', num: 4,  en: 'FOUR',  es: 'CUATRO', countEmoji: '🚗', hex: '#22C55E', cardBg: '#F0FDF4', type: 'number' },
+                { id: 'num5', num: 5,  en: 'FIVE',  es: 'CINCO',  countEmoji: '🦋', hex: '#3B82F6', cardBg: '#EFF6FF', type: 'number' },
+                { id: 'num6', num: 6,  en: 'SIX',   es: 'SEIS',   countEmoji: '🍓', hex: '#A855F7', cardBg: '#FAF5FF', type: 'number' },
+                { id: 'num7', num: 7,  en: 'SEVEN', es: 'SIETE',  countEmoji: '🌈', hex: '#EC4899', cardBg: '#FDF2F8', type: 'number' },
+                { id: 'num8', num: 8,  en: 'EIGHT', es: 'OCHO',   countEmoji: '🐙', hex: '#06B6D4', cardBg: '#ECFEFF', type: 'number' },
+                { id: 'num9', num: 9,  en: 'NINE',  es: 'NUEVE',  countEmoji: '⚽', hex: '#10B981', cardBg: '#ECFDF5', type: 'number' },
+                { id: 'num10',num: 10, en: 'TEN',   es: 'DIEZ',   countEmoji: '🌟', hex: '#F59E0B', cardBg: '#FFFBEB', type: 'number' }
+            ],
+
+            // 4. FORMAS GEOMÉTRICAS (Con caritas simpáticas en SVG)
+            shapes: [
+                { id: 'circle',   en: 'CIRCLE',   es: 'CÍRCULO',   hex: '#EF4444', cardBg: '#FEF2F2', type: 'shape' },
+                { id: 'square',   en: 'SQUARE',   es: 'CUADRADO',  hex: '#3B82F6', cardBg: '#EFF6FF', type: 'shape' },
+                { id: 'triangle', en: 'TRIANGLE', es: 'TRIÁNGULO', hex: '#22C55E', cardBg: '#F0FDF4', type: 'shape' },
+                { id: 'star',     en: 'STAR',     es: 'ESTRELLA',  hex: '#FACC15', cardBg: '#FEFCE8', type: 'shape' },
+                { id: 'heart',    en: 'HEART',    es: 'CORAZÓN',   hex: '#FF4D94', cardBg: '#FFF0F6', type: 'shape' },
+                { id: 'diamond',  en: 'DIAMOND',  es: 'ROMBO',     hex: '#A855F7', cardBg: '#FAF5FF', type: 'shape' },
+                { id: 'moon',     en: 'MOON',     es: 'LUNA',      hex: '#06B6D4', cardBg: '#ECFEFF', type: 'shape' }
+            ],
+
+            // 5. FRUTAS Y COMIDA
+            fruits: [
+                { id: 'apple',      en: 'APPLE',      es: 'MANZANA',   emoji: '🍎', hex: '#EF4444', cardBg: '#FEF2F2', type: 'emoji' },
+                { id: 'banana',     en: 'BANANA',     es: 'PLÁTANO',   emoji: '🍌', hex: '#FACC15', cardBg: '#FEFCE8', type: 'emoji' },
+                { id: 'strawberry', en: 'STRAWBERRY', es: 'FRESA',     emoji: '🍓', hex: '#FF4D94', cardBg: '#FFF0F6', type: 'emoji' },
+                { id: 'orange_fr',  en: 'ORANGE',     es: 'NARANJA',   emoji: '🍊', hex: '#F97316', cardBg: '#FFF7ED', type: 'emoji' },
+                { id: 'watermelon', en: 'WATERMELON', es: 'SANDÍA',    emoji: '🍉', hex: '#22C55E', cardBg: '#F0FDF4', type: 'emoji' },
+                { id: 'grapes',     en: 'GRAPES',     es: 'UVAS',      emoji: '🍇', hex: '#A855F7', cardBg: '#FAF5FF', type: 'emoji' },
+                { id: 'icecream',   en: 'ICE CREAM',  es: 'HELADO',    emoji: '🍦', hex: '#F472B6', cardBg: '#FDF2F8', type: 'emoji' },
+                { id: 'pizza',      en: 'PIZZA',      es: 'PIZZA',     emoji: '🍕', hex: '#EAB308', cardBg: '#FEFCE8', type: 'emoji' }
+            ],
+
+            // 6. EMOCIONES (Estilo Monstruo de los Colores / Inside Out)
+            emotions: [
+                { id: 'happy',     en: 'HAPPY',     es: 'FELIZ',       soundEn: 'Haha!',    soundEs: '¡Jajaja!', emoji: '😄', hex: '#FACC15', cardBg: '#FEFCE8', type: 'emoji' },
+                { id: 'sad',       en: 'SAD',       es: 'TRISTE',      soundEn: 'Boo hoo!', soundEs: '¡Buaaa!',  emoji: '😢', hex: '#3B82F6', cardBg: '#EFF6FF', type: 'emoji' },
+                { id: 'angry',     en: 'ANGRY',     es: 'ENFADADO',    soundEn: 'Hmph!',    soundEs: '¡Grrr!',   emoji: '😠', hex: '#EF4444', cardBg: '#FEF2F2', type: 'emoji' },
+                { id: 'surprised', en: 'SURPRISED', es: 'SORPRENDIDO', soundEn: 'Wow!',     soundEs: '¡Ohhh!',   emoji: '😮', hex: '#A855F7', cardBg: '#FAF5FF', type: 'emoji' },
+                { id: 'sleepy',    en: 'SLEEPY',    es: 'DORMIDO',     soundEn: 'Zzzzz!',   soundEs: '¡Zzzzz!',  emoji: '😴', hex: '#06B6D4', cardBg: '#ECFEFF', type: 'emoji' },
+                { id: 'love',      en: 'IN LOVE',   es: 'ENAMORADO',   soundEn: 'Awww!',    soundEs: '¡Awww!',   emoji: '😍', hex: '#FF4D94', cardBg: '#FFF0F6', type: 'emoji' },
+                { id: 'silly',     en: 'SILLY',     es: 'DIVERTIDO',   soundEn: 'Bleh!',    soundEs: '¡Bleh!',   emoji: '🤪', hex: '#22C55E', cardBg: '#F0FDF4', type: 'emoji' }
+            ]
+        };
+
+        const GAME_MODES = [
+            {
+                id: 'learn',
+                nameEs: 'APRENDER',
+                nameEn: 'LEARN',
+                icon: '🎨',
+                bgClass: 'bg-purple-400 hover:bg-purple-300',
+                descEs: '¡Mira la pista arriba y toca el dibujo igual!',
+                descEn: 'Look at the hint above and tap the matching card!'
+            },
+            {
+                id: 'challenge',
+                nameEs: 'RETO',
+                nameEn: 'CHALLENGE',
+                icon: '🏆',
+                bgClass: 'bg-amber-400 hover:bg-amber-300',
+                descEs: '¡Sin pista visual! ¡Escucha la voz o lee la palabra!',
+                descEn: 'No visual hint! Listen closely or read the word!'
+            },
+            {
+                id: 'crazy',
+                nameEs: 'LOCO',
+                nameEn: 'CRAZY MIX',
+                icon: '🤪',
+                bgClass: 'bg-pink-400 hover:bg-pink-300',
+                descEs: '¡Cuidado! ¡El color de las letras intenta engañarte!',
+                descEn: 'Watch out! The letters are painted with a tricky color!'
+            }
+        ];
+
+        const REWARD_STICKERS = ['🦖', '🦄', '🚀', '🌈', '🦁', '🍦', '🎸', '👑', '🐳', '🦊', '🍕', '🛸'];
+
+        /* =========================================================================
+           2. ESTADO DEL JUEGO Y MOTOR DE VOZ ROBUSTO (ANTI-BLOQUEO)
+           ========================================================================= */
+        let state = {
+            lang: 'en',              // Idioma activo ('en' o 'es')
+            theme: 'colors',         // Tema activo
+            modeIndex: 0,            // 0: Aprender, 1: Reto, 2: Loco
+            stars: 0,
+            streak: 0,
+            progressToGift: 0,
+            unlockedStickers: [],
+            currentTarget: null,
+            currentOptions: [],
+            isLocked: false,
+            isMuted: false,
+            audioUnlocked: false,
+            autoHintTimer: null,
+            voices: []
+        };
+
+        // Referencia global para evitar que el recolector de basura de Chrome/Android corte la voz
+        window.currentUtterance = null;
+        let audioCtx = null;
+        let speakTimeoutId = null;
+
+        // Cargar voces del sistema en cuanto estén disponibles
+        function loadSystemVoices() {
+            if (!('speechSynthesis' in window)) return;
+            const available = window.speechSynthesis.getVoices();
+            if (available && available.length > 0) {
+                state.voices = available;
+            }
+        }
+
+        if ('speechSynthesis' in window) {
+            loadSystemVoices();
+            window.speechSynthesis.onvoiceschanged = loadSystemVoices;
+        }
+
+        function setInitialLang(langCode) {
+            state.lang = langCode;
+            const btnEn = document.getElementById('welcome-lang-en');
+            const btnEs = document.getElementById('welcome-lang-es');
+
+            if (langCode === 'en') {
+                btnEn.className = 'toy-btn bg-sky-400 text-slate-900 font-extrabold px-4 py-2.5 rounded-2xl flex items-center gap-2 text-base sm:text-lg ring-4 ring-amber-400';
+                btnEs.className = 'toy-btn bg-white text-slate-700 font-extrabold px-4 py-2.5 rounded-2xl flex items-center gap-2 text-base sm:text-lg';
+            } else {
+                btnEs.className = 'toy-btn bg-sky-400 text-slate-900 font-extrabold px-4 py-2.5 rounded-2xl flex items-center gap-2 text-base sm:text-lg ring-4 ring-amber-400';
+                btnEn.className = 'toy-btn bg-white text-slate-700 font-extrabold px-4 py-2.5 rounded-2xl flex items-center gap-2 text-base sm:text-lg';
+            }
+
+            document.getElementById('lang-flag').textContent = state.lang === 'en' ? '🇬🇧' : '🇪🇸';
+            document.getElementById('lang-label').textContent = state.lang === 'en' ? 'ENGLISH' : 'ESPAÑOL';
+            renderThemeTabs();
+        }
+
+        // Función crítica ejecutada al pulsar el botón gigante "¡JUGAR! / PLAY!"
+        function unlockAudioAndStart() {
+            state.audioUnlocked = true;
+
+            // 1. Desbloquear Web Audio API inmediatamente dentro del evento click del usuario
+            try {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (!audioCtx) {
+                    audioCtx = new AudioContextClass();
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                // Tocar acorde de bienvenida
+                playSoundEffect('win');
+            } catch (e) {
+                console.warn('AudioContext init error:', e);
+            }
+
+            // 2. Desbloquear Web Speech API en iOS/Android/Chrome
+            if ('speechSynthesis' in window) {
+                loadSystemVoices();
+                try {
+                    window.speechSynthesis.cancel();
+                    const warmUp = new SpeechSynthesisUtterance(state.lang === 'en' ? "Let's play!" : "¡Vamos a jugar!");
+                    warmUp.lang = state.lang === 'en' ? 'en-US' : 'es-ES';
+                    warmUp.volume = 1;
+                    warmUp.rate = 0.95;
+                    warmUp.pitch = 1.15;
+                    const bestVoice = pickBestVoice(state.lang);
+                    if (bestVoice) warmUp.voice = bestVoice;
+                    window.currentUtterance = warmUp;
+                    window.speechSynthesis.speak(warmUp);
+                } catch (e) {
+                    console.warn('Speech warmup error:', e);
+                }
+            }
+
+            // 3. Ocultar pantalla de bienvenida e iniciar primera ronda
+            const overlay = document.getElementById('welcome-overlay');
+            overlay.classList.add('hidden');
+
+            // Iniciar primera ronda (con PINK como pidió el usuario) y pronunciar tras el saludo
+            startNewRound('pink', 750);
+        }
+
+        function pickBestVoice(langCode) {
+            if (!state.voices || state.voices.length === 0) {
+                loadSystemVoices();
+            }
+            if (!state.voices || state.voices.length === 0) return null;
+
+            const targetPrefix = langCode === 'en' ? 'en' : 'es';
+            const matching = state.voices.filter(v => v.lang && v.lang.toLowerCase().startsWith(targetPrefix));
+            if (matching.length === 0) return null;
+
+            // Priorizar voces naturales de Google/Apple/Microsoft
+            const preferred = matching.find(v =>
+                /natural|google|samantha|monica|paulina|luciana|karen|daniel|helena|sabina/i.test(v.name)
+            );
+            return preferred || matching[0];
+        }
+
+        // Pronunciación robusta con animación visual y respaldo
+        function speakText(textToSay, langCode) {
+            if (state.isMuted || !state.audioUnlocked) return;
+
+            const speakerBtn = document.getElementById('speaker-btn');
+            const setSpeakerActive = (active) => {
+                if (!speakerBtn) return;
+                if (active) speakerBtn.classList.add('speaking-pulse');
+                else speakerBtn.classList.remove('speaking-pulse');
+            };
+
+            clearTimeout(speakTimeoutId);
+
+            if ('speechSynthesis' in window) {
+                try {
+                    // En Chrome/Android llamar a cancel() justo en la misma línea que speak() a veces silencia la nueva frase.
+                    // Por eso cancelamos solo si está hablando y damos 60ms de margen limpio.
+                    if (window.speechSynthesis.speaking || window.speechSynthesis.pending) {
+                        window.speechSynthesis.cancel();
+                    }
+
+                    speakTimeoutId = setTimeout(() => {
+                        try {
+                            if (window.speechSynthesis.paused) {
+                                window.speechSynthesis.resume();
+                            }
+
+                            const utterance = new SpeechSynthesisUtterance(textToSay);
+                            utterance.lang = langCode === 'en' ? 'en-US' : 'es-ES';
+                            utterance.rate = 0.88;  // Ritmo claro para niños de 4 años
+                            utterance.pitch = 1.15; // Tono alegre e infantil
+                            utterance.volume = 1.0;
+
+                            const chosenVoice = pickBestVoice(langCode);
+                            if (chosenVoice) {
+                                utterance.voice = chosenVoice;
+                            }
+
+                            utterance.onstart = () => setSpeakerActive(true);
+                            utterance.onend = () => setSpeakerActive(false);
+                            utterance.onerror = () => setSpeakerActive(false);
+
+                            // Guardar en variable global para evitar Garbage Collection prematuro
+                            window.currentUtterance = utterance;
+                            window.speechSynthesis.speak(utterance);
+
+                            // Seguro para quitar la animación si onend no se dispara en algún navegador móvil
+                            setTimeout(() => setSpeakerActive(false), 2600);
+                        } catch (innerErr) {
+                            setSpeakerActive(false);
+                        }
+                    }, 60);
+                } catch (e) {
+                    setSpeakerActive(false);
+                }
+            }
+        }
+
+        function speakCurrentItem(withMusicalPop = false) {
+            if (!state.currentTarget) return;
+            if (withMusicalPop) {
+                playSoundEffect('marimba');
+            }
+
+            const item = state.currentTarget;
+            let phrase = state.lang === 'en' ? item.en : item.es;
+
+            // Si es un animal o emoción con onomatopeya, decir el nombre + su sonido divertido
+            if (state.lang === 'en' && item.soundEn) {
+                phrase = `${item.en}! ${item.soundEn}`;
+            } else if (state.lang === 'es' && item.soundEs) {
+                phrase = `¡${item.es}! ${item.soundEs}`;
+            }
+
+            speakText(phrase, state.lang);
+        }
+
+        /* =========================================================================
+           3. SINTETIZADOR DE EFECTOS MUSICALES (Web Audio API)
+           ========================================================================= */
+        function playSoundEffect(type) {
+            if (state.isMuted) return;
+            try {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (!audioCtx) audioCtx = new AudioContextClass();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+
+                const now = audioCtx.currentTime;
+
+                if (type === 'pop') {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(360, now);
+                    osc.frequency.exponentialRampToValueAtTime(720, now + 0.09);
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.linearRampToValueAtTime(0.01, now + 0.09);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.09);
+                }
+                else if (type === 'marimba') {
+                    // Dos notas de xilófono alegres al tocar el botón de voz
+                    const freqs = [587.33, 880]; // D5, A5
+                    freqs.forEach((f, i) => {
+                        const osc = audioCtx.createOscillator();
+                        const gain = audioCtx.createGain();
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(f, now + i * 0.07);
+                        gain.gain.setValueAtTime(0.28, now + i * 0.07);
+                        gain.gain.exponentialRampToValueAtTime(0.008, now + i * 0.07 + 0.18);
+                        osc.connect(gain);
+                        gain.connect(audioCtx.destination);
+                        osc.start(now + i * 0.07);
+                        osc.stop(now + i * 0.07 + 0.18);
+                    });
+                }
+                else if (type === 'win') {
+                    // Acorde alegre ascendente
+                    const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+                    notes.forEach((freq, idx) => {
+                        const osc = audioCtx.createOscillator();
+                        const gain = audioCtx.createGain();
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(freq, now + idx * 0.075);
+                        gain.gain.setValueAtTime(0.3, now + idx * 0.075);
+                        gain.gain.exponentialRampToValueAtTime(0.008, now + idx * 0.075 + 0.3);
+                        osc.connect(gain);
+                        gain.connect(audioCtx.destination);
+                        osc.start(now + idx * 0.075);
+                        osc.stop(now + idx * 0.075 + 0.3);
+                    });
+                }
+                else if (type === 'boing') {
+                    // Efecto de muelle simpático al fallar
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(240, now);
+                    osc.frequency.linearRampToValueAtTime(140, now + 0.12);
+                    osc.frequency.linearRampToValueAtTime(280, now + 0.25);
+                    osc.frequency.linearRampToValueAtTime(170, now + 0.38);
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.38);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.38);
+                }
+                else if (type === 'fanfare') {
+                    const melody = [523.25, 659.25, 783.99, 1046.50, 783.99, 1046.50];
+                    const times  = [0, 0.1, 0.2, 0.32, 0.46, 0.58];
+                    const durs   = [0.1, 0.1, 0.1, 0.12, 0.1, 0.42];
+                    melody.forEach((freq, i) => {
+                        const osc = audioCtx.createOscillator();
+                        const gain = audioCtx.createGain();
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(freq, now + times[i]);
+                        gain.gain.setValueAtTime(0.25, now + times[i]);
+                        gain.gain.exponentialRampToValueAtTime(0.008, now + times[i] + durs[i]);
+                        osc.connect(gain);
+                        gain.connect(audioCtx.destination);
+                        osc.start(now + times[i]);
+                        osc.stop(now + times[i] + durs[i]);
+                    });
+                }
+            } catch (e) {
+                // Ignorar si hay restricción de hardware
+            }
+        }
+
+        /* =========================================================================
+           4. GENERADORES VISUALES PARA CADA TEMA (SVG Y TARJETAS PARA 4 AÑOS)
+           ========================================================================= */
+        function createMonsterSVG(colorObj, variantIndex) {
+            const fill = colorObj.hex;
+            const light = colorObj.lightHex || '#FFFFFF';
+            const stroke = '#1e293b';
+
+            const bodyPaths = [
+                `M 45 25 C 65 15, 95 25, 110 15 C 125 5, 145 25, 140 50 C 135 70, 155 90, 145 115 C 135 140, 105 145, 80 140 C 55 145, 25 135, 20 110 C 15 85, 35 70, 25 45 C 20 30, 30 32, 45 25 Z`,
+                `M 80 18 C 115 18, 138 40, 142 75 C 146 110, 132 138, 95 142 C 75 144, 60 142, 42 136 C 18 128, 14 98, 20 70 C 26 42, 45 18, 80 18 Z`,
+                `M 80 15 C 102 15, 118 38, 128 65 C 138 92, 150 118, 132 135 C 114 148, 46 148, 28 135 C 10 118, 22 92, 32 65 C 42 38, 58 15, 80 15 Z`,
+                `M 80 14 C 95 14, 104 34, 120 36 C 138 38, 148 56, 136 74 C 126 88, 140 110, 128 126 C 114 142, 96 130, 80 140 C 64 130, 46 142, 32 126 C 20 110, 34 88, 24 74 C 12 56, 22 38, 40 36 C 56 34, 65 14, 80 14 Z`
+            ];
+
+            const faces = [
+                `<g class="monster-eyes">
+                    <circle cx="62" cy="72" r="12" fill="#FFFFFF" stroke="${stroke}" stroke-width="4"/>
+                    <circle cx="64" cy="72" r="5.5" fill="${stroke}"/>
+                    <circle cx="61" cy="69" r="2.2" fill="#FFFFFF"/>
+                    <circle cx="98" cy="72" r="12" fill="#FFFFFF" stroke="${stroke}" stroke-width="4"/>
+                    <circle cx="96" cy="72" r="5.5" fill="${stroke}"/>
+                    <circle cx="93" cy="69" r="2.2" fill="#FFFFFF"/>
+                 </g>
+                 <path d="M 62 95 Q 80 114 98 95" fill="none" stroke="${stroke}" stroke-width="5" stroke-linecap="round"/>
+                 <path d="M 73 102 Q 80 115 87 102 Z" fill="#FB7185" stroke="${stroke}" stroke-width="3"/>`,
+
+                `<g class="monster-eyes">
+                    <circle cx="80" cy="68" r="19" fill="#FFFFFF" stroke="${stroke}" stroke-width="4.5"/>
+                    <circle cx="80" cy="68" r="9" fill="${stroke}"/>
+                    <circle cx="76" cy="63" r="3.5" fill="#FFFFFF"/>
+                 </g>
+                 <path d="M 58 100 Q 80 116 102 100" fill="none" stroke="${stroke}" stroke-width="5" stroke-linecap="round"/>
+                 <rect x="75" y="104" width="10" height="8" rx="2" fill="#FFFFFF" stroke="${stroke}" stroke-width="3"/>`,
+
+                `<g class="monster-eyes">
+                    <circle cx="60" cy="70" r="14" fill="#FFFFFF" stroke="${stroke}" stroke-width="4"/>
+                    <circle cx="62" cy="70" r="6" fill="${stroke}"/>
+                    <circle cx="59" cy="67" r="2.5" fill="#FFFFFF"/>
+                    <circle cx="100" cy="66" r="11" fill="#FFFFFF" stroke="${stroke}" stroke-width="4"/>
+                    <circle cx="98" cy="66" r="5" fill="${stroke}"/>
+                    <circle cx="96" cy="64" r="2" fill="#FFFFFF"/>
+                 </g>
+                 <ellipse cx="80" cy="102" rx="12" ry="9" fill="${stroke}"/>
+                 <ellipse cx="80" cy="105" rx="7" ry="4" fill="#FB7185"/>`,
+
+                `<g class="monster-eyes">
+                    <circle cx="60" cy="74" r="11" fill="#FFFFFF" stroke="${stroke}" stroke-width="4"/>
+                    <circle cx="60" cy="74" r="5.5" fill="${stroke}"/>
+                    <circle cx="58" cy="71" r="2.5" fill="#FFFFFF"/>
+                    <circle cx="100" cy="74" r="11" fill="#FFFFFF" stroke="${stroke}" stroke-width="4"/>
+                    <circle cx="100" cy="74" r="5.5" fill="${stroke}"/>
+                    <circle cx="98" cy="71" r="2.5" fill="#FFFFFF"/>
+                 </g>
+                 <ellipse cx="46" cy="86" rx="6" ry="3.5" fill="#FB7185" opacity="0.7"/>
+                 <ellipse cx="114" cy="86" rx="6" ry="3.5" fill="#FB7185" opacity="0.7"/>
+                 <path d="M 60 94 C 65 114, 95 114, 100 94 Z" fill="#FFFFFF" stroke="${stroke}" stroke-width="4" stroke-linejoin="round"/>`
+            ];
+
+            const shape = bodyPaths[variantIndex % bodyPaths.length];
+            const face = faces[variantIndex % faces.length];
+
+            return `
+                <svg viewBox="0 0 160 160" class="w-24 h-24 sm:w-32 sm:h-32 md:w-36 md:h-36 drop-shadow-[0_5px_0_rgba(30,41,59,0.25)] overflow-visible">
+                    <circle cx="22" cy="30" r="6" fill="${fill}" stroke="${stroke}" stroke-width="3.5"/>
+                    <circle cx="140" cy="28" r="5" fill="${fill}" stroke="${stroke}" stroke-width="3.5"/>
+                    <circle cx="144" cy="128" r="7" fill="${fill}" stroke="${stroke}" stroke-width="3.5"/>
+                    <path d="${shape}" fill="${fill}" stroke="${stroke}" stroke-width="5.5" stroke-linejoin="round"/>
+                    <ellipse cx="58" cy="40" rx="14" ry="6" transform="rotate(-22 58 40)" fill="${light}" opacity="0.75"/>
+                    ${face}
+                </svg>
+            `;
+        }
+
+        // Generador de Formas Geométricas con caritas simpáticas
+        function createShapeSVG(shapeItem, sizeClass = "w-24 h-24 sm:w-32 sm:h-32") {
+            const fill = shapeItem.hex;
+            const stroke = '#1e293b';
+            let geom = '';
+
+            switch (shapeItem.id) {
+                case 'circle':
+                    geom = `<circle cx="80" cy="80" r="58" fill="${fill}" stroke="${stroke}" stroke-width="6"/>`;
+                    break;
+                case 'square':
+                    geom = `<rect x="26" y="26" width="108" height="108" rx="18" fill="${fill}" stroke="${stroke}" stroke-width="6"/>`;
+                    break;
+                case 'triangle':
+                    geom = `<polygon points="80,18 142,134 18,134" fill="${fill}" stroke="${stroke}" stroke-width="6" stroke-linejoin="round"/>`;
+                    break;
+                case 'star':
+                    geom = `<polygon points="80,14 99,56 145,61 110,92 120,138 80,114 40,138 50,92 15,61 61,56" fill="${fill}" stroke="${stroke}" stroke-width="6" stroke-linejoin="round"/>`;
+                    break;
+                case 'heart':
+                    geom = `<path d="M 80 136 C 80 136 20 98 20 54 C 20 30 40 18 58 24 C 70 28 76 38 80 46 C 84 38 90 28 102 24 C 120 18 140 30 140 54 C 140 98 80 136 80 136 Z" fill="${fill}" stroke="${stroke}" stroke-width="6" stroke-linejoin="round"/>`;
+                    break;
+                case 'diamond':
+                    geom = `<polygon points="80,14 138,80 80,146 22,80" fill="${fill}" stroke="${stroke}" stroke-width="6" stroke-linejoin="round"/>`;
+                    break;
+                case 'moon':
+                    geom = `<path d="M 105 22 C 62 24 32 58 36 100 C 40 132 72 146 108 134 C 78 126 66 96 72 68 C 76 46 90 30 105 22 Z" fill="${fill}" stroke="${stroke}" stroke-width="6" stroke-linejoin="round"/>`;
+                    break;
+            }
+
+            const eyeY = shapeItem.id === 'triangle' ? 92 : 76;
+            const smileY = shapeItem.id === 'triangle' ? 110 : 96;
+
+            const face = shapeItem.id === 'moon' ? '' : `
+                <g class="monster-eyes">
+                    <circle cx="64" cy="${eyeY}" r="9" fill="#FFFFFF" stroke="${stroke}" stroke-width="3.5"/>
+                    <circle cx="64" cy="${eyeY}" r="4.5" fill="${stroke}"/>
+                    <circle cx="96" cy="${eyeY}" r="9" fill="#FFFFFF" stroke="${stroke}" stroke-width="3.5"/>
+                    <circle cx="96" cy="${eyeY}" r="4.5" fill="${stroke}"/>
+                </g>
+                <path d="M 66 ${smileY} Q 80 ${smileY + 14} 94 ${smileY}" fill="none" stroke="${stroke}" stroke-width="4.5" stroke-linecap="round"/>
+            `;
+
+            return `
+                <svg viewBox="0 0 160 160" class="${sizeClass} drop-shadow-[0_5px_0_rgba(30,41,59,0.22)] overflow-visible">
+                    ${geom}
+                    ${face}
+                </svg>
+            `;
+        }
+
+        // Renderizador universal para cualquier tarjeta (Color, Animal, Número, Forma, Fruta, Emoción)
+        function createCardVisualHTML(item, variantIndex) {
+            if (item.type === 'color') {
+                return createMonsterSVG(item, variantIndex);
+            }
+            if (item.type === 'shape') {
+                return createShapeSVG(item);
+            }
+            if (item.type === 'number') {
+                // Muestra el número gigante en color + los dibujitos para contar debajo
+                const dots = Array(item.num).fill(item.countEmoji).join('');
+                return `
+                    <div class="flex flex-col items-center justify-center">
+                        <span class="color-word text-5xl sm:text-7xl leading-none" style="color: ${item.hex};">
+                            ${item.num}
+                        </span>
+                        <div class="mt-2 flex flex-wrap items-center justify-center gap-0.5 max-w-[140px] sm:max-w-[180px] text-base sm:text-xl leading-tight">
+                            ${dots}
+                        </div>
+                    </div>
+                `;
+            }
+            // Animales, Frutas y Emociones: Emoji gigante ultra nítido con rebote
+            return `
+                <div class="flex flex-col items-center justify-center">
+                    <span class="text-6xl sm:text-8xl leading-none drop-shadow-[0_6px_4px_rgba(0,0,0,0.18)] select-none">
+                        ${item.emoji}
+                    </span>
+                </div>
+            `;
+        }
+
+        // Mini icono de pista para la cabecera en Modo Aprender
+        function createSmallHintHTML(item) {
+            if (item.type === 'color') {
+                return `
+                    <svg viewBox="0 0 100 100" class="w-12 h-12 sm:w-16 sm:h-16 drop-shadow-[0_3px_0_#1e293b]">
+                        <path d="M 50 12 C 68 12, 85 28, 86 48 C 87 68, 74 86, 52 88 C 30 90, 14 74, 14 52 C 14 30, 32 12, 50 12 Z" 
+                              fill="${item.hex}" stroke="#1e293b" stroke-width="6"/>
+                        <ellipse cx="38" cy="34" rx="10" ry="5" transform="rotate(-25 38 34)" fill="#FFFFFF" opacity="0.65"/>
+                    </svg>
+                `;
+            }
+            if (item.type === 'shape') {
+                return createShapeSVG(item, "w-14 h-14 sm:w-16 sm:h-16");
+            }
+            if (item.type === 'number') {
+                return `
+                    <div class="bg-white border-3 border-slate-800 rounded-2xl px-3 py-1 shadow-[0_3px_0_#1e293b]">
+                        <span class="color-word text-3xl sm:text-4xl" style="color: ${item.hex}">${item.num}</span>
+                    </div>
+                `;
+            }
+            return `<span class="text-4xl sm:text-6xl drop-shadow-sm">${item.emoji}</span>`;
+        }
+
+        /* =========================================================================
+           5. SELECTOR DE TEMAS Y GESTIÓN DE RONDAS
+           ========================================================================= */
+        function renderThemeTabs() {
+            const nav = document.getElementById('theme-selector');
+            nav.innerHTML = '';
+
+            THEMES_META.forEach(t => {
+                const isActive = state.theme === t.id;
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.onclick = () => selectTheme(t.id);
+                btn.className = `theme-tab ${isActive ? `${t.bg} active-tab text-slate-900` : 'bg-white/90 text-slate-700 hover:bg-white'} font-extrabold px-3 py-1.5 rounded-2xl flex items-center gap-1.5 text-xs sm:text-sm shrink-0`;
+                btn.innerHTML = `
+                    <span class="text-base sm:text-xl">${t.icon}</span>
+                    <span>${state.lang === 'en' ? t.en : t.es}</span>
+                `;
+                nav.appendChild(btn);
+            });
+        }
+
+        function selectTheme(themeId) {
+            playSoundEffect('pop');
+            state.theme = themeId;
+            renderThemeTabs();
+            startNewRound();
+        }
+
+        function initGame() {
+            renderThemeTabs();
+            renderProgressDots();
+            // Preparar primera pantalla en el fondo
+            startNewRound('pink', 0, true);
+        }
+
+        function startNewRound(forceItemId = null, speakDelay = 240, silentInit = false) {
+            state.isLocked = false;
+            clearTimeout(state.autoHintTimer);
+
+            const currentList = ITEMS_DB[state.theme] || ITEMS_DB.colors;
+
+            // 1. Elegir objetivo evitando repetir el inmediatamente anterior
+            let target;
+            if (forceItemId) {
+                target = currentList.find(c => c.id === forceItemId) || currentList[0];
+            } else {
+                const candidates = currentList.filter(c => !state.currentTarget || c.id !== state.currentTarget.id);
+                target = candidates[Math.floor(Math.random() * candidates.length)];
+            }
+            state.currentTarget = target;
+
+            // 2. Elegir 3 distractores del mismo tema
+            const distractors = currentList
+                .filter(c => c.id !== target.id)
+                .sort(() => Math.random() - 0.5)
+                .slice(0, 3);
+
+            state.currentOptions = [target, ...distractors].sort(() => Math.random() - 0.5);
+
+            // 3. Actualizar palabra en MAYÚSCULAS y ayudas
+            updateWordDisplay();
+
+            // 4. Renderizar las 4 tarjetas
+            renderOptionsGrid();
+
+            // 5. Pronunciar automáticamente si el audio ya fue desbloqueado
+            if (!silentInit && state.audioUnlocked) {
+                setTimeout(() => {
+                    speakCurrentItem(false);
+                }, speakDelay);
+            }
+
+            // 6. Programar pista visual automática a los 7 segundos para niños de 4 años
+            state.autoHintTimer = setTimeout(() => {
+                if (!state.isLocked) highlightCorrectOption();
+            }, 7000);
+        }
+
+        function updateWordDisplay() {
+            const wordEl = document.getElementById('target-word');
+            const subEl = document.getElementById('target-helper-sub');
+            const splatHintEl = document.getElementById('learning-splat-hint');
+            const instructionEl = document.getElementById('instruction-text');
+            const feedbackEl = document.getElementById('feedback-text');
+            const currentMode = GAME_MODES[state.modeIndex];
+            const item = state.currentTarget;
+
+            // Palabra siempre en MAYÚSCULAS
+            const displayWord = state.lang === 'en' ? item.en : item.es;
+            wordEl.textContent = displayWord;
+
+            // Subtítulo divertido (onomatopeya en animales/emociones o objetos para contar en números)
+            if (item.type === 'number') {
+                subEl.textContent = Array(item.num).fill(item.countEmoji).join(' ');
+            } else if (state.lang === 'en' && item.soundEn) {
+                subEl.textContent = `"${item.soundEn}"`;
+            } else if (state.lang === 'es' && item.soundEs) {
+                subEl.textContent = `"${item.soundEs}"`;
+            } else {
+                subEl.textContent = '';
+            }
+
+            // Animación suave de entrada
+            wordEl.classList.remove('scale-110');
+            void wordEl.offsetWidth;
+            wordEl.classList.add('scale-110');
+            setTimeout(() => wordEl.classList.remove('scale-110'), 250);
+
+            // Pintar la palabra según el modo de juego
+            if (currentMode.id === 'learn') {
+                wordEl.style.color = item.hex;
+                splatHintEl.innerHTML = createSmallHintHTML(item);
+                splatHintEl.classList.remove('hidden');
+            } else if (currentMode.id === 'challenge') {
+                wordEl.style.color = '#FFFFFF';
+                splatHintEl.classList.add('hidden');
+            } else if (currentMode.id === 'crazy') {
+                const wrongItems = state.currentOptions.filter(c => c.id !== item.id);
+                const trickyItem = wrongItems[Math.floor(Math.random() * wrongItems.length)];
+                wordEl.style.color = trickyItem.hex;
+                splatHintEl.classList.add('hidden');
+            }
+
+            instructionEl.textContent = state.lang === 'en' ? currentMode.descEn : currentMode.descEs;
+
+            feedbackEl.textContent = state.lang === 'en'
+                ? '🔊 Listen and tap the matching card!'
+                : '🔊 ¡Escucha y toca la tarjeta correcta!';
+            feedbackEl.className = 'text-sm sm:text-lg font-extrabold text-slate-700 transition-all duration-200 text-center';
+        }
+
+        function renderOptionsGrid() {
+            const grid = document.getElementById('options-grid');
+            grid.innerHTML = '';
+            const currentMode = GAME_MODES[state.modeIndex];
+            const shapeVariants = [0, 1, 2, 3].sort(() => Math.random() - 0.5);
+
+            state.currentOptions.forEach((itemObj, idx) => {
+                const button = document.createElement('button');
+                button.id = `option-${itemObj.id}`;
+                button.type = 'button';
+                button.style.backgroundColor = itemObj.cardBg;
+
+                const floatClass = currentMode.id !== 'learn' ? 'floating-monster' : '';
+                button.style.animationDelay = `${idx * 0.35}s`;
+
+                button.className = `monster-card ${floatClass} rounded-[2rem] p-3 sm:p-4 flex flex-col items-center justify-center group focus:outline-none`;
+                button.setAttribute('aria-label', state.lang === 'en' ? itemObj.en : itemObj.es);
+
+                button.innerHTML = `
+                    <div class="transition-transform duration-200 group-hover:scale-105 flex items-center justify-center">
+                        ${createCardVisualHTML(itemObj, shapeVariants[idx])}
+                    </div>
+                `;
+
+                button.onclick = () => handleOptionSelect(itemObj, button);
+                grid.appendChild(button);
+            });
+        }
+
+        /* =========================================================================
+           6. COMPROBACIÓN DE RESPUESTAS Y RECOMPENSAS
+           ========================================================================= */
+        function handleOptionSelect(selectedItem, buttonEl) {
+            if (state.isLocked) return;
+
+            const feedbackEl = document.getElementById('feedback-text');
+
+            if (selectedItem.id === state.currentTarget.id) {
+                // ¡ACIERTO!
+                state.isLocked = true;
+                clearTimeout(state.autoHintTimer);
+
+                playSoundEffect('win');
+                buttonEl.classList.remove('hint-glow', 'floating-monster');
+                buttonEl.classList.add('animate-happy');
+                buttonEl.style.backgroundColor = '#DCFCE7';
+
+                state.streak++;
+                const bonusStars = state.streak >= 3 ? 2 : 1;
+                state.stars += bonusStars;
+                state.progressToGift++;
+
+                updateScoreUI();
+                launchConfetti(selectedItem.hex);
+
+                const praisesEn = ['AWESOME! 🌟', 'GREAT JOB! 🎉', 'SUPER! 🚀', 'BRAVO! 🌈'];
+                const praisesEs = ['¡GENIAL! 🌟', '¡MUY BIEN! 🎉', '¡SÚPER! 🚀', '¡BRAVO! 🌈'];
+                const praiseList = state.lang === 'en' ? praisesEn : praisesEs;
+                const randomPraise = praiseList[Math.floor(Math.random() * praiseList.length)];
+
+                feedbackEl.textContent = `${randomPraise} (${state.lang === 'en' ? selectedItem.en : selectedItem.es})`;
+                feedbackEl.className = 'text-base sm:text-xl font-extrabold text-emerald-600 scale-105 transition-all duration-200 text-center';
+
+                // Pronunciar de nuevo para reforzar aprendizaje
+                speakCurrentItem(false);
+
+                if (state.progressToGift >= 5) {
+                    state.progressToGift = 0;
+                    setTimeout(() => {
+                        unlockNewSticker();
+                    }, 1000);
+                } else {
+                    setTimeout(() => {
+                        startNewRound();
+                    }, 1450);
+                }
+
+            } else {
+                // ¡INTÉNTALO DE NUEVO!
+                playSoundEffect('boing');
+                state.streak = 0;
+                updateScoreUI();
+
+                buttonEl.classList.remove('floating-monster');
+                buttonEl.classList.add('animate-wrong');
+
+                const tryAgainMsg = state.lang === 'en'
+                    ? `Oops! That's ${selectedItem.en}. Try again! 💪`
+                    : `¡Ups! Ese es ${selectedItem.es}. ¡Prueba otra vez! 💪`;
+
+                feedbackEl.textContent = tryAgainMsg;
+                feedbackEl.className = 'text-sm sm:text-lg font-extrabold text-rose-500 transition-all duration-200 text-center';
+
+                highlightCorrectOption();
+                setTimeout(() => speakCurrentItem(false), 350);
+            }
+        }
+
+        function highlightCorrectOption() {
+            if (!state.currentTarget) return;
+            const correctBtn = document.getElementById(`option-${state.currentTarget.id}`);
+            if (correctBtn) {
+                correctBtn.classList.add('hint-glow');
+            }
+        }
+
+        function triggerManualHint() {
+            playSoundEffect('pop');
+            highlightCorrectOption();
+            speakCurrentItem(false);
+        }
+
+        /* =========================================================================
+           7. CONTROLES DE IDIOMA, MODO Y ÁLBUM DE PEGATINAS
+           ========================================================================= */
+        function updateScoreUI() {
+            const starEl = document.getElementById('star-count');
+            const streakBadge = document.getElementById('streak-badge');
+            const streakCount = document.getElementById('streak-count');
+
+            starEl.textContent = state.stars;
+
+            if (state.streak >= 2) {
+                streakBadge.classList.remove('hidden');
+                streakBadge.classList.add('flex');
+                streakCount.textContent = `x${state.streak}`;
+            } else {
+                streakBadge.classList.add('hidden');
+                streakBadge.classList.remove('flex');
+            }
+
+            renderProgressDots();
+        }
+
+        function renderProgressDots() {
+            const container = document.getElementById('progress-dots');
+            container.innerHTML = '';
+            for (let i = 0; i < 5; i++) {
+                const dot = document.createElement('div');
+                const filled = i < state.progressToGift;
+                dot.className = `w-3 h-3 sm:w-4 sm:h-4 rounded-full border-2 border-slate-800 transition-all duration-300 ${
+                    filled ? 'bg-amber-400 scale-110' : 'bg-slate-200'
+                }`;
+                container.appendChild(dot);
+            }
+        }
+
+        function toggleLanguage() {
+            playSoundEffect('pop');
+            state.lang = state.lang === 'en' ? 'es' : 'en';
+
+            document.getElementById('lang-flag').textContent = state.lang === 'en' ? '🇬🇧' : '🇪🇸';
+            document.getElementById('lang-label').textContent = state.lang === 'en' ? 'ENGLISH' : 'ESPAÑOL';
+
+            const currentMode = GAME_MODES[state.modeIndex];
+            document.getElementById('mode-label').textContent = state.lang === 'en' ? currentMode.nameEn : currentMode.nameEs;
+
+            renderThemeTabs();
+            updateWordDisplay();
+            speakCurrentItem(false);
+        }
+
+        function cycleGameMode() {
+            playSoundEffect('pop');
+            state.modeIndex = (state.modeIndex + 1) % GAME_MODES.length;
+            const currentMode = GAME_MODES[state.modeIndex];
+
+            const modeBtn = document.getElementById('mode-btn');
+            modeBtn.className = `toy-btn ${currentMode.bgClass} text-slate-900 font-extrabold px-3 py-1.5 rounded-2xl flex items-center gap-1.5 text-xs sm:text-base`;
+
+            document.getElementById('mode-icon').textContent = currentMode.icon;
+            document.getElementById('mode-label').textContent = state.lang === 'en' ? currentMode.nameEn : currentMode.nameEs;
+
+            updateWordDisplay();
+            renderOptionsGrid();
+        }
+
+        function toggleMute() {
+            state.isMuted = !state.isMuted;
+            const icon = document.getElementById('sound-icon');
+            const btn = document.getElementById('sound-btn');
+
+            if (state.isMuted) {
+                if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+                icon.className = 'fa-solid fa-volume-xmark';
+                btn.classList.replace('bg-emerald-400', 'bg-slate-300');
+                btn.classList.replace('hover:bg-emerald-300', 'hover:bg-slate-200');
+            } else {
+                icon.className = 'fa-solid fa-volume-high';
+                btn.classList.replace('bg-slate-300', 'bg-emerald-400');
+                btn.classList.replace('hover:bg-slate-200', 'hover:bg-emerald-300');
+                speakCurrentItem(true);
+            }
+        }
+
+        function unlockNewSticker() {
+            playSoundEffect('fanfare');
+            launchConfetti('#FACC15');
+
+            const nextSticker = REWARD_STICKERS[state.unlockedStickers.length % REWARD_STICKERS.length];
+            state.unlockedStickers.push(nextSticker);
+
+            const tray = document.getElementById('sticker-tray');
+            const emptyMsg = document.getElementById('empty-stickers-msg');
+            if (emptyMsg) emptyMsg.remove();
+
+            const badge = document.createElement('span');
+            badge.className = 'text-lg sm:text-xl bg-amber-100 border-2 border-slate-800 rounded-xl px-2 py-0.5 shadow-sm animate-bounce';
+            badge.textContent = nextSticker;
+            tray.appendChild(badge);
+
+            document.getElementById('reward-emoji').textContent = nextSticker;
+            document.getElementById('reward-title').textContent = state.lang === 'en' ? 'NEW STICKER UNLOCKED!' : '¡NUEVO PREMIO DESBLOQUEADO!';
+            document.getElementById('reward-desc').textContent = state.lang === 'en'
+                ? 'Awesome! You got 5 right answers!'
+                : '¡Genial! ¡Has conseguido 5 aciertos!';
+
+            speakText(state.lang === 'en' ? 'New sticker unlocked! Great job!' : '¡Nuevo premio conseguido! ¡Muy bien!', state.lang);
+
+            renderModalStickers();
+            const modal = document.getElementById('reward-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function openStickerModal() {
+            playSoundEffect('pop');
+            document.getElementById('reward-emoji').textContent = '🏆';
+            document.getElementById('reward-title').textContent = state.lang === 'en' ? 'MY STICKER ALBUM' : 'MI ÁLBUM DE PREMIOS';
+            document.getElementById('reward-desc').textContent = state.lang === 'en'
+                ? `You have ${state.stars} stars and ${state.unlockedStickers.length} stickers!`
+                : `¡Tienes ${state.stars} estrellas y ${state.unlockedStickers.length} premios!`;
+
+            renderModalStickers();
+            const modal = document.getElementById('reward-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function renderModalStickers() {
+            const grid = document.getElementById('modal-stickers-grid');
+            grid.innerHTML = '';
+            if (state.unlockedStickers.length === 0) {
+                grid.innerHTML = `<span class="text-slate-400 font-bold text-sm">${
+                    state.lang === 'en' ? 'Get 5 stars to win your first sticker! 🎁' : '¡Consigue 5 aciertos para ganar tu primer premio! 🎁'
+                }</span>`;
+                return;
+            }
+            state.unlockedStickers.forEach(s => {
+                const item = document.createElement('span');
+                item.className = 'text-3xl sm:text-4xl bg-white border-2 border-slate-800 rounded-2xl p-2 shadow-[0_3px_0_#1e293b]';
+                item.textContent = s;
+                grid.appendChild(item);
+            });
+        }
+
+        function closeStickerModal() {
+            playSoundEffect('pop');
+            const modal = document.getElementById('reward-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            renderProgressDots();
+            startNewRound();
+        }
+
+        /* =========================================================================
+           8. MOTOR DE CONFETI EN CANVAS
+           ========================================================================= */
+        const canvas = document.getElementById('confetti-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let animFrameId = null;
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function launchConfetti(mainHex) {
+            const palette = [mainHex, '#FACC15', '#FF4D94', '#3B82F6', '#22C55E', '#A855F7'];
+            for (let i = 0; i < 65; i++) {
+                particles.push({
+                    x: canvas.width / 2 + (Math.random() - 0.5) * 180,
+                    y: canvas.height / 2,
+                    vx: (Math.random() - 0.5) * 16,
+                    vy: (Math.random() - 1) * 16 - 4,
+                    size: Math.random() * 10 + 6,
+                    color: palette[Math.floor(Math.random() * palette.length)],
+                    rotation: Math.random() * 360,
+                    rotSpeed: (Math.random() - 0.5) * 12,
+                    gravity: 0.42,
+                    alpha: 1
+                });
+            }
+            if (!animFrameId) {
+                updateConfetti();
+            }
+        }
+
+        function updateConfetti() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach((p) => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += p.gravity;
+                p.rotation += p.rotSpeed;
+                p.alpha -= 0.012;
+
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, p.alpha);
+                ctx.translate(p.x, p.y);
+                ctx.rotate((p.rotation * Math.PI) / 180);
+                ctx.fillStyle = p.color;
+                ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.7);
+                ctx.strokeStyle = '#1e293b';
+                ctx.lineWidth = 1.5;
+                ctx.strokeRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.7);
+                ctx.restore();
+            });
+
+            particles = particles.filter(p => p.alpha > 0 && p.y < canvas.height + 40);
+
+            if (particles.length > 0) {
+                animFrameId = requestAnimationFrame(updateConfetti);
+            } else {
+                animFrameId = null;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+        }
+
+        window.onload = function () {
+            initGame();
+        };
+    </script>
+</body>
+</html>
+```
