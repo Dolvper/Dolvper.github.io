@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Duelo en Beaufort: La Hija de la Noche</title>
+  <style>
+    :root {
+      --bg-dark: #090a10;
+      --p1-color: #ef4444; /* Rojo Jugador 1 */
+      --p2-color: #3b82f6; /* Azul Jugador 2 */
+      --gold: #f59e0b;
+      --green: #10b981;
+      --card-bg: #161926;
+      --card-border: #2e344e;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    html, body {
+      width: 100vw;
+      height: 100dvh;
+      overflow: hidden;
+      background-color: var(--bg-dark);
+      color: #f8fafc;
+      touch-action: manipulation;
+    }
+
+    /* Contenedor Principal */
+    .game-board {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+
+    /* Zonas de Jugadores */
+    .player-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 12px 14px;
+      position: relative;
+      transition: background 0.3s ease;
+    }
+
+    /* Jugador 2 (Arriba, girado 180 grados) */
+    .player-top {
+      transform: rotate(180deg);
+      background: radial-gradient(circle at bottom, rgba(59, 130, 246, 0.16), transparent 75%);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    /* Jugador 1 (Abajo, orientación normal) */
+    .player-bottom {
+      background: radial-gradient(circle at bottom, rgba(239, 68, 68, 0.16), transparent 75%);
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+
+    /* Cabecera de cada jugador */
+    .player-hud {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 12px;
+      background: rgba(255, 255, 255, 0.04);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .player-tag {
+      font-weight: 800;
+      font-size: 0.9rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .p2-tag { color: #60a5fa; }
+    .p1-tag { color: #f87171; }
+
+    .score-badge {
+      font-size: 1.35rem;
+      font-weight: 900;
+      color: var(--gold);
+      text-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
+    }
+
+    .status-banner {
+      text-align: center;
+      font-size: 0.85rem;
+      font-weight: 700;
+      min-height: 22px;
+      color: #cbd5e1;
+      letter-spacing: 0.5px;
+      margin: 4px 0;
+    }
+
+    /* Cuadrícula de las 4 respuestas */
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 10px;
+      flex: 1;
+      max-height: 75%;
+    }
+
+    .ans-btn {
+      background: linear-gradient(145deg, #1e2235, #121521);
+      border: 2px solid var(--card-border);
+      border-radius: 14px;
+      color: #f1f5f9;
+      font-size: 0.95rem;
+      font-weight: 700;
+      padding: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      line-height: 1.25;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      transition: transform 0.1s, border-color 0.2s, background 0.2s, opacity 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .ans-btn:active:not(:disabled) {
+      transform: scale(0.95);
+    }
+
+    .ans-btn:disabled {
+      cursor: default;
+    }
+
+    /* Estados de los botones */
+    .ans-btn.correct {
+      background: linear-gradient(145deg, #059669, #047857) !important;
+      border-color: #34d399 !important;
+      color: #ffffff !important;
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.6);
+    }
+
+    .ans-btn.wrong {
+      background: linear-gradient(145deg, #dc2626, #991b1b) !important;
+      border-color: #f87171 !important;
+      color: #ffffff !important;
+      box-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
+    }
+
+    .ans-btn.eliminated {
+      opacity: 0.12 !important;
+      pointer-events: none !important;
+      border-color: transparent !important;
+      transform: scale(0.92);
+    }
+
+    /* Consola Central Divisoria */
+    .center-console {
+      height: 64px;
+      background: #05060a;
+      border-top: 2px solid #262b40;
+      border-bottom: 2px solid #262b40;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      position: relative;
+      z-index: 20;
+      box-shadow: 0 0 25px rgba(0,0,0,0.8);
+    }
+
+    /* Barra de tiempo */
+    .timer-track {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 4px;
+      width: 100%;
+      background: #1e293b;
+    }
+
+    .timer-fill {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, #10b981, #f59e0b, #ef4444);
+      transition: width 0.1s linear;
+    }
+
+    .round-pill {
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: #94a3b8;
+      background: #131622;
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1px solid #262b40;
+    }
+
+    /* Indicador de Voz Activa (Sin texto de la pregunta) */
+    .audio-hub {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #131622;
+      padding: 6px 16px;
+      border-radius: 999px;
+      border: 1px solid #2e3552;
+      cursor: pointer;
+    }
+
+    .wave-bars {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      height: 18px;
+    }
+
+    .bar {
+      width: 3px;
+      height: 5px;
+      background: var(--gold);
+      border-radius: 2px;
+      transition: height 0.15s ease;
+    }
+
+    .speaking .bar:nth-child(1) { animation: sound 0.45s infinite alternate; }
+    .speaking .bar:nth-child(2) { animation: sound 0.35s infinite alternate 0.1s; }
+    .speaking .bar:nth-child(3) { animation: sound 0.50s infinite alternate 0.2s; }
+    .speaking .bar:nth-child(4) { animation: sound 0.40s infinite alternate 0.15s; }
+
+    @keyframes sound {
+      0% { height: 4px; background: #f59e0b; }
+      100% { height: 18px; background: #fde047; }
+    }
+
+    .audio-status-text {
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: #e2e8f0;
+    }
+
+    .timer-badge {
+      font-size: 1rem;
+      font-weight: 900;
+      color: var(--gold);
+      min-width: 38px;
+      text-align: right;
+    }
+
+    /* Pantallas de Inicio y Fin */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(7, 9, 15, 0.96);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 28px;
+      text-align: center;
+    }
+
+    .modal-card {
+      max-width: 400px;
+      background: #131624;
+      border: 1px solid #2d334d;
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.7);
+    }
+
+    .modal-title {
+      font-size: 1.65rem;
+      font-weight: 900;
+      background: linear-gradient(90deg, #f87171, #fbbf24, #60a5fa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 6px;
+    }
+
+    .modal-subtitle {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      margin-bottom: 18px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .rules-list {
+      text-align: left;
+      font-size: 0.88rem;
+      color: #cbd5e1;
+      line-height: 1.5;
+      margin-bottom: 22px;
+      background: rgba(0,0,0,0.3);
+      padding: 14px 16px;
+      border-radius: 12px;
+      border-left: 3px solid var(--gold);
+    }
+
+    .rules-list div {
+      margin-bottom: 8px;
+    }
+
+    .start-btn {
+      width: 100%;
+      padding: 15px;
+      font-size: 1.05rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #090a10;
+      background: linear-gradient(135deg, #fbbf24, #d97706);
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+    }
+
+    .start-btn:active {
+      transform: scale(0.97);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- PANTALLA DE INICIO -->
+  <div id="startModal" class="modal-overlay">
+    <div class="modal-card">
+      <h1 class="modal-title">LA HIJA DE LA NOCHE</h1>
+      <p class="modal-subtitle">Concurso Cara a Cara • Laura Gallego</p>
+      <div class="rules-list">
+        <div>📱 <strong>Colocad el móvil en la mesa:</strong> Un jugador frente al otro. Cada mitad está orientada hacia su jugador.</div>
+        <div>👁️ <strong>Primero mirad las opciones:</strong> Tendréis 2,5 segundos para leer las 4 respuestas antes de escuchar la voz.</div>
+        <div>🔊 <strong>Solo Oído:</strong> La pregunta <strong>nunca se escribe en pantalla</strong>; la leerá el presentador en voz alta.</div>
+        <div>⚡ <strong>Velocidad:</strong> El más rápido en acertar gana <strong>+100 pts</strong> (o <strong>+50 pts</strong> tras pista). Fallar resta <strong>-50 pts</strong> y da rebote al rival.</div>
+        <div>⏳ <strong>Regla de los 10s:</strong> Si en 10 segundos nadie responde, se eliminan <strong>2 respuestas falsas</strong> y se repite la pregunta.</div>
+      </div>
+      <button class="start-btn" id="btnStart">🔊 Empezar Concurso</button>
+    </div>
+  </div>
+
+  <!-- PANTALLA FINAL -->
+  <div id="endModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <h1 class="modal-title" id="winnerHeadline">¡FIN DEL JUEGO!</h1>
+      <p class="modal-subtitle" id="winnerSub">Resultado del duelo en Beaufort</p>
+      <div class="rules-list" style="text-align:center; font-size:1.1rem;">
+        <div style="color:#f87171; font-weight:800;">Jugador 1 (Rojo): <span id="finalP1">0</span> pts</div>
+        <div style="color:#60a5fa; font-weight:800; margin-top:8px;">Jugador 2 (Azul): <span id="finalP2">0</span> pts</div>
+      </div>
+      <button class="start-btn" id="btnRestart">🔄 Jugar Otra Partida</button>
+    </div>
+  </div>
+
+  <!-- TABLERO DIVIDIDO -->
+  <div class="game-board">
+
+    <!-- JUGADOR 2 (SUPERIOR - GIRADO 180º) -->
+    <section class="player-area player-top" id="areaP2">
+      <div class="player-hud">
+        <span class="player-tag p2-tag">🔵 JUGADOR 2</span>
+        <span class="score-badge" id="scoreP2">0</span>
+      </div>
+      <div class="status-banner" id="statusP2">Preparado...</div>
+      <div class="options-grid" id="gridP2"></div>
+    </section>
+
+    <!-- CONSOLA CENTRAL -->
+    <div class="center-console">
+      <div class="round-pill" id="roundCounter">1 / 15</div>
+      
+      <div class="audio-hub" id="audioHub" title="Toca para repetir audio">
+        <div class="wave-bars" id="waveBars">
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+        </div>
+        <span class="audio-status-text" id="centerStatus">PREPARANDO</span>
+      </div>
+
+      <div class="timer-badge" id="timerDisplay">10s</div>
+
+      <div class="timer-track">
+        <div class="timer-fill" id="timerBar"></div>
+      </div>
+    </div>
+
+    <!-- JUGADOR 1 (INFERIOR - NORMAL) -->
+    <section class="player-area player-bottom" id="areaP1">
+      <div class="player-hud">
+        <span class="player-tag p1-tag">🔴 JUGADOR 1</span>
+        <span class="score-badge" id="scoreP1">0</span>
+      </div>
+      <div class="status-banner" id="statusP1">Preparado...</div>
+      <div class="options-grid" id="gridP1"></div>
+    </section>
+
+  </div>
+
+  <script>
+    // BANCO DE PREGUNTAS (Trama + Detalles exclusivos de lectores del libro)
+    const ALL_QUESTIONS = [
+      {
+        q: "¿Dónde apareció finalmente la medalla de plata de Nicole que todo el pueblo creía que había robado Isabelle?",
+        options: ["Entre dos tablas del suelo", "En el pozo de la iglesia", "En el bolsillo del cura", "En el jardín de los Latour"],
+        answer: "Entre dos tablas del suelo"
+      },
+      {
+        q: "¿Qué característica física tiene Maximilien Grillet costumbre de observar en todas las personas desde que era niño?",
+        options: ["Sus manos", "Sus zapatos", "Sus ojos", "Su forma de caminar"],
+        answer: "Sus manos"
+      },
+      {
+        q: "¿Qué objeto pierde la señora Lavoine en el jardín de la mansión Grisard obligándola a regresar al anochecer?",
+        options: ["Su chal", "Un camafeo de oro", "Su rosario de plata", "Un pañuelo bordado"],
+        answer: "Su chal"
+      },
+      {
+        q: "¿Qué excusa inventa Isabelle ante Max para justificar el escalofriante grito que oyeron las vecinas en su casa?",
+        options: ["A Mijaíl le cayó un martillo", "Un zorro entró al gallinero", "Chirridos de las bisagras", "Una pesadilla suya"],
+        answer: "A Mijaíl le cayó un martillo"
+      },
+      {
+        q: "¿Cómo se llama el detective privado de París al que acude Max y que termina viajando hasta Polonia?",
+        options: ["Jules Bronac", "Amédée Delvaux", "Martin Dagenham", "Henri Gallois"],
+        answer: "Jules Bronac"
+      },
+      {
+        q: "¿Quién era en realidad el supuesto doctor Amédée Delvaux que huyó aterrorizado de laposada de madrugada?",
+        options: ["Un sacerdote exorcista", "Un médico del marqués", "Un inspector de París", "Un prestamista"],
+        answer: "Un sacerdote exorcista"
+      },
+      {
+        q: "¿En qué país fue mordido Philippe de Latour convirtiéndose en vampiro mientras viajaba hacia San Petersburgo?",
+        options: ["Polonia", "Alemania", "Rumanía", "Suiza"],
+        answer: "Polonia"
+      },
+      {
+        q: "¿Qué secuela física sufrió Mijaíl, además de perder el habla, la noche en que Philippe los atacó en el bosque?",
+        options: ["Su pelo se volvió blanco", "Perdió la visión de un ojo", "Le quedó una cojera", "Cicatrices en el cuello"],
+        answer: "Su pelo se volvió blanco"
+      },
+      {
+        q: "¿De qué cordillera provienen las raíces que utiliza Martin Dagenham para preparar el suero que cura a Jerome?",
+        options: ["Del Himalaya", "De los Cárpatos", "De los Alpes", "De los Andes"],
+        answer: "Del Himalaya"
+      },
+      {
+        q: "¿De qué manera alimenta Isabelle a Philippe en el sótano para evitar que muerda o mate a otras personas?",
+        options: ["Sangre suya en un cuenco", "Con aves del corral", "Con carne cruda del mercado", "Dándole suero de Dagenham"],
+        answer: "Sangre suya en un cuenco"
+      },
+      {
+        q: "¿Quién le presta su caballo a Max para que pueda adelantarse a la turba por el camino del Este?",
+        options: ["La señorita Dubois", "El doctor Leblanc", "Henri Morillon", "La posadera Brigitte"],
+        answer: "La señorita Dubois"
+      },
+      {
+        q: "¿Qué arma improvisada empuña la tímida señora Lavoine cuando marcha enfurecida hacia la mansión Grisard?",
+        options: ["Una pesada sartén", "Un cuchillo de degollar", "Una horca de hierro", "Un rodillo de cocina"],
+        answer: "Una pesada sartén"
+      },
+      {
+        q: "¿Cuáles son las únicas cinco palabras que pronuncia el mudo Mijaíl en toda la novela al bajarse del caballo?",
+        options: ["Corra. No mire atrás", "Salve a Philippe ahora", "Huya hacia el barco", "Yo los detendré aquí"],
+        answer: "Corra. No mire atrás"
+      },
+      {
+        q: "¿Cómo se llama el barco en el que viajan Isabelle, Philippe, Mijaíl y Dagenham rumbo a Nápoles en el epílogo?",
+        options: ["Phoebus", "Aurora", "Esperanza", "Calais"],
+        answer: "Phoebus"
+      },
+      {
+        q: "¿En qué país sueña Isabelle con comprar una finca junto al mar con mucho sol cuando todo termine?",
+        options: ["Italia", "España", "Grecia", "Portugal"],
+        answer: "Italia"
+      }
+    ];
+
+    // ESTADO DEL JUEGO
+    let questions = [];
+    let currentQIndex = 0;
+    let scores = { 1: 0, 2: 0 };
+    let currentOptions = [];
+    let isLocked = true;
+    let fiftyFiftyUsed = false;
+    let lockedPlayers = { 1: false, 2: false };
+    let countdownTimer = null;
+    let timeLeft = 100; // 10.0 segundos en décimas
+
+    // AUDIO SINTETIZADO (Efectos de concurso de TV)
+    let audioCtx = null;
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function playTone(freq, type, duration, delay = 0) {
+      if (!audioCtx) return;
+      setTimeout(() => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.18, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      }, delay);
+    }
+
+    function sfxShowOptions() {
+      playTone(440, 'sine', 0.12, 0);
+      playTone(554, 'sine', 0.15, 100);
+    }
+
+    function sfxCorrect() {
+      playTone(523.25, 'triangle', 0.12, 0);
+      playTone(659.25, 'triangle', 0.12, 110);
+      playTone(783.99, 'triangle', 0.14, 220);
+      playTone(1046.50, 'triangle', 0.35, 330);
+    }
+
+    function sfxWrong() {
+      playTone(190, 'sawtooth', 0.25, 0);
+      playTone(145, 'sawtooth', 0.4, 200);
+    }
+
+    function sfxFiftyFifty() {
+      playTone(600, 'sine', 0.1, 0);
+      playTone(380, 'sine', 0.22, 120);
+    }
+
+    // SÍNTESIS DE VOZ (Web Speech API)
+    function speakQuestion(text, onEndCallback) {
+      if (!('speechSynthesis' in window)) {
+        setCenterStatus("SIN SOPORTE DE VOZ", false);
+        if (onEndCallback) setTimeout(onEndCallback, 1000);
+        return;
+      }
+
+      window.speechSynthesis.cancel();
+
+      const utter = new SpeechSynthesisUtterance(text);
+      const voices = window.speechSynthesis.getVoices();
+      const esVoice = voices.find(v => v.lang.startsWith('es')) || null;
+      if (esVoice) utter.voice = esVoice;
+      utter.lang = 'es-ES';
+      utter.rate = 1.03;
+      utter.pitch = 1.0;
+
+      utter.onstart = () => {
+        setCenterStatus("ESCUCHANDO PREGUNTA...", true);
+      };
+
+      utter.onend = () => {
+        setCenterStatus("¡RESPONDED AHORA!", false);
+        if (onEndCallback) onEndCallback();
+      };
+
+      utter.onerror = () => {
+        setCenterStatus("¡RESPONDED AHORA!", false);
+        if (onEndCallback) onEndCallback();
+      };
+
+      window.speechSynthesis.speak(utter);
+    }
+
+    function setCenterStatus(text, isSpeaking) {
+      document.getElementById('centerStatus').textContent = text;
+      const wave = document.getElementById('waveBars');
+      if (isSpeaking) {
+        wave.classList.add('speaking');
+      } else {
+        wave.classList.remove('speaking');
+      }
+    }
+
+    function setPlayerBanners(msg1, msg2 = msg1) {
+      document.getElementById('statusP1').textContent = msg1;
+      document.getElementById('statusP2').textContent = msg2;
+    }
+
+    function shuffle(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    // INICIAR PARTIDA
+    function startGame() {
+      initAudio();
+      // Desbloqueo inicial de síntesis de voz en móviles
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.getVoices();
+      }
+
+      scores = { 1: 0, 2: 0 };
+      updateScoreUI();
+      questions = shuffle(ALL_QUESTIONS);
+      currentQIndex = 0;
+
+      document.getElementById('startModal').classList.add('hidden');
+      document.getElementById('endModal').classList.add('hidden');
+
+      loadRound();
+    }
+
+    function updateScoreUI() {
+      document.getElementById('scoreP1').textContent = scores[1];
+      document.getElementById('scoreP2').textContent = scores[2];
+    }
+
+    // CARGAR RONDA: 1º Mostrar las 4 respuestas -> 2º Leer la pregunta en voz alta
+    function loadRound() {
+      clearInterval(countdownTimer);
+      window.speechSynthesis.cancel();
+
+      if (currentQIndex >= questions.length) {
+        finishGame();
+        return;
+      }
+
+      const qObj = questions[currentQIndex];
+      currentOptions = shuffle(qObj.options);
+      isLocked = true;
+      fiftyFiftyUsed = false;
+      lockedPlayers = { 1: false, 2: false };
+
+      document.getElementById('roundCounter').textContent = `${currentQIndex + 1} / ${questions.length}`;
+      document.getElementById('timerBar').style.width = '100%';
+      document.getElementById('timerDisplay').textContent = '10s';
+
+      renderPlayerButtons(1, currentOptions);
+      renderPlayerButtons(2, currentOptions);
+      sfxShowOptions();
+
+      // Fase 1: Leen las 4 posibles respuestas en silencio antes de que suene la pregunta
+      setCenterStatus("MIRAD LAS RESPUESTAS...", false);
+      setPlayerBanners("👀 Mirad bien las 4 opciones...");
+
+      setTimeout(() => {
+        // Fase 2: Se desbloquean los pulsadores y se reproduce la pregunta en voz alta
+        isLocked = false;
+        setPlayerBanners("🔊 ¡Escuchad y pulsad el más rápido!");
+        
+        speakQuestion(qObj.q, () => {
+          if (!isLocked) {
+            startTenSecondCountdown();
+          }
+        });
+      }, 2400);
+    }
+
+    function renderPlayerButtons(playerNum, optionsList) {
+      const grid = document.getElementById(`gridP${playerNum}`);
+      grid.innerHTML = '';
+
+      optionsList.forEach((optText, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'ans-btn';
+        btn.dataset.option = optText;
+        btn.dataset.index = idx;
+        btn.textContent = optText;
+
+        // Eventos táctiles inmediatos para que no haya retardo de 300ms en pantallas móviles
+        btn.addEventListener('pointerdown', (e) => {
+          e.preventDefault();
+          handlePlayerAnswer(playerNum, optText, btn);
+        });
+
+        grid.appendChild(btn);
+      });
+    }
+
+    // CUENTA ATRÁS DE 10 SEGUNDOS
+    function startTenSecondCountdown() {
+      clearInterval(countdownTimer);
+      timeLeft = 100; // 10.0 segundos
+
+      countdownTimer = setInterval(() => {
+        if (isLocked) {
+          clearInterval(countdownTimer);
+          return;
+        }
+
+        timeLeft--;
+        const pct = Math.max(0, timeLeft);
+        document.getElementById('timerBar').style.width = `${pct}%`;
+        document.getElementById('timerDisplay').textContent = `${Math.ceil(timeLeft / 10)}s`;
+
+        if (timeLeft <= 0) {
+          clearInterval(countdownTimer);
+          onTenSecondsExpired();
+        }
+      }, 100);
+    }
+
+    // SI EN 10 SEGUNDOS NADIE RESPONDE: QUITAR 2 INCORRECTAS Y REPETIR PREGUNTA
+    function onTenSecondsExpired() {
+      const qObj = questions[currentQIndex];
+
+      if (!fiftyFiftyUsed) {
+        fiftyFiftyUsed = true;
+        isLocked = true;
+        sfxFiftyFifty();
+
+        // Elegir 2 respuestas incorrectas al azar para retirarlas
+        const wrongAnswers = currentOptions.filter(o => o !== qObj.answer);
+        const toEliminate = shuffle(wrongAnswers).slice(0, 2);
+
+        [1, 2].forEach(p => {
+          const buttons = document.querySelectorAll(`#gridP${p} .ans-btn`);
+          buttons.forEach(btn => {
+            if (toEliminate.includes(btn.dataset.option)) {
+              btn.classList.add('eliminated');
+              btn.disabled = true;
+            }
+          });
+        });
+
+        setCenterStatus("50/50 • REPITIENDO...", false);
+        setPlayerBanners("⚠️ ¡10s sin respuesta! Quedan 2 opciones. Escuchad de nuevo...");
+
+        setTimeout(() => {
+          isLocked = false;
+          lockedPlayers = { 1: false, 2: false };
+          speakQuestion(qObj.q, () => {
+            if (!isLocked) {
+              startTenSecondCountdown();
+            }
+          });
+        }, 900);
+
+      } else {
+        // Si tras el 50/50 pasan otros 10 segundos sin respuesta, se revela y pasa a la siguiente
+        isLocked = true;
+        sfxWrong();
+        highlightCorrectAnswer(qObj.answer);
+        setCenterStatus("TIEMPO AGOTADO", false);
+        setPlayerBanners(`⏰ Tiempo agotado. Era: ${qObj.answer}`);
+
+        setTimeout(() => {
+          currentQIndex++;
+          loadRound();
+        }, 2800);
+      }
+    }
+
+    // GESTIÓN DE RESPUESTA DEL JUGADOR MÁS RÁPIDO
+    function handlePlayerAnswer(playerNum, chosenOption, btnElement) {
+      if (isLocked || lockedPlayers[playerNum]) return;
+      if (btnElement.classList.contains('eliminated')) return;
+
+      const qObj = questions[currentQIndex];
+      const otherPlayer = playerNum === 1 ? 2 : 1;
+
+      if (chosenOption === qObj.answer) {
+        // ¡ACIERTO! Se detiene todo y puntúa el más rápido
+        isLocked = true;
+        clearInterval(countdownTimer);
+        window.speechSynthesis.cancel();
+        sfxCorrect();
+
+        const pointsWon = fiftyFiftyUsed ? 50 : 100;
+        scores[playerNum] += pointsWon;
+        updateScoreUI();
+
+        highlightCorrectAnswer(qObj.answer);
+
+        const winMsg = `✅ ¡Punto para Jugador ${playerNum}! (+${pointsWon} pts)`;
+        const loseMsg = `⚡ Jugador ${playerNum} fue más rápido (+${pointsWon} pts)`;
+        setCenterStatus(`¡ACIERTO J${playerNum}!`, false);
+        setPlayerBanners(playerNum === 1 ? winMsg : loseMsg, playerNum === 2 ? winMsg : loseMsg);
+
+        setTimeout(() => {
+          currentQIndex++;
+          loadRound();
+        }, 2500);
+
+      } else {
+        // FALLO: Penalización y bloqueo de ese jugador, dejando rebote al rival
+        lockedPlayers[playerNum] = true;
+        sfxWrong();
+        scores[playerNum] = Math.max(0, scores[playerNum] - 50);
+        updateScoreUI();
+
+        btnElement.classList.add('wrong');
+        // Marcar también como descartada en el lado opuesto para que se vea el fallo
+        const oppBtns = document.querySelectorAll(`#gridP${otherPlayer} .ans-btn`);
+        oppBtns.forEach(b => {
+          if (b.dataset.option === chosenOption) {
+            b.classList.add('eliminated');
+            b.disabled = true;
+          }
+        });
+
+        // Si ambos jugadores han fallado en la misma ronda
+        if (lockedPlayers[1] && lockedPlayers[2]) {
+          isLocked = true;
+          clearInterval(countdownTimer);
+          window.speechSynthesis.cancel();
+          highlightCorrectAnswer(qObj.answer);
+          setCenterStatus("AMBOS FALLARON", false);
+          setPlayerBanners(`❌ Ninguno acertó. Era: ${qObj.answer}`);
+
+          setTimeout(() => {
+            currentQIndex++;
+            loadRound();
+          }, 2600);
+        } else {
+          const msgFail = "❌ ¡Fallaste! (-50 pts) Turno bloqueado";
+          const msgRebound = `🔥 ¡Tu rival falló! Aprovecha el rebote`;
+          setPlayerBanners(
+            playerNum === 1 ? msgFail : msgRebound,
+            playerNum === 2 ? msgFail : msgRebound
+          );
+        }
+      }
+    }
+
+    function highlightCorrectAnswer(correctText) {
+      [1, 2].forEach(p => {
+        const buttons = document.querySelectorAll(`#gridP${p} .ans-btn`);
+        buttons.forEach(btn => {
+          if (btn.dataset.option === correctText) {
+            btn.classList.add('correct');
+          }
+        });
+      });
+    }
+
+    function finishGame() {
+      clearInterval(countdownTimer);
+      window.speechSynthesis.cancel();
+
+      document.getElementById('finalP1').textContent = scores[1];
+      document.getElementById('finalP2').textContent = scores[2];
+
+      const headline = document.getElementById('winnerHeadline');
+      if (scores[1] > scores[2]) {
+        headline.textContent = "🏆 ¡GANA EL JUGADOR 1!";
+      } else if (scores[2] > scores[1]) {
+        headline.textContent = "🏆 ¡GANA EL JUGADOR 2!";
+      } else {
+        headline.textContent = "🤝 ¡EMPATE ÉPICO!";
+      }
+
+      document.getElementById('endModal').classList.remove('hidden');
+    }
+
+    // Botón central permite repetir la locución en cualquier momento si hay ruido ambiente
+    document.getElementById('audioHub').addEventListener('click', () => {
+      if (!isLocked && questions[currentQIndex]) {
+        speakQuestion(questions[currentQIndex].q);
+      }
+    });
+
+    document.getElementById('btnStart').addEventListener('click', startGame);
+    document.getElementById('btnRestart').addEventListener('click', startGame);
+  </script>
+</body>
+</html>
