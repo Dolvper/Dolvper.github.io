@@ -343,19 +343,19 @@
                 </div>
             </div>
 
-            <!-- PASO 2: Elegir qué Icono y Animación saldrá en el Premio Final (100%) -->
+            <!-- PASO 2: Elegir qué Icono y Animación saldrá al completar -->
             <div class="bg-amber-50/90 border-2 border-amber-200 rounded-3xl p-4 sm:p-5 space-y-3">
                 <div class="flex items-center justify-between flex-wrap gap-2">
                     <div>
                         <h2 class="font-extrabold text-amber-900 text-lg flex items-center gap-2">
-                            <span>🌟 2. Icono y Animación del Gran Premio Final (100%)</span>
+                            <span>🌟 2. Icono y Animación al completar tarea</span>
                         </h2>
                         <p class="text-xs sm:text-sm text-amber-800">
-                            Esta animación especial solo saldrá como gran sorpresa cuando Daniella complete todas las tareas
+                            Se selecciona automáticamente con el modo, o puedes elegir aquí el favorito de Daniella
                         </p>
                     </div>
                     <button type="button" onclick="previewSelectedAnimation()" class="bubble-btn bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold px-3.5 py-2 rounded-xl text-xs sm:text-sm flex items-center gap-1.5">
-                        🎬 Probar animación del premio final
+                        🎬 Probar animación
                     </button>
                 </div>
 
@@ -765,53 +765,204 @@
             }
         }
 
-        // Sonido musical suave y ascendente al ganar cada estrella individual
-        function playTaskStarChime(completedCount) {
-            if (!state.soundEnabled) return;
-            const ctx = getAudioCtx();
-            if (!ctx) return;
-            const now = ctx.currentTime;
-
-            const scale = [523.25, 587.33, 659.25, 698.46, 783.99, 880.00, 987.77, 1046.50, 1174.66];
-            const baseFreq = scale[(Math.max(1, completedCount) - 1) % scale.length];
-
-            [baseFreq, baseFreq * 1.25].forEach((freq, idx) => {
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(freq, now + idx * 0.08);
-                gain.gain.setValueAtTime(0.22, now + idx * 0.08);
-                gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.28);
-                osc.connect(gain);
-                gain.connect(ctx.destination);
-                osc.start(now + idx * 0.08);
-                osc.stop(now + idx * 0.08 + 0.28);
-            });
+        /* =====================================================================
+           4. SISTEMA DE ANIMACIONES ESPECIALES AL COMPLETAR (COHETE, SUPERHEROÍNA, CORONA...)
+           ===================================================================== */
+        function getAnimTypeForIcon(icon) {
+            const found = REWARD_OPTIONS.find(r => r.icon === icon);
+            return found ? found.animType : 'magic';
         }
 
-        // Explosión simple y alegre de confeti para cada tarea individual
-        function triggerMiniTaskConfetti() {
-            if (typeof confetti === 'function') {
-                confetti({
-                    particleCount: 28,
-                    spread: 65,
-                    origin: { x: 0.5, y: 0.65 },
-                    colors: ['#F472B6', '#FBBF24', '#34D399', '#60A5FA', '#A78BFA']
+        function triggerCompletionAnimation(iconToUse) {
+            const icon = iconToUse || state.rewardIcon || '🏆';
+            const animType = getAnimTypeForIcon(icon);
+            const overlay = document.getElementById('fx-overlay');
+            overlay.innerHTML = '';
+
+            playSpecialSound(animType);
+
+            if (animType === 'rocket') {
+                // Cohete despegando de abajo a arriba con fuego y nubes de humo
+                let smokeHTML = '';
+                for (let i = 0; i < 8; i++) {
+                    const dx = (Math.random() - 0.5) * 260 + 'px';
+                    const dy = -(Math.random() * 120 + 20) + 'px';
+                    const delay = (Math.random() * 0.35).toFixed(2);
+                    const smokeEmoji = i % 2 === 0 ? '☁️' : '🌟';
+                    smokeHTML += `<div class="fx-smoke" style="--dx:${dx}; --dy:${dy}; animation-delay:${delay}s">${smokeEmoji}</div>`;
+                }
+
+                overlay.innerHTML = `
+                    ${smokeHTML}
+                    <div class="fx-rocket">
+                        🚀
+                        <div class="fx-rocket-flame">🔥</div>
+                    </div>
+                `;
+
+                if (typeof confetti === 'function') {
+                    confetti({
+                        particleCount: 40,
+                        angle: 90,
+                        spread: 45,
+                        origin: { x: 0.5, y: 0.9 },
+                        colors: ['#f97316', '#facc15', '#38bdf8', '#a855f7']
+                    });
+                }
+            } else if (animType === 'superhero') {
+                // Superheroína cruzando el cielo a toda velocidad + cartel cómic
+                overlay.innerHTML = `
+                    <div class="fx-comic-badge bg-yellow-300 border-4 border-pink-600 text-pink-700 font-extrabold px-6 py-3 rounded-3xl shadow-2xl text-2xl sm:text-4xl whitespace-nowrap">
+                        ⚡ ¡SUPER DANIELLA! 💥
+                    </div>
+                    <div class="fx-superhero">
+                        ${icon}
+                        <span class="text-5xl absolute -left-12 top-10">⚡✨💨</span>
+                    </div>
+                `;
+
+                if (typeof confetti === 'function') {
+                    confetti({
+                        particleCount: 45,
+                        spread: 80,
+                        origin: { x: 0.5, y: 0.5 },
+                        colors: ['#ec4899', '#facc15', '#06b6d4']
+                    });
+                }
+            } else if (animType === 'crown') {
+                // Corona Real con explosión circular de joyas y destellos
+                const particles = ['✨', '👑', '💖', '💎', '🌸', '⭐', '✨', '💖', '💎', '🌟'];
+                let sparklesHTML = '';
+                particles.forEach((p, idx) => {
+                    const angle = (idx / particles.length) * Math.PI * 2;
+                    const dist = 140 + Math.random() * 70;
+                    const tx = Math.cos(angle) * dist + 'px';
+                    const ty = Math.sin(angle) * dist + 'px';
+                    sparklesHTML += `<div class="fx-sparkle-particle" style="--tx:${tx}; --ty:${ty};">${p}</div>`;
                 });
+
+                overlay.innerHTML = `
+                    ${sparklesHTML}
+                    <div class="fx-center-icon">${icon}</div>
+                `;
+
+                if (typeof confetti === 'function') {
+                    confetti({
+                        particleCount: 45,
+                        spread: 75,
+                        origin: { x: 0.5, y: 0.5 },
+                        colors: ['#fbbf24', '#f472b6', '#c084fc', '#fde047']
+                    });
+                }
+            } else {
+                // Animación mágica festiva para Trofeo, Unicornio, Estrella, Hada
+                const particles = ['🌟', '✨', '🎉', '💫', '🌈', '⭐', '💖', '✨'];
+                let sparklesHTML = '';
+                particles.forEach((p, idx) => {
+                    const angle = (idx / particles.length) * Math.PI * 2;
+                    const dist = 135 + Math.random() * 65;
+                    const tx = Math.cos(angle) * dist + 'px';
+                    const ty = Math.sin(angle) * dist + 'px';
+                    sparklesHTML += `<div class="fx-sparkle-particle" style="--tx:${tx}; --ty:${ty};">${p}</div>`;
+                });
+
+                overlay.innerHTML = `
+                    ${sparklesHTML}
+                    <div class="fx-center-icon">${icon}</div>
+                `;
+
+                if (typeof confetti === 'function') {
+                    confetti({
+                        particleCount: 40,
+                        spread: 70,
+                        origin: { x: 0.5, y: 0.55 }
+                    });
+                }
             }
+
+            setTimeout(() => {
+                overlay.innerHTML = '';
+            }, 2200);
+        }
+
+        function previewSelectedAnimation() {
+            triggerCompletionAnimation(state.rewardIcon);
+            showToast(`🎬 Probando animación: ${state.rewardIcon}`);
         }
 
         /* =====================================================================
-           4. SISTEMA DE ANIMACIONES ESPECIALES DEL GRAN PREMIO FINAL (100%)
+           RENDERIZADO DE LA PANTALLA PRINCIPAL DE DANIELLA
            ===================================================================== */
-        function getAnimTypeForIcon(icon) {
-// ... existing code ... -->
+        function renderChildScreen() {
+            const modeInfo = MODE_CONFIG[state.theme] || MODE_CONFIG.normal;
+            document.getElementById('activeModeTag').textContent = modeInfo.name;
+            document.getElementById('activeRewardTag').textContent = state.rewardIcon;
+            document.getElementById('themeSubtitle').textContent = modeInfo.subtitle;
+            document.getElementById('headerBadgeIcon').textContent = state.rewardIcon;
+
+            const total = state.tasks.length;
+            const completed = state.tasks.filter(t => t.completed).length;
+            const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+            document.getElementById('progressPercentText').textContent = `${pct}%`;
+            const barFill = document.getElementById('progressBarFill');
+            barFill.style.width = `${pct}%`;
+
+            const barIcon = document.getElementById('progressBarIcon');
+            barIcon.textContent = state.rewardIcon;
+            if (pct > 10) barIcon.classList.remove('hidden');
+            else barIcon.classList.add('hidden');
+
+            // Estrellas
+            const starsContainer = document.getElementById('starsContainer');
+            starsContainer.innerHTML = state.tasks.map((_, i) => {
+                const earned = i < completed;
+                return `<span class="text-3xl sm:text-4xl select-none transition-all duration-300 ${earned ? 'star-earned' : 'text-slate-300'}">★</span>`;
+            }).join('');
+
+            // Tarjetas de las tareas con título + comentario debajo
+            const grid = document.getElementById('taskGrid');
+            grid.innerHTML = state.tasks.map((task, idx) => {
+                const subText = getTaskSubtitle(task);
+                const done = task.completed;
+                return `
+                    <button
+                        type="button"
+                        onclick="toggleTask(${idx})"
+                        class="w-full text-left p-4 sm:p-5 rounded-3xl border-4 transition-all duration-200 flex items-center gap-3.5 sm:gap-4 bubble-btn ${
+                            done
+                            ? 'bg-gradient-to-r from-emerald-400 via-teal-400 to-green-500 border-emerald-300 text-white shadow-lg'
+                            : 'bg-white hover:bg-pink-50/70 border-pink-200 text-slate-800'
+                        }"
+                    >
+                        <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center text-3xl sm:text-4xl shrink-0 shadow-sm ${
+                            done ? 'bg-white/25' : 'bg-pink-50 border-2 border-pink-100'
+                        }">
+                            ${task.emoji || '⭐'}
+                        </div>
+
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-[11px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full ${
+                                    done ? 'bg-white/25 text-white' : 'bg-pink-100 text-pink-600'
+                                }">
+                                    Misión ${idx + 1}
+                                </span>
+                            </div>
+                            <p class="text-lg sm:text-2xl font-extrabold leading-tight mt-1 ${done ? 'line-through decoration-2' : 'text-slate-800'}">
+                                ${task.text}
+                            </p>
+                            <p class="text-xs sm:text-sm font-semibold mt-0.5 leading-snug ${done ? 'text-emerald-50' : 'text-purple-600'}">
+                                ${subText}
+                            </p>
+                        </div>
+
                         <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-full border-4 flex items-center justify-center shrink-0 transition-all ${
                             done
                             ? 'bg-white border-white text-2xl sm:text-3xl scale-105 shadow-md'
                             : 'bg-slate-50 border-slate-300 text-transparent'
                         }">
-                            ${done ? '⭐' : '✓'}
+                            ${done ? state.rewardIcon : '✓'}
                         </div>
                     </button>
                 `;
@@ -819,7 +970,7 @@
         }
 
         /* =====================================================================
-           COMPLETAR TAREA: CONFETI SIMPLE EN CADA TAREA + GRAN ANIMACIÓN AL 100%
+           COMPLETAR TAREA: DISPARAR ANIMACIÓN + LEER TAREA Y COMENTARIO DE DEBAJO
            ===================================================================== */
         function toggleTask(index) {
             const task = state.tasks[index];
@@ -831,18 +982,17 @@
             const subText = getTaskSubtitle(task);
 
             if (task.completed) {
-                // 1. En cada tarea individual: sonido de estrella + confeti sencillo (sin desvelar aún la animación final)
-                playTaskStarChime(completedCount);
-                triggerMiniTaskConfetti();
+                // 1. Lanzar la animación especial elegida (Cohete, Superheroína, Corona, etc.)
+                triggerCompletionAnimation(state.rewardIcon);
 
                 // 2. Construir el mensaje que incluye la tarea completada + EL COMENTARIO DE DEBAJO
                 let fullSpeech = '';
                 const remaining = total - completedCount;
 
                 if (remaining === 0) {
-                    fullSpeech = `¡Increíble Daniella! ${task.text} completado. ${subText}. ¡Has conseguido todas las estrellas y desbloqueado tu gran premio!`;
+                    fullSpeech = `¡Increíble Daniella! ${task.text} completado. ${subText}. ¡Has conseguido todas las estrellas y tu gran premio!`;
                 } else if (remaining === 1) {
-                    fullSpeech = `¡Súper bien Daniella! ${task.text} completado. ${subText}. ¡Solo te falta una estrella para tu sorpresa final!`;
+                    fullSpeech = `¡Súper bien Daniella! ${task.text} completado. ${subText}. ¡Solo te falta una estrella para el premio final!`;
                 } else {
                     fullSpeech = `¡Muy bien Daniella! ${task.text} completado. ${subText}. ¡Ya tienes ${completedCount} estrellas!`;
                 }
@@ -856,13 +1006,266 @@
 
             renderChildScreen();
 
-            // 3. SOLO al llegar al 100% se dispara la gran animación especial y la pantalla del premio final
+            // Si llegó al 100%, mostrar pantalla de premio final tras disfrutar de la animación
             if (completedCount === total && total > 0) {
                 setTimeout(() => {
                     showFinalTrophyScreen();
-                }, 650);
+                }, 1600);
             }
         }
 
         function luliSpeakMotivation() {
-// ... existing code ... -->
+            const nextTask = state.tasks.find(t => !t.completed);
+            let msg = '';
+            if (nextTask) {
+                const sub = getTaskSubtitle(nextTask);
+                msg = `¡Vamos Daniella! Tu siguiente misión es: ${nextTask.text}. ${sub}`;
+            } else {
+                msg = `¡Eres una campeona Daniella! Has completado todas las misiones de hoy.`;
+            }
+            document.getElementById('luliSpeechText').textContent = msg;
+            speakText(msg);
+        }
+
+        /* =====================================================================
+           PANTALLA DE CONFIGURACIÓN (MODOS, SELECTOR DE ICONO Y TAREAS)
+           ===================================================================== */
+        function selectMode(modeKey) {
+            state.theme = modeKey;
+            // Al elegir un modo (Princesa, Astronauta, Superheroína, Normal), se asigna su icono y animación especial
+            state.rewardIcon = MODE_CONFIG[modeKey].defaultIcon;
+            saveState();
+            applyBodyTheme();
+            renderSetupScreen();
+            triggerCompletionAnimation(state.rewardIcon);
+            showToast(`✨ Activado ${MODE_CONFIG[modeKey].name} con animación ${state.rewardIcon}`);
+        }
+
+        function selectRewardIcon(icon) {
+            state.rewardIcon = icon;
+            saveState();
+            renderSetupScreen();
+            triggerCompletionAnimation(icon);
+        }
+
+        function renderSetupScreen() {
+            // Resaltar modo activo
+            ['normal', 'princesa', 'astronauta', 'superheroina'].forEach(m => {
+                const btn = document.getElementById(`mode-btn-${m}`);
+                if (!btn) return;
+                if (state.theme === m) {
+                    btn.className = 'mode-card p-3 rounded-2xl border-4 border-purple-600 bg-purple-600 text-white font-bold text-sm flex flex-col items-center gap-1 shadow-md transform scale-102 transition';
+                } else {
+                    btn.className = 'mode-card p-3 rounded-2xl border-2 border-purple-200 bg-white hover:bg-purple-50 text-slate-700 font-bold text-sm flex flex-col items-center gap-1 transition';
+                }
+            });
+
+            // Renderizar selector de icono al completar
+            const iconGrid = document.getElementById('rewardIconGrid');
+            iconGrid.innerHTML = REWARD_OPTIONS.map(opt => {
+                const active = state.rewardIcon === opt.icon;
+                return `
+                    <button
+                        type="button"
+                        onclick="selectRewardIcon('${opt.icon}')"
+                        class="p-2.5 rounded-2xl border-3 flex flex-col items-center justify-center gap-1 transition ${
+                            active
+                            ? 'bg-amber-400 border-amber-600 text-amber-950 font-extrabold shadow-md scale-105'
+                            : 'bg-white hover:bg-amber-100/60 border-amber-200 text-slate-700 font-semibold'
+                        }"
+                    >
+                        <span class="text-3xl">${opt.icon}</span>
+                        <span class="text-[11px] leading-tight">${opt.label}</span>
+                    </button>
+                `;
+            }).join('');
+
+            const currentRewardObj = REWARD_OPTIONS.find(r => r.icon === state.rewardIcon) || REWARD_OPTIONS[0];
+            document.getElementById('selectedRewardDescription').textContent = currentRewardObj.desc;
+
+            // Renderizar lista de tareas en configuración
+            document.getElementById('setupCount').textContent = state.tasks.length;
+            const listEl = document.getElementById('setupTaskList');
+            listEl.innerHTML = state.tasks.map((task, idx) => {
+                const previewSub = getTaskSubtitle(task);
+                return `
+                    <li class="bg-white border-2 border-slate-200 rounded-2xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-sm">
+                        <div class="flex items-start sm:items-center gap-3 flex-1">
+                            <span class="text-3xl bg-slate-100 w-12 h-12 rounded-xl flex items-center justify-center shrink-0">${task.emoji}</span>
+                            <div class="flex-1 space-y-1">
+                                <input
+                                    type="text"
+                                    value="${task.text.replace(/"/g, '&quot;')}"
+                                    onchange="updateTaskTitle(${idx}, this.value)"
+                                    class="w-full font-extrabold text-slate-800 text-sm sm:text-base bg-transparent border-b border-transparent focus:border-pink-400 focus:outline-none"
+                                />
+                                <input
+                                    type="text"
+                                    value="${previewSub.replace(/"/g, '&quot;')}"
+                                    onchange="updateTaskSubtitle(${idx}, this.value)"
+                                    class="w-full text-xs text-purple-600 font-semibold bg-purple-50/60 px-2 py-1 rounded-lg border border-purple-100 focus:border-purple-400 focus:outline-none"
+                                    title="Editar el comentario que se lee al completar"
+                                />
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-end gap-1.5 shrink-0">
+                            <button type="button" onclick="moveTask(${idx}, -1)" class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 font-bold text-xs">↑</button>
+                            <button type="button" onclick="moveTask(${idx}, 1)" class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 font-bold text-xs">↓</button>
+                            <button type="button" onclick="removeTask(${idx})" class="px-2.5 py-1.5 rounded-lg bg-red-100 hover:bg-red-200 text-red-600 font-bold text-xs">✕</button>
+                        </div>
+                    </li>
+                `;
+            }).join('');
+        }
+
+        function updateTaskTitle(index, val) {
+            if (val.trim()) {
+                state.tasks[index].text = val.trim();
+                saveState();
+            }
+        }
+
+        function updateTaskSubtitle(index, val) {
+            state.tasks[index].customSub = val.trim();
+            saveState();
+            showToast('💬 Comentario actualizado');
+        }
+
+        function detectEmojiForText(text) {
+            const lower = text.toLowerCase();
+            if (lower.includes('cama') || lower.includes('levantar')) return '🛏️';
+            if (lower.includes('desayun') || lower.includes('leche') || lower.includes('comer')) return '🥣';
+            if (lower.includes('pis') || lower.includes('baño')) return '🚽';
+            if (lower.includes('diente')) return '🪥';
+            if (lower.includes('cara') || lower.includes('manos')) return '🧼';
+            if (lower.includes('vestir') || lower.includes('ropa') || lower.includes('abrigo')) return '👗';
+            if (lower.includes('pein') || lower.includes('pelo')) return '🪮';
+            if (lower.includes('mochila')) return '🎒';
+            if (lower.includes('cole')) return '🏫';
+            if (lower.includes('zapato')) return '👟';
+            return '🌟';
+        }
+
+        function addCustomTask() {
+            const titleInput = document.getElementById('newTaskTitleInput');
+            const subInput = document.getElementById('newTaskSubInput');
+            const title = titleInput.value.trim();
+            if (!title) {
+                showToast('⚠️ Escribe el nombre de la tarea');
+                return;
+            }
+            state.tasks.push({
+                id: 'custom_' + Date.now(),
+                text: title,
+                emoji: detectEmojiForText(title),
+                completed: false,
+                customSub: subInput.value.trim()
+            });
+            titleInput.value = '';
+            subInput.value = '';
+            saveState();
+            renderSetupScreen();
+            showToast(`✅ Tarea añadida: ${title}`);
+        }
+
+        function moveTask(index, dir) {
+            const target = index + dir;
+            if (target < 0 || target >= state.tasks.length) return;
+            const temp = state.tasks[index];
+            state.tasks[index] = state.tasks[target];
+            state.tasks[target] = temp;
+            saveState();
+            renderSetupScreen();
+        }
+
+        function removeTask(index) {
+            state.tasks.splice(index, 1);
+            saveState();
+            renderSetupScreen();
+        }
+
+        function restoreDefaultRoutine() {
+            state.tasks = JSON.parse(JSON.stringify(DEFAULT_ROUTINE));
+            saveState();
+            renderSetupScreen();
+            showToast('⭐ Restauradas las 9 tareas principales de Daniella');
+        }
+
+        /* =====================================================================
+           PANTALLA DE PREMIO FINAL (100%)
+           ===================================================================== */
+        function showFinalTrophyScreen() {
+            const modeInfo = MODE_CONFIG[state.theme] || MODE_CONFIG.normal;
+            document.getElementById('finalBigIcon').textContent = state.rewardIcon;
+            document.getElementById('finalSubtitleText').textContent = `¡Has completado todas las misiones de ${modeInfo.name}!`;
+            document.getElementById('victoryPoemText').innerHTML = modeInfo.poem.replace(/\n/g, '<br>');
+
+            switchScreen('trophy');
+            triggerCompletionAnimation(state.rewardIcon);
+        }
+
+        function speakVictoryMessage() {
+            const modeInfo = MODE_CONFIG[state.theme] || MODE_CONFIG.normal;
+            speakText(`¡Felicidades campeona Daniella! ${modeInfo.poem}`);
+        }
+
+        function resetMorningProgress() {
+            state.tasks.forEach(t => t.completed = false);
+            saveState();
+            switchScreen('child');
+            const welcome = '¡Nueva mañana lista, Daniella! Empezamos por levantarse de la cama.';
+            document.getElementById('luliSpeechText').textContent = welcome;
+            showToast('🌅 ¡Estrellas listas para un nuevo día!');
+        }
+
+        /* =====================================================================
+           NAVEGACIÓN Y CONTROLES GENERALES
+           ===================================================================== */
+        function switchScreen(screen) {
+            document.getElementById('child-screen').classList.add('hidden');
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('trophy-screen').classList.add('hidden');
+
+            if (screen === 'setup') {
+                document.getElementById('setup-screen').classList.remove('hidden');
+                renderSetupScreen();
+            } else if (screen === 'trophy') {
+                document.getElementById('trophy-screen').classList.remove('hidden');
+            } else {
+                document.getElementById('child-screen').classList.remove('hidden');
+                renderChildScreen();
+            }
+        }
+
+        function toggleSound() {
+            state.soundEnabled = !state.soundEnabled;
+            if (!state.soundEnabled && 'speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+            }
+            updateSoundButtonUI();
+            saveState();
+            showToast(state.soundEnabled ? '🔊 Voz y efectos activados' : '🔇 Voz y efectos en silencio');
+        }
+
+        function updateSoundButtonUI() {
+            const btn = document.getElementById('soundToggleBtn');
+            btn.innerHTML = state.soundEnabled
+                ? '🔊 <span id="soundBtnLabel">Voz: ON</span>'
+                : '🔇 <span id="soundBtnLabel">Voz: OFF</span>';
+        }
+
+        let toastTimer = null;
+        function showToast(msg) {
+            const box = document.getElementById('toastBox');
+            document.getElementById('toastText').textContent = msg;
+            box.classList.remove('opacity-0');
+            box.classList.add('opacity-100');
+            if (toastTimer) clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                box.classList.remove('opacity-100');
+                box.classList.add('opacity-0');
+            }, 2500);
+        }
+    </script>
+</body>
+</html>
