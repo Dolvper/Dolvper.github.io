@@ -1,1239 +1,366 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Duelo: Carrera a 1.000 Puntos (Base Personalizable)</title>
-  <style>
-    :root {
-      --bg-dark: #090a10;
-      --p1-color: #ef4444; /* Rojo Jugador 1 */
-      --p2-color: #3b82f6; /* Azul Jugador 2 */
-      --gold: #f59e0b;
-      --green: #10b981;
-      --card-bg: #161926;
-      --card-border: #2e344e;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      user-select: none;
-      -webkit-user-select: none;
-      -webkit-touch-callout: none;
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    }
-
-    html, body {
-      width: 100vw;
-      height: 100dvh;
-      overflow: hidden;
-      background-color: var(--bg-dark);
-      color: #f8fafc;
-      touch-action: manipulation;
-    }
-
-    /* Contenedor Principal */
-    .game-board {
-      display: flex;
-      flex-direction: column;
-      width: 100%;
-      height: 100%;
-      position: relative;
-    }
-
-    /* Zonas de Jugadores */
-    .player-area {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      padding: 10px 14px;
-      position: relative;
-      transition: background 0.3s ease;
-    }
-
-    /* Jugador 2 (Arriba, girado 180 grados) */
-    .player-top {
-      transform: rotate(180deg);
-      background: radial-gradient(circle at bottom, rgba(59, 130, 246, 0.16), transparent 75%);
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-    }
-
-    /* Jugador 1 (Abajo, orientación normal) */
-    .player-bottom {
-      background: radial-gradient(circle at bottom, rgba(239, 68, 68, 0.16), transparent 75%);
-      border-top: 1px solid rgba(255,255,255,0.05);
-    }
-
-    /* Cabecera de cada jugador con barra de progreso a 1000 pts */
-    .player-hud {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-      padding: 7px 12px;
-      background: rgba(255, 255, 255, 0.04);
-      border-radius: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-
-    .hud-top-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .player-tag {
-      font-weight: 800;
-      font-size: 0.85rem;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .p2-tag { color: #60a5fa; }
-    .p1-tag { color: #f87171; }
-
-    .score-badge {
-      font-size: 1.25rem;
-      font-weight: 900;
-      color: var(--gold);
-      text-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
-    }
-
-    .score-goal {
-      font-size: 0.75rem;
-      color: #64748b;
-      font-weight: 700;
-    }
-
-    .goal-progress-bg {
-      width: 100%;
-      height: 5px;
-      background: rgba(255, 255, 255, 0.08);
-      border-radius: 999px;
-      overflow: hidden;
-    }
-
-    .goal-progress-fill {
-      height: 100%;
-      width: 0%;
-      transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .p1-fill { background: linear-gradient(90deg, #ef4444, #fbbf24); }
-    .p2-fill { background: linear-gradient(90deg, #3b82f6, #fbbf24); }
-
-    .status-banner {
-      text-align: center;
-      font-size: 0.82rem;
-      font-weight: 700;
-      min-height: 20px;
-      color: #cbd5e1;
-      letter-spacing: 0.4px;
-      margin: 2px 0;
-    }
-
-    /* Cuadrícula de las 4 respuestas */
-    .options-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      grid-template-rows: 1fr 1fr;
-      gap: 9px;
-      flex: 1;
-      max-height: 73%;
-    }
-
-    .ans-btn {
-      background: linear-gradient(145deg, #1e2235, #121521);
-      border: 2px solid var(--card-border);
-      border-radius: 14px;
-      color: #f1f5f9;
-      font-size: 0.92rem;
-      font-weight: 700;
-      padding: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      line-height: 1.2;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-      transition: transform 0.1s, border-color 0.2s, background 0.2s, opacity 0.3s;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .ans-btn:active:not(:disabled) {
-      transform: scale(0.95);
-    }
-
-    .ans-btn:disabled {
-      cursor: default;
-    }
-
-    /* Estados de los botones */
-    .ans-btn.correct {
-      background: linear-gradient(145deg, #059669, #047857) !important;
-      border-color: #34d399 !important;
-      color: #ffffff !important;
-      box-shadow: 0 0 20px rgba(16, 185, 129, 0.6);
-    }
-
-    .ans-btn.wrong {
-      background: linear-gradient(145deg, #dc2626, #991b1b) !important;
-      border-color: #f87171 !important;
-      color: #ffffff !important;
-      box-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
-    }
-
-    .ans-btn.eliminated {
-      opacity: 0.12 !important;
-      pointer-events: none !important;
-      border-color: transparent !important;
-      transform: scale(0.92);
-    }
-
-    /* Consola Central Divisoria */
-    .center-console {
-      height: 60px;
-      background: #05060a;
-      border-top: 2px solid #262b40;
-      border-bottom: 2px solid #262b40;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 14px;
-      position: relative;
-      z-index: 20;
-      box-shadow: 0 0 25px rgba(0,0,0,0.8);
-    }
-
-    /* Barra de tiempo */
-    .timer-track {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      height: 4px;
-      width: 100%;
-      background: #1e293b;
-    }
-
-    .timer-fill {
-      height: 100%;
-      width: 100%;
-      background: linear-gradient(90deg, #10b981, #f59e0b, #ef4444);
-      transition: width 0.1s linear;
-    }
-
-    .round-pill {
-      font-size: 0.75rem;
-      font-weight: 800;
-      color: #94a3b8;
-      background: #131622;
-      padding: 5px 9px;
-      border-radius: 8px;
-      border: 1px solid #262b40;
-      white-space: nowrap;
-    }
-
-    /* Indicador de Voz Activa (Sin texto de la pregunta) */
-    .audio-hub {
-      display: flex;
-      align-items: center;
-      gap: 9px;
-      background: #131622;
-      padding: 6px 14px;
-      border-radius: 999px;
-      border: 1px solid #2e3552;
-      cursor: pointer;
-    }
-
-    .wave-bars {
-      display: flex;
-      align-items: center;
-      gap: 3px;
-      height: 16px;
-    }
-
-    .bar {
-      width: 3px;
-      height: 5px;
-      background: var(--gold);
-      border-radius: 2px;
-      transition: height 0.15s ease;
-    }
-
-    .speaking .bar:nth-child(1) { animation: sound 0.45s infinite alternate; }
-    .speaking .bar:nth-child(2) { animation: sound 0.35s infinite alternate 0.1s; }
-    .speaking .bar:nth-child(3) { animation: sound 0.50s infinite alternate 0.2s; }
-    .speaking .bar:nth-child(4) { animation: sound 0.40s infinite alternate 0.15s; }
-
-    @keyframes sound {
-      0% { height: 4px; background: #f59e0b; }
-      100% { height: 16px; background: #fde047; }
-    }
-
-    .audio-status-text {
-      font-size: 0.74rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
-      color: #e2e8f0;
-    }
-
-    .timer-badge {
-      font-size: 0.95rem;
-      font-weight: 900;
-      color: var(--gold);
-      min-width: 36px;
-      text-align: right;
-    }
-
-    /* Pantallas de Inicio, Carga y Fin */
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(7, 9, 15, 0.96);
-      z-index: 100;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      text-align: center;
-      overflow-y: auto;
-    }
-
-    .modal-card {
-      width: 100%;
-      max-width: 420px;
-      background: #131624;
-      border: 1px solid #2d334d;
-      border-radius: 20px;
-      padding: 22px;
-      box-shadow: 0 15px 40px rgba(0,0,0,0.7);
-    }
-
-    .modal-title {
-      font-size: 1.55rem;
-      font-weight: 900;
-      background: linear-gradient(90deg, #f87171, #fbbf24, #60a5fa);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-bottom: 5px;
-    }
-
-    .modal-subtitle {
-      font-size: 0.8rem;
-      color: #94a3b8;
-      margin-bottom: 16px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .rules-list {
-      text-align: left;
-      font-size: 0.85rem;
-      color: #cbd5e1;
-      line-height: 1.45;
-      margin-bottom: 20px;
-      background: rgba(0,0,0,0.3);
-      padding: 13px 15px;
-      border-radius: 12px;
-      border-left: 3px solid var(--gold);
-    }
-
-    .rules-list div {
-      margin-bottom: 7px;
-    }
-
-    .rules-list div:last-child {
-      margin-bottom: 0;
-    }
-
-    /* Botones de acción en modales */
-    .start-btn {
-      width: 100%;
-      padding: 14px;
-      font-size: 0.98rem;
-      font-weight: 900;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: #090a10;
-      background: linear-gradient(135deg, #fbbf24, #d97706);
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
-      transition: transform 0.1s, opacity 0.2s;
-    }
-
-    .start-btn:active:not(:disabled) {
-      transform: scale(0.97);
-    }
-
-    .start-btn:disabled {
-      opacity: 0.35;
-      cursor: not-allowed;
-      box-shadow: none;
-    }
-
-    .secondary-btn {
-      width: 100%;
-      padding: 13px;
-      font-size: 0.9rem;
-      font-weight: 800;
-      letter-spacing: 0.5px;
-      color: #f8fafc;
-      background: linear-gradient(145deg, #1e293b, #0f172a);
-      border: 1px solid #3b82f6;
-      border-radius: 12px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      margin-bottom: 12px;
-      box-shadow: 0 4px 14px rgba(59, 130, 246, 0.2);
-      transition: transform 0.1s, border-color 0.2s, background 0.2s;
-    }
-
-    .secondary-btn:active {
-      transform: scale(0.97);
-    }
-
-    .upload-btn {
-      border-color: #10b981;
-      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.2);
-    }
-
-    .play-ready-btn {
-      background: linear-gradient(135deg, #10b981, #059669);
-      color: #ffffff;
-      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.45);
-      margin-top: 6px;
-    }
-
-    /* Caja de estado del archivo cargado */
-    .file-status-box {
-      font-size: 0.83rem;
-      padding: 11px 13px;
-      border-radius: 10px;
-      margin-bottom: 14px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px dashed #475569;
-      color: #94a3b8;
-      line-height: 1.4;
-    }
-
-    .file-status-box.loaded-ok {
-      background: rgba(16, 185, 129, 0.12);
-      border: 1px solid #10b981;
-      color: #a7f3d0;
-      font-weight: 700;
-    }
-
-    .file-status-box.loaded-error {
-      background: rgba(239, 68, 68, 0.14);
-      border: 1px solid #ef4444;
-      color: #fca5a5;
-      font-weight: 700;
-    }
-
-    .back-link {
-      display: inline-block;
-      margin-top: 14px;
-      font-size: 0.78rem;
-      color: #94a3b8;
-      background: none;
-      border: none;
-      text-decoration: underline;
-      cursor: pointer;
-    }
-
-    .hidden {
-      display: none !important;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Duelo a 1.000 puntos (IA)</title>
+<style>
+:root{--bg:#090a10;--gold:#f59e0b;--bd:#2e344e;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box;margin:0;padding:0;user-select:none;-webkit-user-select:none;font-family:'Segoe UI',system-ui,sans-serif}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:#f8fafc;touch-action:manipulation}
+.board{display:flex;flex-direction:column;height:100%}
+.area{flex:1;display:flex;flex-direction:column;justify-content:space-between;padding:8px 12px;min-height:0}
+.top{transform:rotate(180deg);background:radial-gradient(circle at bottom,rgba(59,130,246,.16),transparent 75%)}
+.bot{background:radial-gradient(circle at bottom,rgba(239,68,68,.16),transparent 75%)}
+.hud{padding:6px 12px;background:rgba(255,255,255,.04);border-radius:12px;border:1px solid rgba(255,255,255,.08)}
+.row{display:flex;justify-content:space-between;align-items:center}
+.tag{font-weight:800;font-size:.8rem;letter-spacing:1px}
+.score{font-size:1.2rem;font-weight:900;color:var(--gold)}
+.pbg{height:5px;background:rgba(255,255,255,.08);border-radius:9px;overflow:hidden;margin-top:4px}
+.pf{height:100%;width:0;transition:width .35s}
+.status{text-align:center;font-size:.8rem;font-weight:700;min-height:18px;color:#cbd5e1}
+.grid{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:8px;flex:1;max-height:70%}
+.ans{background:linear-gradient(145deg,#1e2235,#121521);border:2px solid var(--bd);border-radius:14px;color:#f1f5f9;font-size:.9rem;font-weight:700;padding:6px;line-height:1.2;transition:transform .1s,opacity .3s}
+.ans:active:not(:disabled){transform:scale(.95)}
+.ans.ok{background:linear-gradient(145deg,#059669,#047857)!important;border-color:#34d399!important}
+.ans.no{background:linear-gradient(145deg,#dc2626,#991b1b)!important;border-color:#f87171!important}
+.ans.out{opacity:.12!important;pointer-events:none}
+.console{height:56px;background:#05060a;border-block:2px solid #262b40;display:flex;align-items:center;justify-content:space-between;padding:0 12px;position:relative}
+.tt{position:absolute;bottom:0;left:0;height:4px;width:100%;background:#1e293b}
+#tbar{height:100%;width:100%;background:linear-gradient(90deg,#10b981,#f59e0b,#ef4444);transition:width .1s linear}
+.pill{font-size:.75rem;font-weight:800;color:#94a3b8;background:#131622;padding:5px 9px;border-radius:8px;border:1px solid #262b40}
+.hub{display:flex;align-items:center;gap:8px;background:#131622;padding:6px 12px;border-radius:99px;border:1px solid #2e3552}
+.wave{display:flex;align-items:center;gap:3px;height:16px}
+.bar{width:3px;height:5px;background:var(--gold);border-radius:2px}
+.speaking .bar{animation:snd .4s infinite alternate}
+.speaking .bar:nth-child(2){animation-delay:.1s}.speaking .bar:nth-child(3){animation-delay:.2s}.speaking .bar:nth-child(4){animation-delay:.15s}
+@keyframes snd{to{height:16px}}
+#cst{font-size:.7rem;font-weight:800;text-transform:uppercase}
+#tdisp{font-weight:900;color:var(--gold);min-width:34px;text-align:right}
+.ov{position:fixed;inset:0;background:rgba(7,9,15,.96);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;overflow-y:auto}
+.card{width:100%;max-width:420px;background:#131624;border:1px solid #2d334d;border-radius:20px;padding:20px;text-align:center;margin:auto}
+h1{font-size:1.45rem;font-weight:900;background:linear-gradient(90deg,#f87171,#fbbf24,#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px}
+.sub{font-size:.75rem;color:#94a3b8;margin-bottom:14px;text-transform:uppercase;letter-spacing:1px}
+.rules{text-align:left;font-size:.82rem;color:#cbd5e1;line-height:1.4;margin-bottom:14px;background:rgba(0,0,0,.3);padding:12px;border-radius:12px;border-left:3px solid var(--gold)}
+.rules div{margin-bottom:6px}
+.btn{width:100%;padding:13px;font-size:.9rem;font-weight:800;color:#f8fafc;background:linear-gradient(145deg,#1e293b,#0f172a);border:1px solid #3b82f6;border-radius:12px;margin-bottom:10px;cursor:pointer}
+.btn.go{color:#090a10;background:linear-gradient(135deg,#fbbf24,#d97706);border:0;text-transform:uppercase}
+.btn.ai{border-color:#a78bfa}
+.btn:disabled{opacity:.4}
+.btn:active:not(:disabled){transform:scale(.97)}
+input[type=text],input[type=number]{width:100%;padding:12px;border-radius:10px;border:1px solid #3b3f5c;background:#0b0d17;color:#f8fafc;font-size:.95rem;margin-bottom:8px;user-select:text;-webkit-user-select:text}
+.two{display:flex;gap:8px;align-items:center;margin-bottom:8px;font-size:.8rem;color:#94a3b8}
+.fs{font-size:.82rem;padding:10px;border-radius:10px;margin:4px 0 12px;border:1px dashed #475569;color:#94a3b8}
+.fs.good{border:1px solid #10b981;background:rgba(16,185,129,.12);color:#a7f3d0}
+.fs.bad{border:1px solid #ef4444;background:rgba(239,68,68,.14);color:#fca5a5}
+.hidden{display:none!important}
+</style>
 </head>
 <body>
 
-  <!-- 1. PANTALLA DE INICIO (EXPLICACIÓN TAL COMO ESTABA) -->
-  <div id="startModal" class="modal-overlay">
-    <div class="modal-card">
-      <h1 class="modal-title">DUELO A 1.000 PUNTOS</h1>
-      <p class="modal-subtitle">Carrera a 1.000 Puntos • Preguntas Personalizables</p>
-      <div class="rules-list">
-        <div>🏆 <strong>Objetivo:</strong> Gana el primer jugador en alcanzar los <strong>1.000 puntos</strong>.</div>
-        <div>🎲 <strong>Stock de preguntas:</strong> En cada partida se mezclan al azar las preguntas del archivo cargado.</div>
-        <div>👁️ <strong>Primero las 4 opciones:</strong> Tendréis 2,4 segundos para leer las respuestas antes de que hable el presentador.</div>
-        <div>🔊 <strong>Solo Oído:</strong> La pregunta <strong>nunca se escribe en pantalla</strong>.</div>
-        <div>⚡ <strong>Puntuación:</strong> Acertar da <strong>+100 pts</strong> (o <strong>+50 pts</strong> tras el 50/50). Fallar resta <strong>-50 pts</strong> y cede el rebote.</div>
-        <div>⏳ <strong>10 Segundos:</strong> Si nadie pulsa en 10s, se eliminan <strong>2 opciones falsas</strong> y se repite la pregunta.</div>
-      </div>
-      <button class="start-btn" id="btnContinueToSetup">Continuar ➔ Configurar Preguntas</button>
-    </div>
+<div id="setup" class="ov"><div class="card">
+  <h1>DUELO A 1.000 PUNTOS</h1>
+  <p class="sub">Elige las preguntas</p>
+  <div class="rules">
+    <div>🏆 Gana quien llegue primero a 1.000 puntos.</div>
+    <div>👁️ Veréis las 4 opciones 2,4 s antes de que se lea la pregunta. Solo se escucha, no se escribe.</div>
+    <div>⚡ Acierto +100 (+50 tras el 50/50). Fallo −50 y rebote para el rival. A los 10 s sin respuesta se quitan 2 opciones falsas.</div>
   </div>
 
-  <!-- 2. PANTALLA DE CARGA Y DESCARGA DE MODELO TXT -->
-  <div id="setupModal" class="modal-overlay hidden">
-    <div class="modal-card">
-      <h1 class="modal-title">BANCO DE PREGUNTAS</h1>
-      <p class="modal-subtitle">Paso 2 • Prepara o sube tu archivo .TXT</p>
-
-      <div class="rules-list">
-        <div>1️⃣ <strong>Descarga el modelo .txt</strong> si necesitas la plantilla con el formato de 4 posibles respuestas y 1 verdadera.</div>
-        <div>2️⃣ <strong>Sube tu archivo .txt</strong> con tus propias preguntas para activar el botón de jugar.</div>
-      </div>
-
-      <!-- Opción 1: Descargar plantilla .txt -->
-      <button class="secondary-btn" id="btnDownloadTemplate">
-        📥 1. Descargar Modelo (.txt)
-      </button>
-
-      <!-- Opción 2: Subir archivo .txt -->
-      <input type="file" id="txtFileInput" accept=".txt,text/plain" class="hidden">
-      <button class="secondary-btn upload-btn" id="btnTriggerUpload">
-        📂 2. Subir Archivo de Preguntas (.txt)
-      </button>
-
-      <!-- Indicador del archivo subido -->
-      <div id="fileStatusBox" class="file-status-box">
-        Ningún archivo cargado todavía. Sube un archivo <strong>.txt</strong> para comenzar.
-      </div>
-
-      <!-- Botón para jugar una vez subido el archivo -->
-      <button class="start-btn play-ready-btn hidden" id="btnStartWithUploaded">
-        🔊 Jugar con estas Preguntas
-      </button>
-
-      <button class="back-link" id="btnBackToRules">← Volver a la explicación del juego</button>
-    </div>
+  <div id="aiBox">
+    <input type="text" id="topic" placeholder="Tema: p. ej. Historia de Roma, cine de los 90…" maxlength="80">
+    <div class="two"><span>Nº de preguntas</span><input type="number" id="count" value="20" min="5" max="40" style="width:80px;margin:0"></div>
+    <button class="btn ai" id="bGen">✨ Generar preguntas con IA</button>
+    <details style="margin-bottom:12px;text-align:left;font-size:.78rem;color:#94a3b8">
+      <summary style="cursor:pointer">Opcional: usar Gemini (más calidad)</summary>
+      <input type="text" id="gkey" placeholder="Pega tu API key de Gemini (se guarda solo en este dispositivo)" style="margin-top:8px">
+    </details>
   </div>
 
-  <!-- 3. PANTALLA FINAL -->
-  <div id="endModal" class="modal-overlay hidden">
-    <div class="modal-card">
-      <h1 class="modal-title" id="winnerHeadline">¡META ALCANZADA!</h1>
-      <p class="modal-subtitle" id="winnerSub">Un jugador ha llegado a los 1.000 puntos</p>
-      <div class="rules-list" style="text-align:center; font-size:1.1rem;">
-        <div style="color:#f87171; font-weight:800;">🔴 Jugador 1: <span id="finalP1">0</span> / 1000 pts</div>
-        <div style="color:#60a5fa; font-weight:800; margin-top:8px;">🔵 Jugador 2: <span id="finalP2">0</span> / 1000 pts</div>
-      </div>
-      <button class="start-btn" id="btnRestart" style="margin-bottom: 10px;">🔄 Nueva Partida (Mismas Preguntas)</button>
-      <button class="secondary-btn" id="btnChangeFile" style="margin-bottom: 0;">📂 Subir otro archivo .txt</button>
-    </div>
+  <button class="btn" id="bUp" style="border-color:#10b981">📂 Subir archivo .txt</button>
+  <input type="file" id="file" accept=".txt,text/plain" class="hidden">
+  <button class="btn" id="bTpl">📥 Descargar modelo .txt</button>
+
+  <div id="fs" class="fs">Todavía no hay preguntas. Genera con IA o sube un .txt.</div>
+  <button class="btn go hidden" id="bPlay">🔊 Jugar</button>
+</div></div>
+
+<div id="endm" class="ov hidden"><div class="card">
+  <h1 id="wh">¡META ALCANZADA!</h1>
+  <p class="sub" id="ws"></p>
+  <div class="rules" style="text-align:center;font-size:1.05rem">
+    <div style="color:#f87171;font-weight:800">🔴 Jugador 1: <span id="f1">0</span> pts</div>
+    <div style="color:#60a5fa;font-weight:800">🔵 Jugador 2: <span id="f2">0</span> pts</div>
   </div>
+  <button class="btn go" id="bAgain">🔄 Otra partida (mismas preguntas)</button>
+  <button class="btn" id="bNew">✨ Cambiar de tema o archivo</button>
+</div></div>
 
-  <!-- TABLERO DIVIDIDO -->
-  <div class="game-board">
-
-    <!-- JUGADOR 2 (SUPERIOR - GIRADO 180º) -->
-    <section class="player-area player-top" id="areaP2">
-      <div class="player-hud">
-        <div class="hud-top-row">
-          <span class="player-tag p2-tag">🔵 JUGADOR 2</span>
-          <div>
-            <span class="score-badge" id="scoreP2">0</span>
-            <span class="score-goal">/ 1000</span>
-          </div>
-        </div>
-        <div class="goal-progress-bg">
-          <div class="goal-progress-fill p2-fill" id="barP2"></div>
-        </div>
-      </div>
-      <div class="status-banner" id="statusP2">Preparado...</div>
-      <div class="options-grid" id="gridP2"></div>
-    </section>
-
-    <!-- CONSOLA CENTRAL -->
-    <div class="center-console">
-      <div class="round-pill" id="roundCounter">Ronda 1</div>
-      
-      <div class="audio-hub" id="audioHub" title="Toca para repetir audio">
-        <div class="wave-bars" id="waveBars">
-          <div class="bar"></div>
-          <div class="bar"></div>
-          <div class="bar"></div>
-          <div class="bar"></div>
-        </div>
-        <span class="audio-status-text" id="centerStatus">ESPERANDO</span>
-      </div>
-
-      <div class="timer-badge" id="timerDisplay">10s</div>
-
-      <div class="timer-track">
-        <div class="timer-fill" id="timerBar"></div>
-      </div>
-    </div>
-
-    <!-- JUGADOR 1 (INFERIOR - NORMAL) -->
-    <section class="player-area player-bottom" id="areaP1">
-      <div class="player-hud">
-        <div class="hud-top-row">
-          <span class="player-tag p1-tag">🔴 JUGADOR 1</span>
-          <div>
-            <span class="score-badge" id="scoreP1">0</span>
-            <span class="score-goal">/ 1000</span>
-          </div>
-        </div>
-        <div class="goal-progress-bg">
-          <div class="goal-progress-fill p1-fill" id="barP1"></div>
-        </div>
-      </div>
-      <div class="status-banner" id="statusP1">Preparado...</div>
-      <div class="options-grid" id="gridP1"></div>
-    </section>
-
+<div class="board">
+  <section class="area top">
+    <div class="hud"><div class="row"><span class="tag" style="color:#60a5fa">🔵 JUGADOR 2</span><div><span class="score" id="s2">0</span> <small>/ 1000</small></div></div><div class="pbg"><div class="pf" id="b2" style="background:linear-gradient(90deg,#3b82f6,#fbbf24)"></div></div></div>
+    <div class="status" id="st2"></div><div class="grid" id="g2"></div>
+  </section>
+  <div class="console">
+    <div class="pill" id="rc">Ronda 1</div>
+    <div class="hub" id="hub"><div class="wave" id="wave"><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div></div><span id="cst">ESPERANDO</span></div>
+    <div id="tdisp">10s</div>
+    <div class="tt"><div id="tbar"></div></div>
   </div>
-
-  <script>
-    const WINNING_SCORE = 1000;
-
-    // BANCO DE PREGUNTAS BASE (Comienza vacío, se rellena al subir el archivo .txt)
-    let ALL_QUESTIONS = [];
-
-    // ESTADO DEL JUEGO
-    let deck = [];
-    let currentCard = null;
-    let roundNumber = 0;
-    let scores = { 1: 0, 2: 0 };
-    let currentOptions = [];
-    let isLocked = true;
-    let fiftyFiftyUsed = false;
-    let lockedPlayers = { 1: false, 2: false };
-    let countdownTimer = null;
-    let timeLeft = 100; // 10.0 segundos en décimas
-
-    // =========================================================================
-    // GENERADOR Y DESCARGA DEL MODELO .TXT
-    // =========================================================================
-    function downloadTxtTemplate() {
-      const templateContent = [
-        "# =====================================================================",
-        "# PLANTILLA DE PREGUNTAS - DUELO A 1.000 PUNTOS",
-        "# =====================================================================",
-        "# INSTRUCCIONES:",
-        "# - Las líneas que empiezan por '#' son comentarios y el juego las ignora.",
-        "# - Separa cada bloque de pregunta con una línea en blanco.",
-        "# - Cada bloque tiene 5 líneas: la pregunta y sus 4 posibles respuestas.",
-        "# - Pon un asterisco (*) al principio de la respuesta VERDADERA.",
-        "#   (Si no pones asterisco en ninguna, se tomará la primera opción como verdadera).",
-        "#",
-        "# Puedes borrar estos ejemplos y escribir tantas preguntas como quieras:",
-        "# =====================================================================",
-        "",
-        "¿Cuál es el planeta más grande del sistema solar?",
-        "*Júpiter",
-        "Saturno",
-        "Marte",
-        "Neptuno",
-        "",
-        "¿En qué año llegó el ser humano a la Luna por primera vez?",
-        "1965",
-        "*1969",
-        "1972",
-        "1959",
-        "",
-        "¿Cuál es el océano de mayor extensión en la Tierra?",
-        "Océano Atlántico",
-        "Océano Índico",
-        "*Océano Pacífico",
-        "Océano Glacial Ártico"
-      ].join("\r\n");
-
-      const blob = new Blob([templateContent], { type: "text/plain;charset=utf-8" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "modelo_preguntas_duelo.txt";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }
-
-    // =========================================================================
-    // LECTOR Y ANALIZADOR DEL ARCHIVO .TXT SUBIDO
-    // =========================================================================
-    function parseQuestionsFromTxt(rawText) {
-      const parsedQuestions = [];
-      const lines = rawText.replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n");
-
-      // Filtramos comentarios (#) y agrupamos líneas no vacías
-      const cleanLines = [];
-      for (let line of lines) {
-        const trimmed = line.trim();
-        if (!trimmed || trimmed.startsWith("#") || trimmed.startsWith("//")) {
-          continue;
-        }
-        cleanLines.push(trimmed);
-      }
-
-      // Modo A: Si el usuario usó formato de 1 línea separada por barras verticales (Pregunta | Correcta | Falsa 1 | Falsa 2 | Falsa 3)
-      const pipeLines = cleanLines.filter(l => l.includes("|"));
-      if (pipeLines.length > 0 && pipeLines.length === cleanLines.length) {
-        for (let line of pipeLines) {
-          const parts = line.split("|").map(p => p.trim()).filter(Boolean);
-          if (parts.length >= 5) {
-            const qText = cleanPrefix(parts[0]);
-            const rawOpts = parts.slice(1, 5);
-            const extracted = extractOptionsAndCorrect(rawOpts);
-            parsedQuestions.push({
-              q: qText,
-              options: extracted.options,
-              answer: extracted.answer
-            });
-          }
-        }
-        return parsedQuestions;
-      }
-
-      // Modo B (Estándar del modelo): Bloques de 5 líneas (1 Pregunta + 4 Respuestas)
-      for (let i = 0; i + 4 < cleanLines.length; i += 5) {
-        const qText = cleanPrefix(cleanLines[i]);
-        const rawOpts = [
-          cleanLines[i + 1],
-          cleanLines[i + 2],
-          cleanLines[i + 3],
-          cleanLines[i + 4]
-        ];
-
-        const extracted = extractOptionsAndCorrect(rawOpts);
-        parsedQuestions.push({
-          q: qText,
-          options: extracted.options,
-          answer: extracted.answer
-        });
-      }
-
-      return parsedQuestions;
-    }
-
-    function cleanPrefix(str) {
-      return str
-        .replace(/^(PREGUNTA|P|Q)\s*[:.-]\s*/i, "")
-        .trim();
-    }
-
-    function extractOptionsAndCorrect(rawOptions) {
-      let correctAnswer = null;
-      const cleanOptions = rawOptions.map((opt) => {
-        let text = opt.replace(/^(OPCI[OÓ]N\s*[1-4A-D]|[1-4A-D])\s*[:.)-]\s*/i, "").trim();
-
-        // Detecta si tiene '*' al inicio o al final o etiqueta (CORRECTA)
-        if (text.startsWith("*")) {
-          text = text.substring(1).trim();
-          correctAnswer = text;
-        } else if (text.endsWith("*")) {
-          text = text.slice(0, -1).trim();
-          correctAnswer = text;
-        } else if (/^CORRECTA\s*[:.-]\s*/i.test(opt)) {
-          text = opt.replace(/^CORRECTA\s*[:.-]\s*/i, "").trim();
-          correctAnswer = text;
-        }
-        return text;
-      });
-
-      // Si no se marcó ninguna con asterisco, la primera respuesta es la verdadera por defecto
-      if (!correctAnswer && cleanOptions.length > 0) {
-        correctAnswer = cleanOptions[0];
-      }
-
-      return {
-        options: cleanOptions,
-        answer: correctAnswer
-      };
-    }
-
-    // =========================================================================
-    // AUDIO SINTETIZADO (Efectos de concurso de TV)
-    // =========================================================================
-    let audioCtx = null;
-    function initAudio() {
-      if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      }
-      if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
-      }
-    }
-
-    function playTone(freq, type, duration, delay = 0) {
-      if (!audioCtx) return;
-      setTimeout(() => {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = type;
-        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-        gain.gain.setValueAtTime(0.18, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + duration);
-      }, delay);
-    }
-
-    function sfxShowOptions() {
-      playTone(440, 'sine', 0.12, 0);
-      playTone(554, 'sine', 0.15, 100);
-    }
-
-    function sfxCorrect() {
-      playTone(523.25, 'triangle', 0.12, 0);
-      playTone(659.25, 'triangle', 0.12, 110);
-      playTone(783.99, 'triangle', 0.14, 220);
-      playTone(1046.50, 'triangle', 0.35, 330);
-    }
-
-    function sfxVictoryFanfare() {
-      playTone(523.25, 'triangle', 0.15, 0);
-      playTone(659.25, 'triangle', 0.15, 150);
-      playTone(783.99, 'triangle', 0.15, 300);
-      playTone(1046.50, 'triangle', 0.25, 450);
-      playTone(783.99, 'triangle', 0.15, 700);
-      playTone(1046.50, 'triangle', 0.55, 850);
-    }
-
-    function sfxWrong() {
-      playTone(190, 'sawtooth', 0.25, 0);
-      playTone(145, 'sawtooth', 0.4, 200);
-    }
-
-    function sfxFiftyFifty() {
-      playTone(600, 'sine', 0.1, 0);
-      playTone(380, 'sine', 0.22, 120);
-    }
-
-    // SÍNTESIS DE VOZ (Web Speech API)
-    function speakQuestion(text, onEndCallback) {
-      if (!('speechSynthesis' in window)) {
-        setCenterStatus("SIN SOPORTE DE VOZ", false);
-        if (onEndCallback) setTimeout(onEndCallback, 1000);
-        return;
-      }
-
-      window.speechSynthesis.cancel();
-
-      const utter = new SpeechSynthesisUtterance(text);
-      const voices = window.speechSynthesis.getVoices();
-      const esVoice = voices.find(v => v.lang.startsWith('es')) || null;
-      if (esVoice) utter.voice = esVoice;
-      utter.lang = 'es-ES';
-      utter.rate = 1.03;
-      utter.pitch = 1.0;
-
-      utter.onstart = () => {
-        setCenterStatus("ESCUCHANDO PREGUNTA...", true);
-      };
-
-      utter.onend = () => {
-        setCenterStatus("¡RESPONDED AHORA!", false);
-        if (onEndCallback) onEndCallback();
-      };
-
-      utter.onerror = () => {
-        setCenterStatus("¡RESPONDED AHORA!", false);
-        if (onEndCallback) onEndCallback();
-      };
-
-      window.speechSynthesis.speak(utter);
-    }
-
-    function setCenterStatus(text, isSpeaking) {
-      document.getElementById('centerStatus').textContent = text;
-      const wave = document.getElementById('waveBars');
-      if (isSpeaking) {
-        wave.classList.add('speaking');
-      } else {
-        wave.classList.remove('speaking');
-      }
-    }
-
-    function setPlayerBanners(msg1, msg2 = msg1) {
-      document.getElementById('statusP1').textContent = msg1;
-      document.getElementById('statusP2').textContent = msg2;
-    }
-
-    // Algoritmo Fisher-Yates para barajado aleatorio real
-    function shuffle(arr) {
-      const copy = [...arr];
-      for (let i = copy.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [copy[i], copy[j]] = [copy[j], copy[i]];
-      }
-      return copy;
-    }
-
-    function getNextRandomQuestion() {
-      if (deck.length === 0) {
-        deck = shuffle(ALL_QUESTIONS);
-      }
-      return deck.pop();
-    }
-
-    // INICIAR PARTIDA CON LAS PREGUNTAS SUBIDAS
-    function startGame() {
-      if (ALL_QUESTIONS.length === 0) return;
-
-      initAudio();
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.getVoices();
-      }
-
-      scores = { 1: 0, 2: 0 };
-      roundNumber = 0;
-      updateScoreUI();
-      deck = shuffle(ALL_QUESTIONS);
-
-      document.getElementById('startModal').classList.add('hidden');
-      document.getElementById('setupModal').classList.add('hidden');
-      document.getElementById('endModal').classList.add('hidden');
-
-      loadRound();
-    }
-
-    function updateScoreUI() {
-      document.getElementById('scoreP1').textContent = scores[1];
-      document.getElementById('scoreP2').textContent = scores[2];
-
-      const pct1 = Math.min(100, (scores[1] / WINNING_SCORE) * 100);
-      const pct2 = Math.min(100, (scores[2] / WINNING_SCORE) * 100);
-
-      document.getElementById('barP1').style.width = `${pct1}%`;
-      document.getElementById('barP2').style.width = `${pct2}%`;
-    }
-
-    // CARGAR RONDA: 1º Mostrar las 4 respuestas -> 2º Leer la pregunta en voz alta
-    function loadRound() {
-      clearInterval(countdownTimer);
-      window.speechSynthesis.cancel();
-
-      // Comprobar si alguien alcanzó los 1000 puntos
-      if (scores[1] >= WINNING_SCORE || scores[2] >= WINNING_SCORE) {
-        finishGame();
-        return;
-      }
-
-      roundNumber++;
-      currentCard = getNextRandomQuestion();
-      currentOptions = shuffle(currentCard.options);
-      isLocked = true;
-      fiftyFiftyUsed = false;
-      lockedPlayers = { 1: false, 2: false };
-
-      document.getElementById('roundCounter').textContent = `Ronda ${roundNumber}`;
-      document.getElementById('timerBar').style.width = '100%';
-      document.getElementById('timerDisplay').textContent = '10s';
-
-      renderPlayerButtons(1, currentOptions);
-      renderPlayerButtons(2, currentOptions);
-      sfxShowOptions();
-
-      // Fase 1: Leen las 4 posibles respuestas en silencio antes de que suene la pregunta
-      setCenterStatus("MIRAD LAS RESPUESTAS...", false);
-      setPlayerBanners("👀 Leed las 4 opciones antes de escuchar...");
-
-      setTimeout(() => {
-        // Fase 2: Se desbloquean los pulsadores y se reproduce la pregunta en voz alta
-        isLocked = false;
-        setPlayerBanners("🔊 ¡Escuchad y pulsad el más rápido!");
-        
-        speakQuestion(currentCard.q, () => {
-          if (!isLocked) {
-            startTenSecondCountdown();
-          }
-        });
-      }, 2400);
-    }
-
-    function renderPlayerButtons(playerNum, optionsList) {
-      const grid = document.getElementById(`gridP${playerNum}`);
-      grid.innerHTML = '';
-
-      optionsList.forEach((optText, idx) => {
-        const btn = document.createElement('button');
-        btn.className = 'ans-btn';
-        btn.dataset.option = optText;
-        btn.dataset.index = idx;
-        btn.textContent = optText;
-
-        btn.addEventListener('pointerdown', (e) => {
-          e.preventDefault();
-          handlePlayerAnswer(playerNum, optText, btn);
-        });
-
-        grid.appendChild(btn);
-      });
-    }
-
-    // CUENTA ATRÁS DE 10 SEGUNDOS
-    function startTenSecondCountdown() {
-      clearInterval(countdownTimer);
-      timeLeft = 100; // 10.0 segundos
-
-      countdownTimer = setInterval(() => {
-        if (isLocked) {
-          clearInterval(countdownTimer);
-          return;
-        }
-
-        timeLeft--;
-        const pct = Math.max(0, timeLeft);
-        document.getElementById('timerBar').style.width = `${pct}%`;
-        document.getElementById('timerDisplay').textContent = `${Math.ceil(timeLeft / 10)}s`;
-
-        if (timeLeft <= 0) {
-          clearInterval(countdownTimer);
-          onTenSecondsExpired();
-        }
-      }, 100);
-    }
-
-    // SI EN 10 SEGUNDOS NADIE RESPONDE: QUITAR 2 INCORRECTAS Y REPETIR PREGUNTA
-    function onTenSecondsExpired() {
-      if (!fiftyFiftyUsed) {
-        fiftyFiftyUsed = true;
-        isLocked = true;
-        sfxFiftyFifty();
-
-        // Elegir 2 respuestas incorrectas al azar para retirarlas
-        const wrongAnswers = currentOptions.filter(o => o !== currentCard.answer);
-        const toEliminate = shuffle(wrongAnswers).slice(0, 2);
-
-        [1, 2].forEach(p => {
-          const buttons = document.querySelectorAll(`#gridP${p} .ans-btn`);
-          buttons.forEach(btn => {
-            if (toEliminate.includes(btn.dataset.option)) {
-              btn.classList.add('eliminated');
-              btn.disabled = true;
-            }
-          });
-        });
-
-        setCenterStatus("50/50 • REPITIENDO...", false);
-        setPlayerBanners("⚠️ ¡10s sin respuesta! Quedan 2 opciones. Escuchad de nuevo...");
-
-        setTimeout(() => {
-          isLocked = false;
-          lockedPlayers = { 1: false, 2: false };
-          speakQuestion(currentCard.q, () => {
-            if (!isLocked) {
-              startTenSecondCountdown();
-            }
-          });
-        }, 900);
-
-      } else {
-        // Si tras el 50/50 pasan otros 10 segundos sin respuesta, pasa a la siguiente
-        isLocked = true;
-        sfxWrong();
-        highlightCorrectAnswer(currentCard.answer);
-        setCenterStatus("TIEMPO AGOTADO", false);
-        setPlayerBanners(`⏰ Tiempo agotado. Era: ${currentCard.answer}`);
-
-        setTimeout(() => {
-          loadRound();
-        }, 2800);
-      }
-    }
-
-    // GESTIÓN DE RESPUESTA DEL JUGADOR MÁS RÁPIDO
-    function handlePlayerAnswer(playerNum, chosenOption, btnElement) {
-      if (isLocked || lockedPlayers[playerNum]) return;
-      if (btnElement.classList.contains('eliminated')) return;
-
-      const otherPlayer = playerNum === 1 ? 2 : 1;
-
-      if (chosenOption === currentCard.answer) {
-        // ¡ACIERTO! Se detiene todo y puntúa el más rápido
-        isLocked = true;
-        clearInterval(countdownTimer);
-        window.speechSynthesis.cancel();
-
-        const pointsWon = fiftyFiftyUsed ? 50 : 100;
-        scores[playerNum] += pointsWon;
-        updateScoreUI();
-
-        highlightCorrectAnswer(currentCard.answer);
-
-        const reachedGoal = scores[playerNum] >= WINNING_SCORE;
-        if (reachedGoal) {
-          sfxVictoryFanfare();
-        } else {
-          sfxCorrect();
-        }
-
-        const winMsg = reachedGoal
-          ? `🏆 ¡¡¡1.000 PUNTOS ALCANZADOS!!! ¡GANASTE!`
-          : `✅ ¡Punto para Jugador ${playerNum}! (+${pointsWon} pts)`;
-        const loseMsg = reachedGoal
-          ? `🏁 ¡Jugador ${playerNum} llegó a los 1.000 puntos!`
-          : `⚡ Jugador ${playerNum} fue más rápido (+${pointsWon} pts)`;
-
-        setCenterStatus(reachedGoal ? `¡VICTORIA J${playerNum}!` : `¡ACIERTO J${playerNum}!`, false);
-        setPlayerBanners(playerNum === 1 ? winMsg : loseMsg, playerNum === 2 ? winMsg : loseMsg);
-
-        setTimeout(() => {
-          loadRound();
-        }, 2500);
-
-      } else {
-        // FALLO: Penalización y bloqueo de ese jugador, dejando rebote al rival
-        lockedPlayers[playerNum] = true;
-        sfxWrong();
-        scores[playerNum] = Math.max(0, scores[playerNum] - 50);
-        updateScoreUI();
-
-        btnElement.classList.add('wrong');
-        const oppBtns = document.querySelectorAll(`#gridP${otherPlayer} .ans-btn`);
-        oppBtns.forEach(b => {
-          if (b.dataset.option === chosenOption) {
-            b.classList.add('eliminated');
-            b.disabled = true;
-          }
-        });
-
-        // Si ambos jugadores han fallado en la misma ronda
-        if (lockedPlayers[1] && lockedPlayers[2]) {
-          isLocked = true;
-          clearInterval(countdownTimer);
-          window.speechSynthesis.cancel();
-          highlightCorrectAnswer(currentCard.answer);
-          setCenterStatus("AMBOS FALLARON", false);
-          setPlayerBanners(`❌ Ninguno acertó. Era: ${currentCard.answer}`);
-
-          setTimeout(() => {
-            loadRound();
-          }, 2600);
-        } else {
-          const msgFail = "❌ ¡Fallaste! (-50 pts) Turno bloqueado";
-          const msgRebound = `🔥 ¡Tu rival falló! Aprovecha el rebote`;
-          setPlayerBanners(
-            playerNum === 1 ? msgFail : msgRebound,
-            playerNum === 2 ? msgFail : msgRebound
-          );
-        }
-      }
-    }
-
-    function highlightCorrectAnswer(correctText) {
-      [1, 2].forEach(p => {
-        const buttons = document.querySelectorAll(`#gridP${p} .ans-btn`);
-        buttons.forEach(btn => {
-          if (btn.dataset.option === correctText) {
-            btn.classList.add('correct');
-          }
-        });
-      });
-    }
-
-    function finishGame() {
-      clearInterval(countdownTimer);
-      window.speechSynthesis.cancel();
-
-      document.getElementById('finalP1').textContent = scores[1];
-      document.getElementById('finalP2').textContent = scores[2];
-
-      const headline = document.getElementById('winnerHeadline');
-      const sub = document.getElementById('winnerSub');
-
-      if (scores[1] >= WINNING_SCORE) {
-        headline.textContent = "🏆 ¡GANA EL JUGADOR 1!";
-        sub.textContent = `Alcanzó los ${scores[1]} puntos en la ronda ${roundNumber}`;
-      } else if (scores[2] >= WINNING_SCORE) {
-        headline.textContent = "🏆 ¡GANA EL JUGADOR 2!";
-        sub.textContent = `Alcanzó los ${scores[2]} puntos en la ronda ${roundNumber}`;
-      }
-
-      document.getElementById('endModal').classList.remove('hidden');
-    }
-
-    // =========================================================================
-    // EVENTOS DE NAVEGACIÓN Y CARGA DE ARCHIVOS
-    // =========================================================================
-
-    // Pasar de la pantalla 1 (Explicación) a la pantalla 2 (Descargar / Subir .txt)
-    document.getElementById('btnContinueToSetup').addEventListener('click', () => {
-      initAudio();
-      document.getElementById('startModal').classList.add('hidden');
-      document.getElementById('setupModal').classList.remove('hidden');
+  <section class="area bot">
+    <div class="hud"><div class="row"><span class="tag" style="color:#f87171">🔴 JUGADOR 1</span><div><span class="score" id="s1">0</span> <small>/ 1000</small></div></div><div class="pbg"><div class="pf" id="b1" style="background:linear-gradient(90deg,#ef4444,#fbbf24)"></div></div></div>
+    <div class="status" id="st1"></div><div class="grid" id="g1"></div>
+  </section>
+</div>
+
+<script>
+const WIN = 1000, $ = id => document.getElementById(id);
+let ALL = [], deck = [], card = null, opts = [], round = 0, scores = {1:0,2:0};
+let locked = true, used5050 = false, blocked = {1:false,2:false}, timer = null, left = 100;
+
+/* ---------- Utilidades ---------- */
+const shuffle = a => { a = [...a]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const banners = (a, b = a) => { $('st1').textContent = a; $('st2').textContent = b; };
+const setC = (t, sp) => { $('cst').textContent = t; $('wave').classList.toggle('speaking', !!sp); };
+const esc = s => s.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+
+function setStatus(kind, html) {
+  const b = $('fs'); b.className = 'fs ' + (kind || ''); b.innerHTML = html;
+  $('bPlay').classList.toggle('hidden', kind !== 'good');
+}
+function loaded(list, origin) {
+  ALL = list;
+  setStatus('good', `✅ ${list.length} preguntas listas (${esc(origin)}).`);
+}
+
+/* ---------- Archivo .txt ---------- */
+function parseTxt(raw) {
+  const lines = raw.replace(/\r\n?/g, '\n').split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#') && !l.startsWith('//'));
+  const mk = (q, raw4) => {
+    let ans = null;
+    const o = raw4.map(t => {
+      t = t.replace(/^([1-4A-D])\s*[:.)-]\s*/i, '');
+      if (t.startsWith('*')) { t = t.slice(1).trim(); ans = t; }
+      return t;
     });
+    return { q: q.replace(/^(PREGUNTA|P|Q)\s*[:.-]\s*/i, ''), options: o, answer: ans || o[0] };
+  };
+  const out = [];
+  if (lines.length && lines.every(l => l.includes('|'))) {
+    lines.forEach(l => { const p = l.split('|').map(x => x.trim()).filter(Boolean); if (p.length >= 5) out.push(mk(p[0], p.slice(1, 5))); });
+    return out;
+  }
+  for (let i = 0; i + 4 < lines.length; i += 5) out.push(mk(lines[i], lines.slice(i + 1, i + 5)));
+  return out;
+}
 
-    // Volver a la explicación desde la pantalla de configuración
-    document.getElementById('btnBackToRules').addEventListener('click', () => {
-      document.getElementById('setupModal').classList.add('hidden');
-      document.getElementById('startModal').classList.remove('hidden');
-    });
+$('bUp').onclick = () => { $('file').value = ''; $('file').click(); };
+$('file').onchange = e => {
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    const p = parseTxt(ev.target.result);
+    p.length ? loaded(p, f.name) : (ALL = [], setStatus('bad', '❌ No se encontraron preguntas válidas. Descarga el modelo para ver el formato.'));
+  };
+  r.readAsText(f, 'UTF-8');
+};
 
-    // Botón 1: Descargar modelo .txt
-    document.getElementById('btnDownloadTemplate').addEventListener('click', () => {
-      downloadTxtTemplate();
-    });
+$('bTpl').onclick = async () => {
+  const txt = ['# Bloques de 5 líneas separados por línea en blanco: pregunta + 4 respuestas.', '# Marca la correcta con * al principio.', '',
+    '¿Cuál es el planeta más grande del sistema solar?', '*Júpiter', 'Saturno', 'Marte', 'Neptuno', '',
+    '¿En qué año llegó el ser humano a la Luna?', '1965', '*1969', '1972', '1959'].join('\r\n');
+  try {
+    const dl = await claude.use('downloads');
+    if (dl) { await dl.save({ filename: 'modelo_preguntas_duelo.txt', data: txt }); return; }
+  } catch (e) {}
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([txt], { type: 'text/plain;charset=utf-8' }));
+  a.download = 'modelo_preguntas_duelo.txt'; a.click();
+};
 
-    // Botón 2: Abrir selector de archivo .txt
-    const fileInput = document.getElementById('txtFileInput');
-    document.getElementById('btnTriggerUpload').addEventListener('click', () => {
-      fileInput.value = '';
-      fileInput.click();
-    });
+/* ---------- Generación con IA ---------- */
+function validAI(arr) {
+  if (!Array.isArray(arr)) return [];
+  return arr.filter(x => x && typeof x.q === 'string' && Array.isArray(x.options) && x.options.length === 4 &&
+    x.options.every(o => typeof o === 'string' && o.trim()) && new Set(x.options).size === 4 && x.options.includes(x.answer))
+    .map(x => ({ q: x.q.trim(), options: x.options.map(o => o.trim()), answer: x.answer.trim() }));
+}
 
-    // Procesar el archivo .txt cuando el usuario lo selecciona
-    fileInput.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
+function extractJSON(t) {
+  t = String(t || '').replace(/```json|```/g, '');
+  const i = t.indexOf('['), j = t.lastIndexOf(']');
+  if (i < 0 || j < i) throw new Error('sin JSON');
+  return JSON.parse(t.slice(i, j + 1));
+}
+async function askPollinations(prompt) {
+  const r = await fetch('https://text.pollinations.ai/openai', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model: 'openai', messages: [{ role: 'user', content: prompt }] })
+  });
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  const d = await r.json();
+  return d.choices[0].message.content;
+}
+async function askGemini(prompt, key) {
+  const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=' + encodeURIComponent(key), {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: 'application/json' } })
+  });
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  const d = await r.json();
+  return d.candidates[0].content.parts[0].text;
+}
+try { $('gkey').value = localStorage.getItem('gkey') || ''; } catch (e) {}
 
-      const statusBox = document.getElementById('fileStatusBox');
-      const playBtn = document.getElementById('btnStartWithUploaded');
+$('bGen').onclick = async () => {
+  const topic = $('topic').value.trim();
+  const n = Math.min(40, Math.max(5, parseInt($('count').value) || 20));
+  if (!topic) { setStatus('bad', '✍️ Escribe primero el tema.'); return; }
+  const key = $('gkey').value.trim();
+  try { localStorage.setItem('gkey', key); } catch (e) {}
+  const btn = $('bGen'); btn.disabled = true; btn.textContent = '⏳ Generando…';
+  setStatus('', 'La IA está preparando las preguntas… puede tardar unos segundos.');
+  const prompt = `Genera ${n} preguntas de concurso en español sobre el tema: "${topic}".
+Reglas: cada pregunta debe entenderse solo al oírla (sin imágenes); una única respuesta correcta clara; 3 distractores plausibles; respuestas cortas (máx. 6 palabras); dificultad variada; datos verificables, sin repetir.
+Devuelve SOLO un array JSON, sin texto extra ni markdown, con objetos así:
+{"q":"pregunta","options":["a","b","c","d"],"answer":"texto exacto de la opción correcta"}`;
+  try {
+    const txt = key ? await askGemini(prompt, key) : await askPollinations(prompt);
+    const list = validAI(extractJSON(txt));
+    list.length >= 3 ? loaded(list, (key ? 'Gemini' : 'IA gratuita') + ' · ' + topic)
+      : setStatus('bad', '❌ La IA no devolvió preguntas válidas. Prueba otra vez o cambia el tema.');
+  } catch (e) {
+    setStatus('bad', '❌ No se pudo generar (' + (e.message || 'error') + '). Si usas la IA gratuita puede estar saturada: reintenta o usa una key de Gemini.');
+  }
+  btn.disabled = false; btn.textContent = '✨ Generar preguntas con IA';
+};
 
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const content = event.target.result;
-        const parsed = parseQuestionsFromTxt(content);
+/* ---------- Audio ---------- */
+let ac = null;
+const initAudio = () => { try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); ac.state === 'suspended' && ac.resume(); } catch (e) {} };
+function tone(f, type, d, delay = 0) {
+  if (!ac) return;
+  setTimeout(() => {
+    const o = ac.createOscillator(), g = ac.createGain(), t = ac.currentTime;
+    o.type = type; o.frequency.setValueAtTime(f, t);
+    g.gain.setValueAtTime(.18, t); g.gain.exponentialRampToValueAtTime(.001, t + d);
+    o.connect(g); g.connect(ac.destination); o.start(); o.stop(t + d);
+  }, delay);
+}
+const sfx = {
+  show: () => { tone(440, 'sine', .12); tone(554, 'sine', .15, 100); },
+  ok: () => [523, 659, 784, 1046].forEach((f, i) => tone(f, 'triangle', i == 3 ? .35 : .12, i * 110)),
+  win: () => [523, 659, 784, 1046, 784, 1046].forEach((f, i) => tone(f, 'triangle', .2, [0, 150, 300, 450, 700, 850][i])),
+  bad: () => { tone(190, 'sawtooth', .25); tone(145, 'sawtooth', .4, 200); },
+  half: () => { tone(600, 'sine', .1); tone(380, 'sine', .22, 120); }
+};
 
-        if (parsed.length > 0) {
-          ALL_QUESTIONS = parsed;
-          statusBox.className = 'file-status-box loaded-ok';
-          statusBox.innerHTML = `✅ Archivo <strong>"${file.name}"</strong> cargado con éxito.<br>Se han detectado <strong>${parsed.length} preguntas</strong> listas para jugar.`;
-          playBtn.classList.remove('hidden');
-        } else {
-          ALL_QUESTIONS = [];
-          statusBox.className = 'file-status-box loaded-error';
-          statusBox.innerHTML = `❌ No se encontraron preguntas válidas en <strong>"${file.name}"</strong>.<br>Descarga el modelo .txt para ver el formato de 1 pregunta y 4 respuestas.`;
-          playBtn.classList.add('hidden');
-        }
-      };
+function speak(text, done) {
+  if (!('speechSynthesis' in window)) { setC('SIN VOZ', false); done && setTimeout(done, 1000); return; }
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text), v = speechSynthesis.getVoices().find(v => v.lang.startsWith('es'));
+  if (v) u.voice = v; u.lang = 'es-ES'; u.rate = 1.03;
+  u.onstart = () => setC('ESCUCHANDO…', true);
+  u.onend = u.onerror = () => { setC('¡RESPONDED!', false); done && done(); };
+  speechSynthesis.speak(u);
+}
 
-      reader.onerror = () => {
-        statusBox.className = 'file-status-box loaded-error';
-        statusBox.textContent = "❌ Error al leer el archivo .txt.";
-        playBtn.classList.add('hidden');
-      };
+/* ---------- Juego ---------- */
+function updateUI() {
+  [1, 2].forEach(p => { $('s' + p).textContent = scores[p]; $('b' + p).style.width = Math.min(100, scores[p] / WIN * 100) + '%'; });
+}
+function startGame() {
+  if (!ALL.length) return;
+  initAudio(); speechSynthesis.getVoices();
+  scores = {1:0,2:0}; round = 0; updateUI(); deck = shuffle(ALL);
+  $('setup').classList.add('hidden'); $('endm').classList.add('hidden');
+  loadRound();
+}
+function loadRound() {
+  clearInterval(timer); speechSynthesis.cancel();
+  if (scores[1] >= WIN || scores[2] >= WIN) return finish();
+  round++;
+  if (!deck.length) deck = shuffle(ALL);
+  card = deck.pop(); opts = shuffle(card.options);
+  locked = true; used5050 = false; blocked = {1:false,2:false};
+  $('rc').textContent = 'Ronda ' + round; $('tbar').style.width = '100%'; $('tdisp').textContent = '10s';
+  [1, 2].forEach(render); sfx.show();
+  setC('MIRAD LAS RESPUESTAS…', false); banners('👀 Leed las 4 opciones antes de escuchar…');
+  setTimeout(() => {
+    locked = false; banners('🔊 ¡Escuchad y pulsad el más rápido!');
+    speak(card.q, () => { if (!locked) countdown(); });
+  }, 2400);
+}
+function render(p) {
+  const g = $('g' + p); g.innerHTML = '';
+  opts.forEach(t => {
+    const b = document.createElement('button');
+    b.className = 'ans'; b.dataset.o = t; b.textContent = t;
+    b.addEventListener('pointerdown', e => { e.preventDefault(); answer(p, t, b); });
+    g.appendChild(b);
+  });
+}
+function countdown() {
+  clearInterval(timer); left = 100;
+  timer = setInterval(() => {
+    if (locked) return clearInterval(timer);
+    left--; $('tbar').style.width = left + '%'; $('tdisp').textContent = Math.ceil(left / 10) + 's';
+    if (left <= 0) { clearInterval(timer); expired(); }
+  }, 100);
+}
+function expired() {
+  if (!used5050) {
+    used5050 = true; locked = true; sfx.half();
+    const out = shuffle(opts.filter(o => o !== card.answer)).slice(0, 2);
+    document.querySelectorAll('.ans').forEach(b => { if (out.includes(b.dataset.o)) { b.classList.add('out'); b.disabled = true; } });
+    setC('50/50 · REPITIENDO…', false); banners('⚠️ ¡10 s sin respuesta! Quedan 2 opciones.');
+    setTimeout(() => { locked = false; blocked = {1:false,2:false}; speak(card.q, () => { if (!locked) countdown(); }); }, 900);
+  } else {
+    locked = true; sfx.bad(); mark(); setC('TIEMPO AGOTADO', false); banners('⏰ Era: ' + card.answer);
+    setTimeout(loadRound, 2800);
+  }
+}
+function mark() { document.querySelectorAll('.ans').forEach(b => b.dataset.o === card.answer && b.classList.add('ok')); }
+function answer(p, t, btn) {
+  if (locked || blocked[p] || btn.classList.contains('out')) return;
+  const o = p === 1 ? 2 : 1;
+  if (t === card.answer) {
+    locked = true; clearInterval(timer); speechSynthesis.cancel();
+    const pts = used5050 ? 50 : 100; scores[p] += pts; updateUI(); mark();
+    const goal = scores[p] >= WIN; goal ? sfx.win() : sfx.ok();
+    const w = goal ? '🏆 ¡1.000 PUNTOS! ¡GANASTE!' : `✅ ¡Punto para J${p}! (+${pts})`;
+    const l = goal ? `🏁 ¡Jugador ${p} llegó a 1.000!` : `⚡ Jugador ${p} fue más rápido (+${pts})`;
+    setC(goal ? `¡VICTORIA J${p}!` : `¡ACIERTO J${p}!`, false);
+    banners(p === 1 ? w : l, p === 2 ? w : l);
+    setTimeout(loadRound, 2500);
+  } else {
+    blocked[p] = true; sfx.bad(); scores[p] = Math.max(0, scores[p] - 50); updateUI();
+    btn.classList.add('no');
+    document.querySelectorAll(`#g${o} .ans`).forEach(b => { if (b.dataset.o === t) { b.classList.add('out'); b.disabled = true; } });
+    if (blocked[1] && blocked[2]) {
+      locked = true; clearInterval(timer); speechSynthesis.cancel(); mark();
+      setC('AMBOS FALLARON', false); banners('❌ Era: ' + card.answer);
+      setTimeout(loadRound, 2600);
+    } else {
+      const f = '❌ ¡Fallaste! (−50) Turno bloqueado', r = '🔥 ¡Tu rival falló! Aprovecha el rebote';
+      banners(p === 1 ? f : r, p === 2 ? f : r);
+    }
+  }
+}
+function finish() {
+  clearInterval(timer); speechSynthesis.cancel();
+  $('f1').textContent = scores[1]; $('f2').textContent = scores[2];
+  const w = scores[1] >= WIN ? 1 : 2;
+  $('wh').textContent = `🏆 ¡GANA EL JUGADOR ${w}!`;
+  $('ws').textContent = `Llegó a ${scores[w]} puntos en la ronda ${round}`;
+  $('endm').classList.remove('hidden');
+}
 
-      reader.readAsText(file, 'UTF-8');
-    });
-
-    // Botón para jugar una vez subido el archivo
-    document.getElementById('btnStartWithUploaded').addEventListener('click', startGame);
-
-    // Botones de la pantalla final
-    document.getElementById('btnRestart').addEventListener('click', startGame);
-    document.getElementById('btnChangeFile').addEventListener('click', () => {
-      document.getElementById('endModal').classList.add('hidden');
-      document.getElementById('setupModal').classList.remove('hidden');
-    });
-
-    // Botón central permite repetir la locución en cualquier momento si hay ruido ambiente
-    document.getElementById('audioHub').addEventListener('click', () => {
-      if (!isLocked && currentCard) {
-        speakQuestion(currentCard.q);
-      }
-    });
-  </script>
+$('bPlay').onclick = startGame;
+$('bAgain').onclick = startGame;
+$('bNew').onclick = () => { $('endm').classList.add('hidden'); $('setup').classList.remove('hidden'); };
+$('hub').onclick = () => { if (!locked && card) speak(card.q); };
+$('topic').addEventListener('keydown', e => { if (e.key === 'Enter') $('bGen').click(); });
+</script>
 </body>
 </html>
